@@ -3,11 +3,10 @@ ios = require 'iOSKit'
 
 whiteBG = new BackgroundLayer
 
-box1 = new Layer name:box1
-box2 = new Layer name:box2
 
 
-box1.constraints = (leading:50, top:200)
-box2.constraints = (trailing:box1, bottom:box1)
+keyboard = new ios.Keyboard
 
-ios.layout()
+# print keyboard.keys["j"]
+
+# keyExpanded = new Layer width:ios.px(58), height:ios.px(108), superLayer:keyboard.all, x:keyboard.x

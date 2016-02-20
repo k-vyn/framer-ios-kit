@@ -3,6 +3,6 @@
   "deviceScale" : -1,
   "deviceOrientation" : 0,
   "contentScale" : 1,
-  "sharedPrototype" : 0,
-  "deviceType" : "iphone-6-silver"
+  "sharedPrototype" : 1,
+  "deviceType" : "iphone-6plus-silver"
 }
