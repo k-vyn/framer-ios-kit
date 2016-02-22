@@ -312,8 +312,8 @@ layoutChange = (layer, type) ->
 
 
 exports.Keyboard = (array) ->
-	all = new Layer backgroundColor:"#D1D5DA", name:"keyboard"
-	all.constraints = (bottom:0, height:216, trailing:1, leading:1)
+	board = new Layer backgroundColor:"#D1D5DA", name:"keyboard"
+	board.constraints = (bottom:0, height:216, trailing:1, leading:1)
 	exports.layout()
 	lettersArray = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v",  "b", "n", "m"]
 	keysArray = []
@@ -340,15 +340,48 @@ exports.Keyboard = (array) ->
 			"marginTop" : 34 * exports.scale
 		}
 	]
+	keyPopUp = new Layer width:@keyWidth, height:@keyHeight, x:@.x-16*exports.scale, backgroundColor:"transparent", superLayer:board, name:"key pop up"
+	box = new Layer borderRadius:exports.px(10), superLayer:keyPopUp, backgroundColor:"transparent", color:"black", name:"letter"
+	box.style = {
+		"font-size" : 39 * exports.scale + "px"
+		"font-weight" : 300
+		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
+		'text-align' : 'center'
+		'line-height' : @lineHeight
+	}
+	@.color = "white"
+	path = new Layer superLayer:keyPopUp, backgroundColor:"transparent", name:"shape path"
+
+
+
 	for letter in lettersArray
 		index = lettersArray.indexOf(letter) 
-		key = new Layer name:"key " + letter, superLayer:all, borderRadius:5*exports.scale, backgroundColor:"white", color:"black", shadowY:1, shadowColor:"black", shadowOpacity:.25
+		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.scale, backgroundColor:"white", color:"black", shadowY:1, shadowColor:"black", shadowOpacity:.25
+		keyPopUp.bringToFront()
+		box.bringToFront()
 		if exports.scale == 2
 			key.constraints = (width:32, height:44)
+			keyPopUp.constraints = (width:65, height:122)
+			path.constraints = (width:65, height: 122)
+			path.y = 10
+			@pathWidth = exports.px(65)
+			@pathHeight = exports.px(122)
+			@keyHeight = exports.px(32)
+			@keyWidth = exports.px(44)
+			@lineHeight = @keyWidth - 17 + "px"
+			box.constraints = (width:32, height:44)
+			box.centerX()
+			box.y = exports.px(28)
 		if exports.scale == 3
 			key.constraints = (width:35, height:46)
+			@keyHeight = exports.px(122)
+			@keyWidth = exports.px(65)
+			@lineHeight = @keyWidth + "px"
+
 		if exports.width == 640
 			key.constraints = (width:26, height:39)
+
+		keyPopUp.visible = false
 
 		exports.layout()
 		key.style = {
@@ -359,7 +392,6 @@ exports.Keyboard = (array) ->
 			'line-height' : key.height - exports.px(5) + "px"
 		}
 		key.html = letter
-		popUpLayers = []
 		if index <= rowsMap[0].endIndex
 			rowIndex = index - rowsMap[0].startIndex
 			key.x = rowsMap[0].padding + (rowIndex*spacer) + (rowIndex*key.width)
@@ -372,27 +404,63 @@ exports.Keyboard = (array) ->
 			rowIndex = index - rowsMap[2].startIndex
 			key.x = rowsMap[2].padding + (rowIndex*spacer) + (rowIndex*key.width)
 			key.y = rowsMap[2].marginTop + key.height * 2
-		key.on Events.TouchStart, ->
-			keyPopUp = new Layer width:57*exports.scale, height:100*exports.scale, x:@.x-13*exports.scale, maxY:all.y + @.y + key.height, backgroundColor:"transparent"
-			box = new Layer width:57*exports.scale, height:57*exports.scale, borderRadius:10*exports.scale, superLayer:keyPopUp, backgroundColor:"white", color:"black"
-			box.html = @.html
-			box.style = {
-				"font-size" : 39 * exports.scale + "px"
-				"font-weight" : 300
-				"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
-				'text-align' : 'center'
-				'padding-top' : 17 * exports.scale + "px"
-			}
-			@.color = "white"
-			popUpLayers.push keyPopUp
-		key.on Events.TouchEnd, ->
-			popUpLayers[popUpLayers.length - 1].destroy()
-			@.color = "black"
+		path.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 
+		<svg width='#{@pathWidth}px' height='#{@pathHeight}' viewBox='0 0 63 114' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+		    <title>Rectangle 44 Copy</title>
+		    <desc>Created with Sketch.</desc>
+		    <defs>
+		        <filter x='-50%' y='-50%' width='200%' height='200%' filterUnits='objectBoundingBox' id='filter-1'>
+		            <feOffset dx='0' dy='0' in='SourceAlpha' result='shadowOffsetOuter1'></feOffset>
+		            <feGaussianBlur stdDeviation='1.5' in='shadowOffsetOuter1' result='shadowBlurOuter1'></feGaussianBlur>
+		            <feColorMatrix values='0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.21 0' in='shadowBlurOuter1' type='matrix' result='shadowMatrixOuter1'></feColorMatrix>
+		            <feMerge>
+		                <feMergeNode in='shadowMatrixOuter1'></feMergeNode>
+		                <feMergeNode in='SourceGraphic'></feMergeNode>
+		            </feMerge>
+		        </filter>
+		    </defs>
+		    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+		        <g id='iPhone-6' sketch:type='MSArtboardGroup' transform='translate(-118.000000, -240.000000)' stroke='#C7C7C7' filter='url(#filter-1)' stroke-width='0.5' 
+		        fill='#FFFFFF' opacity='0.998367537'>
+		         <path d='M134,306 C134,306 121,295 121,290 C121,279.616788 121,253.001456 121,253.001456 C121,247.477804 125.485832,243 131.002774,243 L167.862127,243 C173.386507,243 177.880862,247.469905 
+		         177.900044,252.997271 C177.900044,252.997271 178,280 177.999999,290 C177.999999,295.006553 165,306 165,306 L165,346.049594 
+		         C165,348.806807 162.770556,351.041969 160.002098,351.041969 L138.997902,351.041969 
+		          C136.237637,351.041969 134,348.808331 134,346.049594 L134,306 Z' id='Rectangle-44-Copy' sketch:type='MSShapeGroup' transform='translate(149.500000, 297.020985) scale(-1, 1) translate(-149.500000, -297.020985) '>
+		          </path>
+		        </g>
+		    </g>
+		</svg>"
 		keysArray.push key
 
+
+
+		board.on Events.TouchStart, ->
+			
+
+
+		key.on Events.TouchStart, ->
+			keyPopUp.visible = true	
+			box.html = @.name
+			keyPopUp.maxY = @.maxY
+			keyPopUp.midX = @.midX
+
+		key.on Events.TouchMove, ->
+			box.html = @.name
+			keyPopUp.maxY = @.maxY
+			keyPopUp.midX = @.midX	
+
+		board.on Events.TouchEnd, ->
+			keyPopUp.visible = false
+
+
+
+
+
+		
+
 	return {
-		"all" : all
+		"board" : board
 		"keys" : keysArray
 		"key" : {
 			"q" : keysArray[0]

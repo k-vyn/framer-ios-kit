@@ -2,6 +2,9 @@
 ios = require 'iOSKit'
 
 whiteBG = new BackgroundLayer
+	
+ios.layout()
+
 
 
 
