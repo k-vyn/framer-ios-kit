@@ -2,14 +2,6 @@
 ios = require 'iOSKit'
 
 whiteBG = new BackgroundLayer
-	
-ios.layout()
 
+keyboard = new ios.Keyboard 
 
-
-
-keyboard = new ios.Keyboard
-
-# print keyboard.keys["j"]
-
-# keyExpanded = new Layer width:ios.px(58), height:ios.px(108), superLayer:keyboard.all, x:keyboard.x
