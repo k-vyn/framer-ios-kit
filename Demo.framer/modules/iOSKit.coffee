@@ -4,97 +4,47 @@ framerDevices = {
 #Fullscreen
 "fullscreen" : { height: window.innerHeight, width: window.innerWidth,	scale:1, mobile:false, platform:"web"}
 
-#Safari Browsers
-"desktop-safari-1024-600": { height: 600, width: 1024,	scale: 1, mobile:false, platform:"web"}
-"desktop-safari-1280-800": { height: 800, width: 1280,	scale: 1, mobile:false, platform:"web"}
-"desktop-safari-1440-900": { height: 900, width: 1440,	scale: 1, mobile:false, platform:"web"}
-
 #iPhones
+##5S
+"apple-iphone-5s-space-gray": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5s-silver": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5s-gold": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 
-#5S
-"iphone-5s-spacegray": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5s-spacegray-hand": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5s-silver": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5s-silver-hand": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5s-gold": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5s-gold-hand": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-#5c
-"iphone-5c-yellow-hand": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-green": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-green-hand": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-blue": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-blue-hand": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-red": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-red-hand": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-white": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-white-hand": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-yellow": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-pink-hand": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-5c-pink": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-#6
-"iphone-6-spacegray" : { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-6-spacegray-hand" : { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-6-silver": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-6-silver-hand": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-6-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-"iphone-6-gold-hand": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-#6 plus
-"iphone-6plus-gold-hand": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone-6plus-gold": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone-6plus-silver-hand": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone-6plus-silver": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone-6plus-spacegray-hand": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone-6plus-spacegray": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone6plus-gold-hand": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone6plus-gold": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone6plus-silver-hand": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone6plus-silver": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone6plus-spacegray-hand": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"iphone6plus-spacegray" : { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
+##5c
+"apple-iphone-5c-green": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5c-blue": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5c-red": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5c-white": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5c-yellow": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5c-pink": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+##6s
+"apple-iphone-6s-space-gray" : { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-6s-silver": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-6s-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-6s-rose-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
+#6s plus
+"apple-iphone-6s-plus-gold": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
+"apple-iphone-6s-plus-silver": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
+"apple-iphone-6s-plus-space-gray": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
+"apple-iphone-6s-plus-rose-gold": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
 
 #iPads
 
 #Air
-"ipad-air-silver-hand": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-"ipad-air-silver": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-"ipad-air-spacegray-hand": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-"ipad-air-spacegray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+
+"apple-ipad-air-2-gold": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+"apple-ipad-air-2-silver": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+"apple-ipad-air-2-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+
 #mini
-"ipad-mini-spacegrey": { height: 1024, width: 768,	scale: 1, mobile:true, platform:"iOS"}
-"ipad-mini-spacegrey-hand": { height: 1024, width: 768,	scale: 1, mobile:true, platform:"iOS"}
-"ipad-mini-silver":{ height: 1024, width: 768, scale: 1, mobile:true, platform:"iOS"}
-"ipad-mini-silver-hand": { height: 1024, width: 768, scale: 1, mobile:true, platform:"iOS"}
+"apple-ipad-mini-4-gold": { height: 2048, width: 1536,	scale: 1, mobile:true, platform:"iOS"}
+"apple-ipad-mini-4-space-gray": { height: 2048, width: 1536,	scale: 1, mobile:true, platform:"iOS"}
+"apple-ipad-mini-4-silver":{ height: 2048, width: 1536, scale: 1, mobile:true, platform:"iOS"}
 
-#Apple Watches
-"applewatch-38-black-bracelet": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatch-38-steel-bracelet": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatch-42-black-bracelet": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatch-42-steel-bracelet": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-38-gold-buckle-blue": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-38-gold-buckle-gray": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-38-gold-buckle-red": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-38-gold-sportband-black": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-38-gold-sportband-white": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-42-gold-buckle-blue": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-42-gold-buckle-gray": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-42-gold-buckle-red": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-42-gold-sportband-black": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchedition-42-gold-sportband-white": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-38-aluminum-sportband-black": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-38-aluminum-sportband-blue": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-38-aluminum-sportband-green": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-38-aluminum-sportband-pink": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-38-aluminum-sportband-white": { height: 340, width: 272,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-42-aluminum-sportband-black": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-42-aluminum-sportband-blue": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-42-aluminum-sportband-green": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-42-aluminum-sportband-pink": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-"applewatchsport-42-aluminum-sportband-white": { height: 390, width: 312,	scale: 2, mobile:true, platform:"watchOS"}
-
-#Nexus Devices
-"nexus-5-black": { height: 1920, width: 1080,	scale: 3, mobile:true, platform:"android"}
-"nexus-5-black-hand": { height: 1920, width: 1080,	scale: 3, mobile:true, platform:"android"}
-"nexus-9": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"android"}
+#Pro
+"apple-ipad-pro-gold": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
+"apple-ipad-pro-silver": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
+"apple-ipad-pro-space-gray" : { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
 }
 
 exports.name = 0
