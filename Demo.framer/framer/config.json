@@ -4,7 +4,7 @@
   "contentScale" : 1,
   "deviceType" : "apple-iphone-6s-silver",
   "selectedHand" : "",
-  "updateDelay" : 0.3,
+  "updateDelay" : -1,
   "deviceScale" : "fit",
   "orientation" : 0,
   "fullScreen" : false
