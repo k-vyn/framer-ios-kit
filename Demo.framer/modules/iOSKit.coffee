@@ -94,9 +94,6 @@ onResize = () ->
 window.addEventListener("resize", onResize)
 window.addEventListener("orientationchange" , onResize)
 
-
-
-
 defaults = {
 	constraintProps : ["height", "width"]
 	constraintTypes: ["top", "leading", "trailing", "bottom"]
@@ -129,6 +126,11 @@ defaults = {
 	keyboardProps: ["returnKey"]
 	keyboard: {
 		returnKey:"default"
+	}
+	textProps: ["text", "style", "superLayer"]
+	text: {
+		text: "iOS Text Layer"
+		style: "default"
 	}
 }
 ## Conversions
@@ -177,7 +179,6 @@ exports.layout = (layer) ->
 				layoutChange(layer, c)
 
 #Size Constraints
-
 
 layoutSize = (layer, type) ->
 	if layer.constraints[type]
@@ -263,6 +264,248 @@ layoutChange = (layer, type) ->
 							else
 								@.objLayer = object
 							layer[prop] = @.objLayer[objProp2] - exports.scale * @.objInt
+
+
+#Text Layers
+exports.styles = {
+	"default" : {
+		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
+	}
+}
+
+## Custom Styles
+
+exports.addStyle = (array) ->
+	key = Object.keys(array)[0]
+	exports.styles[key] = array[key]
+
+exports.apply = (layer, style) ->
+	print style
+	props = Object.keys(style)
+	framerProps = ["width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX"]
+	cssProps = ["fontFamily", "fontSize", "textAlign"]
+	for p in props
+		if framerProps.indexOf(p) != -1 
+			if style[p] == parseInt(style[p], 10)
+				style[p] = exports.px(style[p])
+			layer[p] = style[p]
+			if p == "superLayer"
+				print p + " " + style[p]
+		if cssProps.indexOf(p) != -1 
+			if p == "fontSize"
+				layer.style["font-size"] = exports.px(style[p]) + "px"
+			if p == "fontFamily"
+				layer.style["font-family"] = style[p]
+			if p == "textAlign"
+				layer.style["text-align"] = style[p]
+
+exports.Custom = (style) ->
+	layer = new Layer 
+	exports.apply(layer, style)
+	return layer 
+
+#Automatic sizing for text layers
+textSizing = (layer, text, height, style, lines) ->
+	device = exports.getDevice()
+	layer.height = parseInt(height[0] + height[1]) + 2
+	if lines != undefined
+		layer.height = layer.height * lines
+	layer.html = text 
+	stringLength = 0
+	lookingForBreak = text.search("<br>")
+	pureText = ""
+	if lookingForBreak != -1
+		line1 = text.substring(0,lookingForBreak)
+		line2 =  text.substring(lookingForBreak + 5, text.length)
+		if line1.length > line2.length
+			text = line1
+		if line2.length > line1.length
+			text = line2
+	invalidText = /(<([^>]+)>)/ig
+	pureText = text.replace(invalidText, "")
+	characterArray = pureText.split('')
+	for c in characterArray
+		stringLength = chars[c][style] + stringLength
+	layer.width = stringLength * device.scale
+
+
+# Text Layers
+textProperties = ["style", "text", "lines", "align", "superLayer", "x", "y"]
+textDefaults = {
+	"text" : "Text",
+	"style" : "h3"
+	"lines" : 1
+}
+exports.Text = (array) ->
+	device = exports.getDevice()
+	if array == undefined
+		array = []
+	for i in textProperties
+		if array[i] != undefined
+			@[i] = array[i]
+		else
+			@[i] = textDefaults[i]
+	switch @.style
+		when "h1" then @.styleObject = exports.h1
+		when "h2" then @.styleObject = exports.h2
+		when "h3" then @.styleObject = exports.h3
+		when "h4" then @.styleObject = exports.h4
+		when "body" then @.styleObject = exports.body
+		when "small" then @.styleObject = exports.small
+		when "link" then @.styleObject = exports.link
+		else  @.styleObject = exports.h3
+	textLayer = new Layer name:@.style + " : " + @.text
+	textSizing(textLayer, @.text, @.styleObject['line-height'], @.style, @.lines)
+	textLayer.style = @.styleObject
+	if @.superLayer != undefined
+		textLayer.props = (superLayer:@.superLayer)
+	if @.align != undefined
+		switch @.align 
+			when "center" then [ textLayer.style['text-align'] = 'center', textLayer.center() ]
+			when "centerX" then [ textLayer.style['text-align'] = 'center', textLayer.centerX() ] 
+			when "centerY" then textLayer.centerY()
+			when "right" then textLayer.style['text-align'] = 'right'
+	if array.x != undefined
+		textLayer.x = array.x
+	if array.y != undefined
+		textLayer.y = array.y
+	return textLayer
+
+
+
+# Tab bar
+# defaultTabs = [
+# 		{
+# 			"label": "recents"
+# 			"selected" : "modules/db-uikit-assets/ios_tabbar/s_recents.svg"
+# 			"unselected" : "modules/db-uikit-assets/ios_tabbar/u_recents.svg"
+# 			"height" : 23
+# 			"width" : 23
+# 		},
+# 		{
+# 			"label": "files"
+# 			"selected" : "modules/db-uikit-assets/ios_tabbar/s_files.svg"
+# 			"unselected" : "modules/db-uikit-assets/ios_tabbar/u_files.svg"
+# 			"height" : 25
+# 			"width" : 21
+# 		}
+# 		{
+# 			"label": "photos"
+# 			"selected" : "modules/db-uikit-assets/ios_tabbar/s_photos.svg"
+# 			"unselected" : "modules/db-uikit-assets/ios_tabbar/u_photos.svg"
+# 			"height" : 26
+# 			"width" : 24
+# 		},
+# 		{
+# 			"label": "offline"
+# 			"selected" : "modules/db-uikit-assets/ios_tabbar/s_offline.svg"
+# 			"unselected" : "modules/db-uikit-assets/ios_tabbar/u_offline.svg"
+# 			"height" : 27
+# 			"width" : 17
+# 		},
+# 		{
+# 			"label": "settings"
+# 			"selected" : "modules/db-uikit-assets/ios_tabbar/s_settings.svg"
+# 			"unselected" : "modules/db-uikit-assets/ios_tabbar/u_settings.svg"
+# 			"height" : 25
+# 			"width" : 25
+# 		}
+# 		]
+
+# tabBarProperties = ["style", "tabs", "start"]
+# tabBarDefaults = {
+# 	"style" : "dropbox"
+# 	"start" : 0
+# 	"tabs" :  defaultTabs 
+# 	}
+
+# exports.TabBar = (array) ->
+# 	createdTabs = []
+# 	views = []
+# 	tabsIndexable = []
+# 	if array == undefined
+# 		array = []
+# 	for i in tabBarProperties
+# 		if array[i] != undefined
+# 			@[i] = array[i]
+# 		else
+# 			@[i] = tabBarDefaults[i]
+# 	tabBarHeight = 49
+# 	iconSize = 25 * exports.scale
+# 	tabBar = new Layer width:exports.width, height:tabBarHeight*exports.scale, y:exports.height-tabBarHeight*exports.scale, backgroundColor:"white", name:"Tab Bar"
+# 	tabCount = @.tabs.length
+# 	iconPadding = 0
+# 	if exports.width == 1536 || exports.width == 768
+# 		switch @.tabs.length
+# 			when 5 then iconPadding = 150
+# 			when 4 then iconPadding = 175
+# 			when 3 then iconPadding = 200
+# 			when 2 then iconPadding = 225
+# 			when 1 then iconPadding = 250
+# 	else 
+# 		switch @.tabs.length
+# 			when 5 then iconPadding = 25
+# 			when 4 then iconPadding = 50
+# 			when 3 then iconPadding = 75
+# 			when 2 then iconPadding = 100
+# 			when 1 then iconPadding = 150
+# 	iconPadding = iconPadding * exports.scale
+# 	iconSpaceX = (exports.width - ( iconPadding * 2 ) - (iconSize * tabCount)) / ( tabCount - 1 )
+# 	tabBarLabelStyle = {
+# 		"font-size" : 10 * exports.scale + "px"
+# 		"text-transform" : "capitalize"
+# 		"color" : "#929292"
+# 	}
+# 	divider = new Layer superLayer:tabBar, name:"Divider", height:1, width:exports.width, backgroundColor:"#B2B2B2"
+# 	for tab in @.tabs
+# 		label = new exports.Text style:"small", text:tab.label, superLayer:tabBar, align:"center"
+# 		iconContainer = new Layer width:iconSize, height:iconSize + (2*exports.scale), superLayer:tabBar, name:"tab icon for " + tab.label, y:7*exports.scale, backgroundColor:"white"
+# 		iconContainer.x = iconPadding + ((iconSpaceX + iconSize)*@.tabs.indexOf(tab))
+# 		icon = new Layer image:tab.selected, height:tab.height*exports.scale, width:tab.width*exports.scale, superLayer:iconContainer
+# 		icon.centerX()
+# 		label.midX = iconContainer.midX
+# 		label.y = iconContainer.maxY + 1
+# 		label.style = tabBarLabelStyle
+# 		view = new Layer width:exports.width, height:exports.height - (21*exports.scale) - (tabBarHeight*exports.scale), y:(21*exports.scale), name:".view[" + @.tabs.indexOf(tab) + "]", backgroundColor:"transparent"
+# 		label.states.add
+# 			selected: { color: "#007EE5" } 
+# 			unselected: { color :"#929292"}
+# 		icon.states.add
+# 			selected: {image:tab.selected}
+# 			unselected: {image:tab.unselected}
+# 		view.states.add
+# 			selected: {visible:true}
+# 			unselected: {visible:false}
+# 		createdTabs.push {
+# 			"icon" : icon
+# 			"label" : label
+# 			"view" : view
+# 		}
+# 		views.push view
+# 		tabsIndexable.push iconContainer
+# 		if @.tabs.indexOf(tab) != @.start
+# 			icon.states.switch('unselected')
+# 			label.states.switch('unselected')
+# 			view.states.switch('unselected')
+# 		else
+# 			label.states.switch('selected')
+# 	for tab in tabsIndexable
+# 		tab.on Events.Click, ->
+# 			index = tabsIndexable.indexOf(@)
+# 			for tab in createdTabs
+# 				tab.icon.states.switch('unselected')
+# 				tab.label.states.switch('unselected')
+# 				tab.view.states.switch('unselected')
+# 			createdTabs[index].icon.states.switch('selected')
+# 			createdTabs[index].label.states.switch('selected')
+# 			createdTabs[index].view.states.switch('selected')
+# 	return {
+# 		"all" : tabBar
+# 		"tab" : createdTabs
+# 		"index" : tabsIndexable
+# 		"view" : views
+# 		}
+
 
 
 
@@ -575,26 +818,316 @@ exports.Keyboard = (array) ->
 		return unicodeFormat
 
 	exports.layout()
-	emojiSections = ["Smileys & People", "Animals & Nature", "Food & Drink", "Activity", "Travel & Places", "Objects", "Symbols", "Flags"]
+	emojiSections = ["Frequnetly Used", "Smileys & People", "Animals & Nature", "Food & Drink", "Activity", "Travel & Places", "Objects", "Symbols", "Flags"]
 	rawEmojis = ["98 80", "98 AC", "98 81", "98 82", "98 83", "98 84", "98 85", "98 86", "98 87", "98 89", "98 8a", "99 82", "99 83", "E2 98 BA EF B8 8F", "98 8B" , "98 8C", "98 8D", "98 98", "98 97", "98 99", "98 9A", "98 9C", "98 9D", "98 9B", "A4 91", "A4 93", "98 8E", "A4 97", "98 8F", "98 B6", "98 90", "98 91", "98 92", "99 84", "A4 94", "98 B3", "98 9E", "98 9F", "98 A0", "98 A1", "98 94", "98 95", "99 81", "E2 98 B9 EF B8 8F", "98 A3", "98 96", "98 AB", "98 A9", "98 A4", "98 AE", "98 B1", "98 A8", "98 B0", "98 AF", "98 A6", "98 A7", "98 A2", "98 A5", "98 AA", "98 93", "98 AD", "98 B5", "98 B2", "A4 90", "98 B7", "A4 92", "A4 95", "98 B4", "92 A4", "92 A9", "98 88", "91 BF", "91 B9", "91 BA", "92 80", "91 BB", "91 BD", "A4 96", "98 BA", "98 B8", "98 B9", "98 BB", "98 BC", "98 BD", "99 80", "98 BF", "98 BE", "99 8C", "91 8F", "91 8B", "91 8D", "91 8E", "91 8A", "E2 9C 8A", "E2 9C 8C EF B8 8F", "91 8C", "E2 9C 8B", "91 90", "92 AA", "99 8F", "E2 98 9D EF B8 8F", "91 86", "91 87", "91 88", "91 89", "96 95", "96 90", "A4 98", "96 96", "E2 9C 8D EF B8 8F", "92 85", "91 84", "91 85", "91 82", "91 83", "91 81", "91 80", "91 A4", "91 A5", "97 A3", "91 B6", "91 A6", "91 A7", "91 A8", "91 A9", "91 B1", "91 B4", "91 B5", "91 B2", "91 B3", "91 AE", "91 B7", "92 82", "95 B5", "8E 85", "91 BC", "91 B8", "91 B0", "9A B6", "8F 83", "92 83", "91 AF", "91 AB", "91 AC", "91 AD", "99 87", "92 81", "99 85", "99 86", "99 8B", "99 8E", "99 8D", "92 87", "92 86", "92 91", "91 A9 E2 80 8D E2 9D A4 EF B8 8F E2 80 8D F0 9F 91 A9", "91 A8 E2 80 8D E2 9D A4 EF B8 8F E2 80 8D F0 9F 91 A8", "92 8F", "91 A9 E2 80 8D E2 9D A4 EF B8 8F E2 80 8D F0 9F 92 8B E2 80 8D F0 9F 91 A9", "91 A8 E2 80 8D E2 9D A4 EF B8 8F E2 80 8D F0 9F 92 8B E2 80 8D F0 9F 91 A8", "91 AA", "91 A8 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A7", "91 A8 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A7 E2 80 8D F0 9F 91 A6", "91 A8 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A6 E2 80 8D F0 9F 91 A6", "91 A8 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A7 E2 80 8D F0 9F 91 A7", "91 A9 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A6", "91 A9 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A7", "91 A9 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A7 E2 80 8D F0 9F 91 A6", "91 A9 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A6 E2 80 8D F0 9F 91 A6", "91 A9 E2 80 8D F0 9F 91 A9 E2 80 8D F0 9F 91 A7 E2 80 8D F0 9F 91 A7", "91 A8 E2 80 8D F0 9F 91 A8 E2 80 8D F0 9F 91 A6", "91 A8 E2 80 8D F0 9F 91 A8 E2 80 8D F0 9F 91 A7", "91 A8 E2 80 8D F0 9F 91 A8 E2 80 8D F0 9F 91 A7 E2 80 8D F0 9F 91 A6", "91 A8 E2 80 8D F0 9F 91 A8 E2 80 8D F0 9F 91 A6 E2 80 8D F0 9F 91 A6", "91 A8 E2 80 8D F0 9F 91 A8 E2 80 8D F0 9F 91 A7 E2 80 8D F0 9F 91 A7", "91 9A", "91 95", "91 96", "91 94", "91 97", "91 99", "91 98", "92 84", "92 8B", "91 A3", "91 A0", "91 A1", "91 A2", "91 9E", "91 9F", "91 92", "8E A9", "E2 9B 91", "8E 93", "91 91", "8E 92", "91 9D", "91 9B", "91 9C", "92 BC", "91 93", "95 B6", "92 8D", "8C 82", "9B 91", "90 B6", "90 B1", "90 AD", "90 B9", "90 B0", "90 BB", "90 BC", "90 A8", "90 AF", "A6 81", "90 AE", "90 B7", "90 BD", "90 B8", "90 99", "90 B5", "99 88", "99 89", "99 8A", "90 92", "90 94", "90 A7", "90 A6", "90 A4", "90 A3", "90 A5", "90 BA", "90 97", "90 B4", "A6 84", "90 9D", "90 9B", "90 8C", "90 9E", "90 9C", "95 B7", "A6 82", "A6 80", "90 8D", "90 A2", "90 A0", "90 9F", "90 A1", "90 AC", "90 B3", "90 8B", "90 8A", "90 86", "90 85", "90 83", "90 82", "90 84", "90 AA", "90 AB", "90 98", "90 90", "90 8F", "90 91", "90 8E", "90 96", "90 80", "90 81", "90 93", "A6 83", "95 8A", "90 95", "90 A9", "90 88", "90 87", "90 BF", "90 BE", "90 89", "90 B2", "8C B5", "8E 84", "8C B2", "8C B3", "8C B4", "8C B1", "8C BF", "E2 98 98", "8D 80", "8E 8D", "8E 8B", "8D 83", "8D 82", "8D 81", "8C BE", "8C BA", "8C BA", "8C BB", "8C B9", "8C B7", "8C BC", "8C B8", "92 90", "8D 84", "8C B0", "8E 83", "90 9A", "95 B8", "8C 8E", "8C 8D", "8C 8F", "8C 95", "8C 96", "8C 97", "8C 98", "8C 91", "8C 92", "8C 93", "8C 94", "8C 9A", "8C 9D", "8C 9B", "8C 9C", "8C 9E", "8C 99", "E2 AD 90 EF B8 8F", "8C 9F", "92 AB", "E2 9C A8", "E2 98 84 EF B8 8F", "E2 98 80 EF B8 8F", "8C A4", "E2 9B 85 EF B8 8F", "8C A5", "8C A6", "E2 98 81 EF B8 8F", "8C A7", "E2 9B 88", "8C A9", "E2 9A A1 EF B8 8F", "94 A5", "92 A5", "E2 9D 84 EF B8 8F", "8C A8", "E2 98 83 EF B8 8F", "E2 9B 84 EF B8 8F", "8C AC", "92 A8", "8C AA", "8C AB", "E2 98 82 EF B8 8F", "E2 98 94 EF B8 8F", "92 A7", "92 A6", "8C 8A", "9B 91", "9B 91", "8D 8F", "8D 8E", "8D 90", "8D 8A", "8D 8B", "8D 8C", "8D 89", "8D 87", "8D 93", "8D 88", "8D 92", "8D 91", "8D 8D", "8D 85", "8D 86", "8C B6", "8C BD", "8D A0", "8D AF", "8D 9E", "A7 80", "8D 97", "8D 96", "8D A4", "8D B3", "8D 94", "8D 9F", "8C AD", "8D 95", "8D 9D", "8C AE", "8C AF", "8D 9C", "8D B2", "8D A5", "8D A3", "8D B1", "8D 9B", "8D 99", "8D 9A", "8D 98", "8D A2", "8D A1", "8D A7", "8D A8", "8D A6", "8D B0", "8E 82", "8D AE", "8D AC", "8D AD", "8D AB", "8D BF", "8D A9", "8D AA", "8D BA", "8D BB", "8D B7", "8D B8", "8D B9", "8D BE", "8D B6", "8D B5", "E2 98 95 EF B8 8F", "8D BC", "8D B4", "8D BD","9B 91", "9B 91", "9B 91", "E2 9A BD EF B8 8F", "8F 80", "8F 88", "E2 9A BE EF B8 8F", "8E BE", "8F 90", "8F 89", "8E B1", "E2 9B B3 EF B8 8F", "8F 8C", "8F 93", "8F B8", "8F 92", "8F 91", "8F 8F", "8E BF", "E2 9B B7", "8F 82", "E2 9B B8", "8F B9", "8E A3", "9A A3", "8F 8A", "8F 84", "9B 80", "E2 9B B9", "8F 8B", "9A B4", "9A B5", "8F 87", "95 B4", "8F 86", "8E BD", "8F 85", "8E 96", "8E 97", "8F B5", "8E AB", "8E 9F", "8E AD", "8E A8", "8E AA", "8E A4", "8E A7", "8E BC", "8E B9", "8E B7", "8E BA", "8E B8", "8E BB", "8E AC", "8E AE", "91 BE", "8E AF", "8E B2", "8E B0", "8E B3", "9B 91", "9B 91", "9B 91", "9A 97", "9A 95", "9A 99", "9A 8C", "9A 8E", "8F 8E", "9A 93", "9A 91", "9A 92", "9A 90", "9A 9A", "9A 9B", "9A 9C","8F 8D", "9A B2", "9A A8", "9A 94", "9A 8D", "9A 98", "9A 96", "9A A1", "9A A0", "9A AF", "9A 83", "9A 8B", "9A 9D", "9A 84", "9A 85", "9A 88", "9A 9E", "9A 82", "9A 86", "9A 87", "9A 8A", "9A 89", "9A 81", "9B A9", "E2 9C 88 EF B8 8F", "9B AB", "9B AC", "E2 9B B5 EF B8 8F", "9B A5", "9A A4", "E2 9B B4", "9B B3", "9A 80", "9B B0", "92 BA", "E2 9A 93 EF B8 8F", "9A A7", "E2 9B BD EF B8 8F", "9A 8F", "9A A6", "9A A5", "8F 81", "9A A2", "8E A1", "8E A2", "8E A0", "8F 97", "8C 81", "97 BC", "8F AD", "E2 9B B2 EF B8 8F", "8E 91", "E2 9B B0", "8F 94", "97 BB", "8C 8B", "97 BE", "8F 95", "E2 9B BA EF B8 8F", "8F 9E", "9B A3", "9B A4", "8C 85", "8C 84", "8F 9C", "8F 96", "8F 9D", "8C 87", "8C 86", "8F 99", "8C 83", "8C 89", "8C 8C", "8C A0", "8E 87", "8E 86", "8C 88", "8F 98", "8F B0", "8F AF", "8F 9F", "97 BD", "8F A0", "8F A1", "8F 9A", "8F A2", "8F AC", "8F A3", "8F A4", "8F A5", "8F A6", "8F A8", "8F AA", "8F AB", "8F A9", "92 92", "8F 9B", "E2 9B AA EF B8 8F", "95 8C", "95 8D", "95 8B", "E2 9B A9", "E2 8C 9A EF B8 8F", "93 B1", "93 B2", "92 BB", "E2 8C A8 EF B8 8F", "96 A5", "96 A8", "96 B1", "96 B2", "95 B9", "97 9C", "92 BD", "92 BE", "92 BF", "93 80", "93 BC", "93 B7", "93 B8", "93 B9", "8E A5", "93 BD", "8E 9E", "93 9E", "E2 98 8E EF B8 8F", "93 9F", "93 A0", "93 BA", "93 BB", "8E 99", "8E 9A", "8E 9B", "E2 8F B1", "E2 8F B2", "E2 8F B0", "95 B0", "E2 8F B3", "E2 8C 9B EF B8 8F", "93 A1", "94 8B", "94 8C", "92 A1", "94 A6", "95 AF", "97 91", "9B A2", "92 B8", "92 B5", "92 B4", "92 B6", "92 B7", "92 B0", "92 B3", "92 8E", "E2 9A 96", "94 A7", "94 A8", "E2 9A 92", "9B A0", "E2 9B 8F", "94 A9", "E2 9A 99", "E2 9B 93", "94 AB", "92 A3", "94 AA", "97 A1", "E2 9A 94", "9B A1", "9A AC", "E2 98 A0 EF B8 8F", "E2 9A B0", "E2 9A B1", "8F BA", "94 AE", "93 BF", "92 88", "E2 9A 97", "94 AD", "94 AC", "95 B3", "92 8A", "92 89", "8C A1", "8F B7", "94 96", "9A BD", "9A BF", "9B 81", "94 91", "97 9D", "9B 8B", "9B 8C", "9B 8F", "9A AA", "9B 8E", "96 BC", "97 BA", "E2 9B B1", "97 BF", "9B 8D", "8E 88", "8E 8F", "8E 80", "8E 81", "8E 8A", "8E 89", "8E 8E", "8E 90", "8E 8C", "8F AE", "E2 9C 89 EF B8 8F", "93 A9", "93 A8", "93 A7", "92 8C", "93 AE", "93 AA", "93 AB", "93 AC", "93 AD", "93 A6", "93 AF", "93 A5", "93 A4", "93 9C", "93 83", "93 91", "93 8A", "93 88", "93 89", "93 84", "93 85", "93 86", "97 93", "93 87", "97 83", "97 B3", "97 84", "93 8B", "97 92", "93 81", "93 82", "97 82", "97 9E", "93 B0", "93 93", "93 95", "93 97", "93 98", "93 99", "93 94", "93 92", "93 9A", "93 96", "94 97", "93 8E", "96 87", "E2 9C 82 EF B8 8F", "93 90", "93 8F", "93 8C", "93 8D", "9A A9", "8F B3", "8F B4", "94 90", "94 92", "94 93", "94 8F", "96 8A", "96 8B", "E2 9C 92 EF B8 8F", "93 9D", "E2 9C 8F EF B8 8F", "96 8D", "96 8C", "94 8D", "94 8E", "9B 91", "9B 91", "E2 9D A4 EF B8 8F", "92 9B", "92 9A", "92 99", "92 9C", "92 94", "E2 9D A3 EF B8 8F", "92 95", "92 9E", "92 93", "92 97", "92 96", "92 98", "92 9D", "92 9F", "E2 98 AE EF B8 8F", "E2 9C 9D EF B8 8F", "E2 98 AA EF B8 8F", "95 89", "E2 98 B8 EF B8 8F", "E2 9C A1 EF B8 8F", "94 AF", "95 8E", "E2 98 AF EF B8 8F", "E2 98 A6 EF B8 8F", "9B 90", "E2 9B 8E", "E2 99 88 EF B8 8F", "E2 99 89 EF B8 8F", "E2 99 8A EF B8 8F", "E2 99 8B EF B8 8F", "E2 99 8C EF B8 8F", "E2 99 8D EF B8 8F", "E2 99 8E EF B8 8F", "E2 99 8F EF B8 8F", "E2 99 90 EF B8 8F", "E2 99 91 EF B8 8F", "E2 99 92 EF B8 8F", "E2 99 93 EF B8 8F", "86 94", "E2 9A 9B", "88 B3", "88 B9", "E2 98 A2 EF B8 8F", "E2 98 A3 EF B8 8F", "93 B4", "93 B3", "88 B6", "88 9A EF B8 8F", "88 B8", "88 BA", "88 B7 EF B8 8F", "E2 9C B4 EF B8 8F", "86 9A", "89 91", "92 AE", "89 90", "E3 8A 99 EF B8 8F", "E3 8A 97 EF B8 8F", "88 B4", "88 B5", "88 B2", "85 B0 EF B8 8F", "85 B1 EF B8 8F", "86 8E", "86 91", "85 BE EF B8 8F", "86 98", "E2 9B 94 EF B8 8F", "93 9B", "9A AB", "E2 9D 8C", "E2 AD 95 EF B8 8F", "92 A2", "E2 99 A8 EF B8 8F", "9A B7", "9A AF", "9A B3", "9A B1", "94 9E", "93 B5", "E2 9D 97 EF B8 8F", "E2 9D 95", "E2 9D 93", "E2 9D 94", "E2 80 BC EF B8 8F", "E2 81 89 EF B8 8F", "92 AF", "94 85", "94 86", "94 B1", "E2 9A 9C", "E3 80 BD EF B8 8F", "E2 9A A0 EF B8 8F", "9A B8", "94 B0", "E2 99 BB EF B8 8F", "88 AF EF B8 8F", "92 B9", "E2 9D 87 EF B8 8F", "E2 9C B3 EF B8 8F", "E2 9D 8E", "E2 9C 85", "92 A0", "8C 80", "E2 9E BF", "8C 90", "E2 93 82 EF B8 8F", "8F A7", "88 82 EF B8 8F", "9B 82", "9B 83", "9B 84", "9B 85", "E2 99 BF EF B8 8F", "9A AD", "9A BE", "85 BF EF B8 8F", "9A B0", "9A B9", "9A BA", "9A BC", "9A BB", "9A AE", "8E A6", "93 B6", "88 81", "86 96", "86 97", "86 99", "86 92", "86 95", "86 93", "30 EF B8 8F E2 83 A3", "31 EF B8 8F E2 83 A3", "32 EF B8 8F E2 83 A3", "33 EF B8 8F E2 83 A3", "34 EF B8 8F E2 83 A3", "35 EF B8 8F E2 83 A3", "36 EF B8 8F E2 83 A3", "37 EF B8 8F E2 83 A3", "38 EF B8 8F E2 83 A3", "39 EF B8 8F E2 83 A3", "94 9F", "94 A2", "E2 96 B6 EF B8 8F", "E2 8F B8", "E2 8F AF", "E2 8F B9", "E2 8F BA", "E2 8F AD", "E2 8F AE", "E2 8F A9", "E2 8F AA", "94 80", "94 81", "94 82", "E2 97 80 EF B8 8F", "94 BC", "94 BD", "E2 8F AB", "E2 8F AC", "E2 9E A1 EF B8 8F", "E2 AC 85 EF B8 8F", "E2 AC 86 EF B8 8F", "E2 AC 87 EF B8 8F", "E2 86 97 EF B8 8F", "E2 86 98 EF B8 8F", "E2 86 99 EF B8 8F", "E2 86 96 EF B8 8F", "E2 86 95 EF B8 8F", "E2 86 94 EF B8 8F", "94 84", "E2 86 AA EF B8 8F", "E2 86 A9 EF B8 8F", "E2 A4 B4 EF B8 8F", "E2 A4 B5 EF B8 8F", "23 EF B8 8F E2 83 A3", "2A EF B8 8F E2 83 A3", "E2 84 B9 EF B8 8F", "94 A4", "94 A1", "94 A0", "94 A3", "8E B5", "8E B6", "E3 80 B0 EF B8 8F", "E2 9E B0", "E2 9C 94 EF B8 8F", "94 83", "E2 9E 95", "E2 9E 96", "E2 9E 97", "E2 9C 96 EF B8 8F", "92 B2", "92 B1", "C2 A9 EF B8 8F", "C2 AE EF B8 8F", "E2 84 A2 EF B8 8F", "94 9A", "94 99", "94 9B", "94 9D", "94 9C", "E2 98 91 EF B8 8F", "94 98", "E2 9A AA EF B8 8F", "E2 9A AB EF B8 8F", "94 B4", "94 B5", "94 B8", "94 B9", "94 B6", "94 B7", "94 BA", "E2 96 AA EF B8 8F", "E2 96 AB EF B8 8F", "E2 AC 9B EF B8 8F", "E2 AC 9C EF B8 8F", "94 BB", "E2 97 BC EF B8 8F", "E2 97 BB EF B8 8F", "E2 97 BE EF B8 8F", "E2 97 BD EF B8 8F", "94 B2", "94 B3", "94 88", "94 89", "94 8A", "94 87", "93 A3", "93 A2", "94 94", "94 95", "83 8F", "80 84 EF B8 8F", "E2 99 A0 EF B8 8F", "E2 99 A3 EF B8 8F", "E2 99 A5 EF B8 8F", "E2 99 A6 EF B8 8F", "8E B4", "91 81 E2 80 8D F0 9F 97 A8", "92 AD", "97 AF", "92 AC", "95 90", "95 91", "95 92", "95 93", "95 94", "95 95", "95 96", "95 97", "95 98", "95 99", "95 9A", "95 9B", "95 9C", "95 9D", "95 9E", "95 9F", "95 A0", "95 A1", "95 A2", "95 A3", "95 A4", "95 A5", "95 A6", "95 A7", "9B 91", "87 A6 F0 9F 87 AB", "87 A6 F0 9F 87 BD", "87 A6 F0 9F 87 B1", "87 A9 F0 9F 87 BF", "87 A6 F0 9F 87 B8", "87 A6 F0 9F 87 A9", "87 A6 F0 9F 87 B4", "87 A6 F0 9F 87 AE", "87 A6 F0 9F 87 B6", "87 A6 F0 9F 87 AC", "87 A6 F0 9F 87 B7", "87 A6 F0 9F 87 B2", "87 A6 F0 9F 87 BC", "87 A6 F0 9F 87 BA", "87 A6 F0 9F 87 B9", "87 A6 F0 9F 87 BF", "87 A7 F0 9F 87 B8", "87 A7 F0 9F 87 AD", "87 A7 F0 9F 87 A9", "87 A7 F0 9F 87 A7", "87 A7 F0 9F 87 BE", "87 A7 F0 9F 87 AA", "87 A7 F0 9F 87 BF", "87 A7 F0 9F 87 AF", "87 A7 F0 9F 87 B2", "87 A7 F0 9F 87 B9", "87 A7 F0 9F 87 B4", "87 A7 F0 9F 87 B6", "87 A7 F0 9F 87 A6", "87 A7 F0 9F 87 BC", "87 A7 F0 9F 87 B7", "87 AE F0 9F 87 B4", "87 BB F0 9F 87 AC", "87 A7 F0 9F 87 B3", "87 A7 F0 9F 87 AC", "87 A7 F0 9F 87 AB", "87 A7 F0 9F 87 AE", "87 A8 F0 9F 87 BB", "87 B0 F0 9F 87 AD", "87 A8 F0 9F 87 B2", "87 A8 F0 9F 87 A6", "87 AE F0 9F 87 A8", "87 B0 F0 9F 87 BE", "87 A8 F0 9F 87 AB", "87 B9 F0 9F 87 A9", "87 A8 F0 9F 87 B1", "87 A8 F0 9F 87 B3", "87 A8 F0 9F 87 BD", "87 A8 F0 9F 87 A8", "87 A8 F0 9F 87 B4", "87 B0 F0 9F 87 B2", "87 A8 F0 9F 87 AC", "87 A8 F0 9F 87 A9", "87 A8 F0 9F 87 B0", "87 A8 F0 9F 87 B7", "87 AD F0 9F 87 B7", "87 A8 F0 9F 87 BA", "87 A8 F0 9F 87 BC", "87 A8 F0 9F 87 BE", "87 A8 F0 9F 87 BF", "87 A9 F0 9F 87 B0", "87 A9 F0 9F 87 AF", "87 A9 F0 9F 87 B2", "87 A9 F0 9F 87 B4", "87 AA F0 9F 87 A8", "87 AA F0 9F 87 AC", "87 B8 F0 9F 87 BB", "87 AC F0 9F 87 B6", "87 AA F0 9F 87 B7", "87 AA F0 9F 87 AA", "87 AA F0 9F 87 B9", "87 AA F0 9F 87 BA", "87 AB F0 9F 87 B0", "87 AB F0 9F 87 B4", "87 AB F0 9F 87 AF", "87 AB F0 9F 87 AE", "87 AB F0 9F 87 B7", "87 AC F0 9F 87 AB", "87 B5 F0 9F 87 AB", "87 B9 F0 9F 87 AB", "87 AC F0 9F 87 A6", "87 AC F0 9F 87 B2", "87 AC F0 9F 87 AA", "87 A9 F0 9F 87 AA", "87 AC F0 9F 87 AD", "87 AC F0 9F 87 AE", "87 AC F0 9F 87 B7", "87 AC F0 9F 87 B1", "87 AC F0 9F 87 A9", "87 AC F0 9F 87 B5", "87 AC F0 9F 87 BA", "87 AC F0 9F 87 B9", "87 AC F0 9F 87 AC", "87 AC F0 9F 87 B3", "87 AC F0 9F 87 BC", "87 AC F0 9F 87 BE", "87 AD F0 9F 87 B9", "87 AD F0 9F 87 B3", "87 AD F0 9F 87 B0", "87 AD F0 9F 87 BA", "87 AE F0 9F 87 B8", "87 AE F0 9F 87 B3", "87 AE F0 9F 87 A9", "87 AE F0 9F 87 B7", "87 AE F0 9F 87 B6", "87 AE F0 9F 87 AA", "87 AE F0 9F 87 B2", "87 AE F0 9F 87 B1", "87 AE F0 9F 87 B9", "87 A8 F0 9F 87 AE", "87 AF F0 9F 87 B2", "87 AF F0 9F 87 B5", "87 AF F0 9F 87 AA", "87 AF F0 9F 87 B4", "87 B0 F0 9F 87 BF", "87 B0 F0 9F 87 AA", "87 B0 F0 9F 87 AE", "87 BD F0 9F 87 B0", "87 B0 F0 9F 87 BC", "87 B0 F0 9F 87 AC", "87 B1 F0 9F 87 A6", "87 B1 F0 9F 87 BB", "87 B1 F0 9F 87 A7", "87 B1 F0 9F 87 B8", "87 B1 F0 9F 87 B7", "87 B1 F0 9F 87 BE", "87 B1 F0 9F 87 AE", "87 B1 F0 9F 87 B9", "87 B1 F0 9F 87 BA", "87 B2 F0 9F 87 B4", "87 B2 F0 9F 87 B0", "87 B2 F0 9F 87 AC", "87 B2 F0 9F 87 BC", "87 B2 F0 9F 87 BE", "87 B2 F0 9F 87 BB", "87 B2 F0 9F 87 B1", "87 B2 F0 9F 87 B9", "87 B2 F0 9F 87 AD", "87 B2 F0 9F 87 B6", "87 B2 F0 9F 87 B7", "87 B2 F0 9F 87 BA", "87 BE F0 9F 87 B9", "87 B2 F0 9F 87 BD", "87 AB F0 9F 87 B2", "87 B2 F0 9F 87 A9", "87 B2 F0 9F 87 A8", "87 B2 F0 9F 87 B3", "87 B2 F0 9F 87 AA", "87 B2 F0 9F 87 B8", "87 B2 F0 9F 87 A6", "87 B2 F0 9F 87 BF", "87 B2 F0 9F 87 B2", "87 B3 F0 9F 87 A6", "87 B3 F0 9F 87 B7", "87 B3 F0 9F 87 B5", "87 B3 F0 9F 87 B1", "87 B3 F0 9F 87 A8", "87 B3 F0 9F 87 BF", "87 B3 F0 9F 87 AE", "87 B3 F0 9F 87 AA", "87 B3 F0 9F 87 AC", "87 B3 F0 9F 87 BA", "87 B3 F0 9F 87 AB", "87 B2 F0 9F 87 B5", "87 B0 F0 9F 87 B5", "87 B3 F0 9F 87 B4", "87 B4 F0 9F 87 B2", "87 B5 F0 9F 87 B0", "87 B5 F0 9F 87 BC", "87 B5 F0 9F 87 B8", "87 B5 F0 9F 87 A6", "87 B5 F0 9F 87 AC", "87 B5 F0 9F 87 BE", "87 B5 F0 9F 87 AA", "87 B5 F0 9F 87 AD", "87 B5 F0 9F 87 B3", "87 B5 F0 9F 87 B1", "87 B5 F0 9F 87 B9", "87 B5 F0 9F 87 B7", "87 B6 F0 9F 87 A6", "87 B7 F0 9F 87 AA", "87 B7 F0 9F 87 B4", "87 B7 F0 9F 87 BA", "87 B7 F0 9F 87 BC", "87 A7 F0 9F 87 B1", "87 B8 F0 9F 87 AD", "87 B0 F0 9F 87 B3", "87 B1 F0 9F 87 A8", "87 B5 F0 9F 87 B2", "87 BB F0 9F 87 A8", "87 BC F0 9F 87 B8", "87 B8 F0 9F 87 B2", "87 B8 F0 9F 87 B9", "87 B8 F0 9F 87 A6", "87 B8 F0 9F 87 B3", "87 B7 F0 9F 87 B8", "87 B8 F0 9F 87 A8", "87 B8 F0 9F 87 B1", "87 B8 F0 9F 87 AC", "87 B8 F0 9F 87 BD", "87 B8 F0 9F 87 B0", "87 B8 F0 9F 87 AE", "87 B8 F0 9F 87 A7", "87 B8 F0 9F 87 B4", "87 BF F0 9F 87 A6", "87 AC F0 9F 87 B8", "87 B0 F0 9F 87 B7", "87 B8 F0 9F 87 B8", "87 AA F0 9F 87 B8", "87 B1 F0 9F 87 B0", "87 B8 F0 9F 87 A9", "87 B8 F0 9F 87 B7", "87 B8 F0 9F 87 BF", "87 B8 F0 9F 87 AA", "87 A8 F0 9F 87 AD", "87 B8 F0 9F 87 BE", "87 B9 F0 9F 87 BC", "87 B9 F0 9F 87 AF", "87 B9 F0 9F 87 BF", "87 B9 F0 9F 87 AD", "87 B9 F0 9F 87 B1", "87 B9 F0 9F 87 AC", "87 B9 F0 9F 87 B0", "87 B9 F0 9F 87 B4", "87 B9 F0 9F 87 B9", "87 B9 F0 9F 87 B3", "87 B9 F0 9F 87 B7", "87 B9 F0 9F 87 B2", "87 B9 F0 9F 87 A8", "87 B9 F0 9F 87 BB", "87 BA F0 9F 87 AC", "87 BA F0 9F 87 A6", "87 A6 F0 9F 87 AA", "87 AC F0 9F 87 A7", "87 BA F0 9F 87 B8", "87 BB F0 9F 87 AE", "87 BA F0 9F 87 BE", "87 BA F0 9F 87 BF", "87 BB F0 9F 87 BA", "87 BB F0 9F 87 A6", "87 BB F0 9F 87 AA", "87 BB F0 9F 87 B3", "87 BC F0 9F 87 AB", "87 AA F0 9F 87 AD", "87 BE F0 9F 87 AA", "87 BF F0 9F 87 B2", "87 BF F0 9F 87 BC"]
 	emojisArray = []
+	freqEmojisArray = []
 	for em in rawEmojis
 		emojisArray.push emojiFormatter(em)
 
 	
-
-
+	frequentlyUsedEmojisRaw = ["92 85", "91 84", "91 85", "91 82", "91 83","92 85", "91 84", "91 85", "91 82", "91 83","92 85", "91 84", "91 85", "91 82", "91 83","92 85", "91 84", "91 85", "91 82", "91 83","92 85", "91 84", "91 85", "91 82", "91 83",]
+	for em in frequentlyUsedEmojisRaw
+		freqEmojisArray.push emojiFormatter(em)
 
 	emojiKey.on Events.TouchStart, ->
 		emojiKey.backgroundColor = "white"
 		emojiBG = new Layer backgroundColor:"#ECEEF1"
+		box = exports.px(30)
 		emojiBG.constraints = (trailing:1, leading:1, bottom:1, height:258)
 		exports.layout()
 		emojiGalley = new ScrollComponent superLayer:emojiBG, width:emojiBG.width, height:emojiBG.height - exports.px(40)
 		emojiGalley.speedY = 0
 		emojiSpacer = exports.px(6)
-		box = exports.px(30)
+		emojiPicker = new Layer backgroundColor:"transparent", name:"emoji picker", superLayer:emojiBG
+		emojiPicker.constraints = 
+			leading:1
+			trailing:1
+			bottom:1
+			height:42
+		ABC = new Layer backgroundColor:"transparent", superLayer:emojiPicker
+		ABC.html = "ABC"
+		ABC.style = {
+			"font-size" : exports.px(15) + "px"
+			"font-weight" : 500
+			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
+			"color" : "#4F555D"
+		}
+		ABC.constraints = 
+			leading:12
+			bottom:14
+			width:30
+			height:15
+
+		exports.layout()
 		row = -1
+		ABC.on Events.Click, ->
+			emojiBG.destroy()
+		frequent = new Layer superLayer:emojiPicker, backgroundColor:"transparent"
+		frequent.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Recent</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='iOS-9-Keyboards' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6-Portrait-Light-Copy' sketch:type='MSArtboardGroup' transform='translate(-55.000000, -638.000000)'>
+			            <g id='Keyboards' sketch:type='MSLayerGroup' transform='translate(0.000000, 408.000000)'>
+			                <g id='Recent' transform='translate(55.500000, 230.000000)' sketch:type='MSShapeGroup'>
+			                    <circle id='Body' stroke='#4A5461' cx='8' cy='8' r='8'></circle>
+			                    <path d='M7.5,7.5 L7.5,8.5 L8.5,8.5 L8.5,2 L7.5,2 L7.5,7.5 L4,7.5 L4,8.5 L8.5,8.5 L8.5,7.5 L7.5,7.5 Z' id='Hands' fill='#4A5461'></path>
+			                </g>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		frequent.constraints = 
+			leading : [ABC, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+		smileys = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+		smileys.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>:D</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='iOS-9-Keyboards' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6-Portrait-Light-Copy' sketch:type='MSArtboardGroup' transform='translate(-86.000000, -638.000000)'>
+			            <g id='Keyboards' sketch:type='MSLayerGroup' transform='translate(0.000000, 408.000000)'>
+			                <g id=':D' transform='translate(87.000000, 230.500000)' sketch:type='MSShapeGroup'>
+			                    <circle id='Head' stroke='#4A5461' stroke-width='0.789473684' cx='7.5' cy='7.5' r='7.5'></circle>
+			                    <path d='M7.5,13.5263158 C10.2686907,13.5263158 12.5131579,10.3684212 12.5131579,9.18421045 C12.5131579,7.60526317 11.4389098,9.18421043 7.5,9.18421053 C3.56109023,9.18421062 2.48684211,7.60526317 2.48684211,9.18421045 C2.48684211,10.368421 4.73130935,13.5263158 7.5,13.5263158 Z M7.5,10.9605263 C8.93233083,11.1578947 11.7969925,10.368421 11.7969925,9.44423552 C11.7969925,8.78947368 10.8762084,9.57894727 7.5,9.77631579 C4.12379162,9.57894743 3.20300872,8.78947369 3.20300752,9.44423552 C3.20300582,10.368421 6.06766917,11.1578947 7.5,10.9605263 Z' id='Smile' fill='#4A5461'></path>
+			                    <path d='M5.23684211,6.3236598 C5.64378876,6.3236598 5.97368421,5.88183554 5.97368421,5.33681769 C5.97368421,4.79179985 5.64378876,4.34997559 5.23684211,4.34997559 C4.82989545,4.34997559 4.5,4.79179985 4.5,5.33681769 C4.5,5.88183554 4.82989545,6.3236598 5.23684211,6.3236598 Z M9.73684211,6.3236598 C10.1437888,6.3236598 10.4736842,5.88183554 10.4736842,5.33681769 C10.4736842,4.79179985 10.1437888,4.34997559 9.73684211,4.34997559 C9.32989545,4.34997559 9,4.79179985 9,5.33681769 C9,5.88183554 9.32989545,6.3236598 9.73684211,6.3236598 Z' id='Eyes' fill='#4A5461'></path>
+			                </g>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		smileys.constraints =
+			leading : [frequent, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+		animals = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+		animals.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Group</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6' sketch:type='MSArtboardGroup' transform='translate(-117.000000, -639.000000)' stroke='#4A5361'>
+			            <g id='ic_Food' sketch:type='MSLayerGroup' transform='translate(118.000000, 640.000000)'>
+			                <g id='Group' sketch:type='MSShapeGroup'>
+			                    <path d='M5.68377537,1.38156646 C6.23926066,1.13624 6.85372005,1 7.5,1 C8.14627995,1 8.76073934,1.13624 9.31622463,1.38156646 C9.80879275,0.562359019 10.8255888,0 12,0 C13.6568542,0 15,1.11928813 15,2.5 C15,3.5571398 14.2126246,4.46102843 13.0999226,4.82662514 C14.2496528,5.64185422 15,6.98330062 15,8.5 C15,10.7167144 13.3971873,12.5590719 11.2872671,12.9313673 C10.4867248,14.1757703 9.08961696,15 7.5,15 C5.91038304,15 4.51327524,14.1757703 3.71273291,12.9313673 C1.60281268,12.5590719 0,10.7167144 0,8.5 C0,6.98330062 0.750347244,5.64185422 1.90007741,4.82662514 C0.787375445,4.46102843 0,3.5571398 0,2.5 C0,1.11928813 1.34314575,0 3,0 C4.17441122,0 5.19120725,0.562359019 5.68377537,1.38156646 Z' id='Oval-8'></path>
+			                    <path d='M5.73834228,12 C5.86290979,12 6.14642353,12 6.14642353,12 C6.14642353,12 6.43215696,12.4426123 6.5246582,12.4919739 C6.66455601,12.5666277 7,12.4919739 7,12.4919739 L7,12 L8,12 L8,12.4919739 L8.49799228,12.4919739 L8.84301769,12 L9.3918457,12 C9.3918457,12 8.99598457,12.9839478 8.49799228,12.9839478 L6.60702407,12.9839478 C6.21404813,12.9839478 5.45996094,12 5.73834228,12 Z' id='Rectangle-44-Copy-2'></path>
+			                    <circle id='Oval-14' cx='10.5' cy='7.5' r='0.5'></circle>
+			                    <circle id='Oval-14-Copy' cx='4.5' cy='7.5' r='0.5'></circle>
+			                    <path d='M12.6999969,5 C12.6999969,3.06700338 11.1329936,1.5 9.19999695,1.5' id='Oval-16'></path>
+			                    <path d='M5.5,5 C5.5,3.06700338 3.93299662,1.5 2,1.5' id='Oval-16-Copy' transform='translate(3.750000, 3.250000) scale(-1, 1) translate(-3.750000, -3.250000) '></path>
+			                    <rect id='Rectangle-44-Copy' x='7' y='11' width='1' height='1'></rect>
+			                    <path d='M6,10 L6.5,10 L6.49999999,9.5 L8.50000005,9.5 L8.50000005,10 L9,10 L9,10.5 L8.5,10.5 L8.5,11 L6.5,11 L6.5,10.5 L6,10.5 L6,10 Z' id='Path'></path>
+			                </g>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		animals.constraints =
+			leading : [smileys, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+		food = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+		food.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Food</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='iOS-9-Keyboards' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6-Portrait-Light-Copy' sketch:type='MSArtboardGroup' transform='translate(-148.000000, -637.000000)'>
+			            <g id='Keyboards' sketch:type='MSLayerGroup' transform='translate(0.000000, 408.000000)'>
+			                <g id='Food' transform='translate(149.500000, 229.500000)' sketch:type='MSShapeGroup'>
+			                    <path d='M5.5,15.5 L1,15.5 L0,5 L6.5,5 L6.26360933,7.48210202' id='Drink' stroke='#4A5461'></path>
+			                    <path d='M6.01077545,1.96930098 L6.51571352,5.22270539 L5.71908184,5.67947812 L5.0389009,1.96930098 L4.85557247,1.96930098 L4.85557247,0.96930098 L8.85557247,0.96930098 L8.85557247,1.96930098 L6.01077545,1.96930098 Z' id='Straw' fill='#4A5461' transform='translate(6.855572, 3.324390) rotate(24.000000) translate(-6.855572, -3.324390) '></path>
+			                    <rect id='Bottom-Bun' stroke='#4A5461' x='3' y='14' width='10.5' height='1.5' rx='1'></rect>
+			                    <path d='M1.5,12.5024408 C1.5,11.948808 1.94916916,11.5 2.49268723,11.5 L14.0073128,11.5 C14.5555588,11.5 15,11.9469499 15,12.5024408 L15,12.9975592 C15,13.551192 14.5508308,14 14.0073128,14 L2.49268723,14 C1.94444121,14 1.5,13.5530501 1.5,12.9975592 L1.5,12.5024408 Z M3.93300003,11.8392727 C3.41771834,11.6518976 3.44483697,11.5 3.9955775,11.5 L13.0044225,11.5 C13.5542648,11.5 13.5866061,11.6503251 13.067,11.8392727 L8.5,13.5 L3.93300003,11.8392727 Z' id='&quot;Patty&quot;' fill='#4A5461'></path>
+			                    <path d='M2.5,10.5 L13.5,10.5 L15,11.5 L1,11.5 L2.5,10.5 Z' id='Cheese' fill='#4A5461'></path>
+			                    <path d='M8.25,10.5 C11.4256373,10.5 14,10.3284271 14,9.5 C14,8.67157288 11.4256373,8 8.25,8 C5.07436269,8 2.5,8.67157288 2.5,9.5 C2.5,10.3284271 5.07436269,10.5 8.25,10.5 Z' id='Top-Bun' stroke='#4A5461' stroke-width='0.75'></path>
+			                </g>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		food.constraints =
+			leading : [animals, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+		activity = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+		activity.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(16)}px' height='#{exports.px(16)}px' viewBox='0 0 16 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Soccer Ball</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs>
+			        <circle id='path-1' cx='8' cy='8' r='8'></circle>
+			    </defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6' sketch:type='MSArtboardGroup' transform='translate(-179.000000, -639.000000)'>
+			            <g id='Soccer-Ball' sketch:type='MSLayerGroup' transform='translate(179.000000, 639.000000)'>
+			                <mask id='mask-2' sketch:name='Mask' fill='white'>
+			                    <use xlink:href='#path-1'></use>
+			                </mask>
+			                <use id='Mask' stroke='#4A5361' sketch:type='MSShapeGroup' xlink:href='#path-1'></use>
+			                <path d='M6,12.1203046 L12.8573384,8 L13.3723765,8.8571673 L6.51503807,12.9774719 L6,12.1203046 L6,12.1203046 Z' id='Rectangle-47' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M11.849648,8.7260551 L19.1001103,5.34510901 L19.5227285,6.2514168 L12.2722662,9.63236289 L11.849648,8.7260551 L11.849648,8.7260551 Z' id='Rectangle-47-Copy-3' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M6,3.1203046 L12.8573384,-1 L13.3723765,-0.142832699 L6.51503807,3.9774719 L6,3.1203046 L6,3.1203046 Z' id='Rectangle-47-Copy-2' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M-1,7.1203046 L5.85733841,3 L6.37237648,3.8571673 L-0.484961925,7.9774719 L-1,7.1203046 L-1,7.1203046 Z' id='Rectangle-47-Copy-4' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <rect id='Rectangle-50' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)' x='4' y='6' width='1' height='5'></rect>
+			                <rect id='Rectangle-51' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)' x='11.5' y='3' width='1' height='12'></rect>
+			                <path d='M5,4.8571673 L11.8573384,8.9774719 L12.3723765,8.1203046 L5.51503807,4 L5,4.8571673' id='Rectangle-47-Copy' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M5,12.8571673 L11.8573384,16.9774719 L12.3723765,16.1203046 L5.51503807,12 L5,12.8571673' id='Rectangle-47-Copy-5' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M11.9048972,6.14766064 L13.8714227,8.33170849 L12.4019596,10.8768933 L9.52725589,10.2658562 L9.22005445,7.34302965 L11.9048972,6.14766064' id='Polygon-1' fill='#D8D8D8' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M11.9048972,6.14766064 L13.8714227,8.33170849 L12.4019596,10.8768933 L9.52725589,10.2658562 L9.22005445,7.34302965 L11.9048972,6.14766064' id='Polygon-1-Copy' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M7.45771189,3.19504739 L7.35514484,6.13218333 L4.5300676,6.9422612 L2.88664089,4.5057809 L4.69602457,2.18987541 L7.45771189,3.19504739' id='Polygon-1-Copy-2' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M7.45771189,11.1950474 L7.35514484,14.1321833 L4.5300676,14.9422612 L2.88664089,12.5057809 L4.69602457,10.1898754 L7.45771189,11.1950474' id='Polygon-1-Copy-3' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			                <path d='M14.5431701,0.0725939314 L14.4406031,3.00972988 L11.6155258,3.81980774 L9.97209912,1.38332745 L11.7814828,-0.93257805 L14.5431701,0.0725939314' id='Polygon-1-Copy-4' fill='#4A5361' sketch:type='MSShapeGroup' mask='url(#mask-2)'></path>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		activity.constraints =
+			leading : [food, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+		travel = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+		travel.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Transport</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='iOS-9-Keyboards' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6-Portrait-Light-Copy' sketch:type='MSArtboardGroup' transform='translate(-241.000000, -638.000000)'>
+			            <g id='Keyboards' sketch:type='MSLayerGroup' transform='translate(0.000000, 408.000000)'>
+			                <g id='Transport' transform='translate(241.500000, 230.000000)' sketch:type='MSShapeGroup'>
+			                    <path d='M0,6 L1,6 L1,15 L0,15 L0,6 Z M15,4 L16,4 L16,15 L15,15 L15,4 Z M3.5,0 L4.5,0 L4.5,7 L3.5,7 L3.5,0 Z M1,6 L3.5,6 L3.5,7 L1,7 L1,6 Z M4.5,0 L9.5,0 L9.5,1 L4.5,1 L4.5,0 Z M9.5,0 L10.5,0 L10.5,6 L9.5,6 L9.5,0 Z M10.5,4 L15,4 L15,5 L10.5,5 L10.5,4 Z' id='Skyline' fill='#4A5461'></path>
+			                    <g id='Windows' transform='translate(2.000000, 2.000000)' fill='#4A5461'>
+			                        <rect id='Window' x='0' y='6' width='1' height='1'></rect>
+			                        <rect id='Window' x='3.5' y='0' width='1' height='1'></rect>
+			                        <rect id='Window' x='5.5' y='0' width='1' height='1'></rect>
+			                        <rect id='Window' x='5.5' y='2' width='1' height='1'></rect>
+			                        <rect id='Window' x='3.5' y='2' width='1' height='1'></rect>
+			                        <rect id='Window' x='11' y='4' width='1' height='1'></rect>
+			                        <rect id='Window' x='11' y='6' width='1' height='1'></rect>
+			                    </g>
+			                    <g id='Car' transform='translate(2.500000, 6.500000)'>
+			                        <path d='M8.5,8 L2.5,8 L2.5,9.5 L0.5,9.5 L0.5,7.8681145 C0.201202192,7.69582702 0,7.37091363 0,6.9906311 L0,5.0093689 C0,4.45190985 0.444836974,4 0.995577499,4 L10.0044225,4 C10.5542648,4 11,4.44335318 11,5.0093689 L11,6.9906311 C11,7.3653315 10.7990244,7.69234519 10.5,7.86649002 L10.5,9.5 L8.5,9.5 L8.5,8 Z M1.75,6.5 C2.16421356,6.5 2.5,6.16421356 2.5,5.75 C2.5,5.33578644 2.16421356,5 1.75,5 C1.33578644,5 1,5.33578644 1,5.75 C1,6.16421356 1.33578644,6.5 1.75,6.5 Z M9.25,6.5 C9.66421356,6.5 10,6.16421356 10,5.75 C10,5.33578644 9.66421356,5 9.25,5 C8.83578644,5 8.5,5.33578644 8.5,5.75 C8.5,6.16421356 8.83578644,6.5 9.25,6.5 Z M0.5,7 L10.5,7 L10.5,7.5 L0.5,7.5 L0.5,7 Z M3,6.5 L8,6.5 L8,7 L3,7 L3,6.5 Z' id='Body' fill='#4A5461'></path>
+			                        <path d='M1.5,4.5 L1.5,3 C1.5,1.34314575 2.83902013,0 4.50166547,0 L6.49833453,0 C8.15610859,0 9.5,1.34651712 9.5,3 L9.5,5' id='Roof' stroke='#4A5461'></path>
+			                    </g>
+			                </g>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		travel.constraints =
+			leading : [activity, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+		objects = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+		objects.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+				<svg width='#{exports.px(11)}px' height='#{exports.px(16)}px' viewBox='0 0 11 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Lightbulb</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6' sketch:type='MSArtboardGroup' transform='translate(-244.000000, -639.000000)' stroke='#4A5361'>
+			            <g id='Lightbulb' sketch:type='MSLayerGroup' transform='translate(244.000000, 639.000000)'>
+			                <path d='M8,10.4002904 C9.78083795,9.48993491 11,7.63734273 11,5.5 C11,2.46243388 8.53756612,0 5.5,0 C2.46243388,0 0,2.46243388 0,5.5 C0,7.63734273 1.21916205,9.48993491 3,10.4002904 L3,14.0020869 C3,15.1017394 3.89761602,16 5.0048815,16 L5.9951185,16 C7.1061002,16 8,15.1055038 8,14.0020869 L8,10.4002904 Z' id='Oval-17' sketch:type='MSShapeGroup'></path>
+			                <rect id='Rectangle-50' sketch:type='MSShapeGroup' x='3' y='12' width='5' height='1'></rect>
+			                <rect id='Rectangle-51' sketch:type='MSShapeGroup' x='4' y='13.5' width='1.5' height='1'></rect>
+			                <path d='M5,8.5 C5,8.5 3.49999999,7.50000001 4,7 C4.50000001,6.49999999 5,7.66666667 5.5,8 C5.5,8 6.5,6.50000001 7,7 C7.5,7.49999999 6,8.5 6,8.5 L6,11 L5,11 L5,8.5 Z' id='Rectangle-52' sketch:type='MSShapeGroup'></path>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		objects.constraints =
+			leading : [travel, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+		symbols = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+		symbols.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(16)}px' height='#{exports.px(17)}px' viewBox='0 0 15 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Objects &amp; Symbols</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='iOS-9-Keyboards' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6-Portrait-Light-Copy' sketch:type='MSArtboardGroup' transform='translate(-304.000000, -638.000000)' fill='#4A5461'>
+			            <g id='Keyboards' sketch:type='MSLayerGroup' transform='translate(0.000000, 408.000000)'>
+			                <g id='Objects-&amp;-Symbols' transform='translate(304.000000, 230.000000)'>
+			                    <g id='Thing' transform='translate(0.000000, 0.500000)' sketch:type='MSShapeGroup'>
+			                        <rect id='Rectangle-1209' x='0' y='0' width='7' height='1'></rect>
+			                        <rect id='Rectangle-1209' x='0' y='2' width='7' height='1'></rect>
+			                        <rect id='Rectangle-1211' x='3' y='3' width='1' height='4'></rect>
+			                    </g>
+			                    <path d='M11.75,0.159263978 L11.75,0 L11,0 L11,5.091493 C10.59344,4.94221392 10.0639662,4.96453224 9.55715399,5.19017957 C8.69849293,5.5724801 8.23003835,6.39365621 8.51083141,7.02432774 C8.79162447,7.65499928 9.71533454,7.85634375 10.5739956,7.47404321 C11.2761183,7.16143803 11.7173393,6.55538972 11.7013595,6 L11.75,6 L11.75,1.39385056 C12.3175908,1.59590037 13,2.0817456 13,3.25 C13,4.25 12.75,5.5 12.75,5.5 C12.75,5.5 13.75,4.75 13.75,2.5 C13.75,1.02256101 12.5642674,0.407473019 11.75,0.159263978 Z' id='Note' sketch:type='MSShapeGroup'></path>
+			                    <text id='&amp;' sketch:type='MSTextLayer' font-family='SF UI Display' font-size='9.5' font-weight='normal'>
+			                        <tspan x='0.25' y='16'>&amp;</tspan>
+			                    </text>
+			                    <text id='%' sketch:type='MSTextLayer' font-family='SF UI Display' font-size='9.5' font-weight='normal'>
+			                        <tspan x='7.75' y='16'>%</tspan>
+			                    </text>
+			                </g>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		symbols.constraints =
+			leading : [objects, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+		flags = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+		flags.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(11)}px' height='#{exports.px(15)}px' viewBox='0 0 11 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Flag</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='iOS-9-Keyboards' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6-Portrait-Light-Copy' sketch:type='MSArtboardGroup' transform='translate(-275.000000, -639.000000)'>
+			            <g id='Keyboards' sketch:type='MSLayerGroup' transform='translate(0.000000, 408.000000)'>
+			                <g id='Flag' transform='translate(275.000000, 231.500000)' sketch:type='MSShapeGroup'>
+			                    <rect id='Pole' fill='#4A5461' x='0' y='0' width='1' height='14'></rect>
+			                    <path d='M1,1 C1,1 1.25,2 3.5,2 C5.75,2 6,0.749999998 8,0.75 C10,0.749999998 10,1.5 10,1.5 L10,7.5 C10,7.5 10,6.5 8,6.5 C6,6.5 4.80623911,8 3.5,8 C2.19376089,8 1,7 1,7 L1,1 Z' stroke='#4A5461' stroke-linejoin='round'></path>
+			                </g>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		flags.constraints =
+			leading : [symbols, 15]
+			bottom: 14
+			width:16
+			height:20
+		exports.layout()
+
 		loadEmojis = (em) ->
 			row++ 
 			index = emojisArray.indexOf(em)
@@ -608,134 +1141,81 @@ exports.Keyboard = (array) ->
 				"line-height" : box + "px"
 				"text-align" : "center"
 			}
-			emoji.on Events.TouchStart, ->
+			emoji.on Events.Click, ->
 				print @.name
+			emojisLoaded++
+			print emojisLoaded
 
-		inc = 100
+		inc = 200
 		firstLoad = .1
 		timeInc = 2
 		fullAmount = emojisArray.length
-		loads = Math.floor(fullAmount / inc) - 1
+		loads = Math.ceil(fullAmount / inc) - 1
 		partialAmount = fullAmount % inc
-		print "You'll need to do this #{loads}"
-		print "You'll need to do this #{partialAmount} more times"
+		emojisLoaded = 0
+		for i in [0..loads]
+			i++
+			
+		#Scroll Load
+		emojiGalley.on Events.Move, ->
+			if emojiGalley.scrollX > 2000 && emojisLoaded < 400
+				for em in emojisArray[200...400]
+					loadEmojis(em)
+				emojiGalley.scrollX = 2001
+			if emojiGalley.scrollX > 5000 && emojisLoaded < 600
+				for em in emojisArray[400...600]
+					loadEmojis(em)
+				emojiGalley.scrollX = 5001
+			if emojiGalley.scrollX > 7500 && emojisLoaded < 800
+				for em in emojisArray[600...800]
+					loadEmojis(em)
+				emojiGalley.scrollX = 7501
+			if emojiGalley.scrollX > 10000 && emojisLoaded < 1000
+				for em in emojisArray[800...1000]
+					loadEmojis(em)
+				emojiGalley.scrollX = 10001
+			if emojiGalley.scrollX > 12500 && emojisLoaded < 1200
+				for em in emojisArray[1000...1297]
+					loadEmojis(em)
+				emojiGalley.scrollX = 12501
+
+		#Time Load
+		Utils.delay 1, -> 
+			if emojisLoaded < 400 && emojiGalley.scrollX == 0
+				scrollX = emojiGalley.scrollX
+				for em in emojisArray[200...400]
+					loadEmojis(em)
+		Utils.delay 2.5, -> 
+			if emojisLoaded < 600 && emojiGalley.scrollX == 0
+				scrollX = emojiGalley.scrollX
+				for em in emojisArray[400...600]
+					loadEmojis(em)
+		Utils.delay 2.5, -> 
+			if emojisLoaded < 800 && emojiGalley.scrollX == 0
+				scrollX = emojiGalley.scrollX
+				for em in emojisArray[600...800]
+					loadEmojis(em)
+		Utils.delay 5.5, -> 
+			if emojisLoaded < 1000 && emojiGalley.scrollX == 0
+				scrollX = emojiGalley.scrollX
+				for em in emojisArray[800...1000]
+					loadEmojis(em)
+		Utils.delay 7, -> 
+			if emojisLoaded < 1297 && emojiGalley.scrollX == 0
+				scrollX = emojiGalley.scrollX
+				for em in emojisArray[1000...1297]
+					loadEmojis(em)
 
 
-
-
+		for em in freqEmojisArray
+			loadEmojis(em)
 		for em in emojisArray[0...inc]
 			loadEmojis(em)
 
 
-		Utils.delay firstLoad, ->
-			for em in emojisArray[inc...(inc*2)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc, ->
-			for em in emojisArray[(inc*2)...(inc*3)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 2, ->
-			for em in emojisArray[(inc*3)...(inc*4)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 3, ->
-			for em in emojisArray[(inc*4)...(inc*5)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 4, ->
-			for em in emojisArray[(inc*5)...(inc*6)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 5, ->
-			for em in emojisArray[(inc*6)...(inc*7)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 6, ->
-			for em in emojisArray[(inc*7)...(inc*8)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 7, ->
-			for em in emojisArray[(inc*8)...(inc*9)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 8, ->
-			for em in emojisArray[(inc*9)...(inc*10)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 9, ->
-			for em in emojisArray[(inc*10)...(inc*11)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 10, ->
-			for em in emojisArray[(inc*11)...(inc*12)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 11, ->
-			for em in emojisArray[(inc*12)...(inc*13)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 12, ->
-			for em in emojisArray[(inc*13)...(inc*14)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 13, ->
-			for em in emojisArray[(inc*14)...(inc*15)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 14, ->
-			for em in emojisArray[(inc*15)...(inc*16)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 15, ->
-			for em in emojisArray[(inc*16)...(inc*17)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 16, ->
-			for em in emojisArray[(inc*17)...(inc*18)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 17, ->
-			for em in emojisArray[(inc*18)...(inc*19)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 18, ->
-			for em in emojisArray[(inc*19)...(inc*20)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 19, ->
-			for em in emojisArray[(inc*20)...(inc*21)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 20, ->
-			for em in emojisArray[(inc*21)...(inc*22)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 21, ->
-			for em in emojisArray[(inc*22)...(inc*23)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 22, ->
-			for em in emojisArray[(inc*23)...(inc*24)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 23, ->
-			for em in emojisArray[(inc*24)...(inc*25)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 24, ->
-			for em in emojisArray[(inc*25)...(inc*26)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 25, ->
-			for em in emojisArray[(inc*26)...(inc*27)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 26, ->
-			for em in emojisArray[(inc*27)...(inc*28)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 27, ->
-			for em in emojisArray[(inc*28)...(inc*29)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 28, ->
-			for em in emojisArray[(inc*29)...(inc*30)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 29, ->
-			for em in emojisArray[(inc*30)...(inc*31)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 30, ->
-			for em in emojisArray[(inc*31)...(inc*32)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 31, ->
-			for em in emojisArray[(inc*32)...(inc*33)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 32, ->
-			for em in emojisArray[(inc*33)...(inc*34)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 33, ->
-			for em in emojisArray[(inc*34)...(inc*35)]
-				loadEmojis(em)
-		Utils.delay firstLoad + timeInc * 34, ->
-			for em in emojisArray[(inc*35)...(inc*36)]
-				loadEmojis(em)
-
 		for sec in emojiSections
 			index = emojiSections.indexOf(sec)
-			title = new Layer superLayer:emojiGalley.content, backgroundColor:"transparent", x:index*1000 + exports.px(8), height:80, width:800
+			title = new Layer superLayer:emojiGalley.content, backgroundColor:"transparent", x:index*5000 + exports.px(8), height:80, width:800
 			title.html = sec
 			title.style = {
 				"font-size" : exports.px(12) + "px"
