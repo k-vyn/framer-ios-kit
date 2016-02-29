@@ -94,7 +94,82 @@ onResize = () ->
 window.addEventListener("resize", onResize)
 window.addEventListener("orientationchange" , onResize)
 
+
+
+
+
+
 defaults = {
+	charWidths: {			
+		"A" : .7
+		"B" : .65
+		"C" : .78
+		"D" : .77
+		"E" : .58
+		"F" : .57
+		"G" : .77
+		"H" : .71
+		"I" : .1
+		"J" : .49
+		"K" : .65
+		"L" : .57
+		"M" : .87
+		"N" : .71
+		"O" : .8
+		"P" : .62
+		"Q" : .8
+		"R" : .63
+		"S" : .63
+		"T" : .66
+		"U" : .7
+		"V" : .7
+		"W" : 1.03
+		"X" : .68
+		"Y" : .67
+		"Z" : .645
+		"a" : .54
+		"b" : .63
+		"c" : .57
+		"d" : .59
+		"e" : .59
+		"f" : .28
+		"g" : .59
+		"h" : .57
+		"i" : .12
+		"j" : .12
+		"k" : .53
+		"l" : .105
+		"m" : .9
+		"n" : .56
+		"o" : .6
+		"p" : .62
+		"q" : .59
+		"r" : .34
+		"s" : .505
+		"t" : .28
+		"u" : .56
+		"v" : .53
+		"w" : .835
+		"x" : .515
+		"y" : .528
+		"z" : .51
+		" " : .44
+		"?" : .495
+		"!" : .18
+		"." : .18
+		"," : .17
+		"'" : .09
+		"1" : .32
+		"2" : .63
+		"3" : .62
+		"4" : .655
+		"5" : .64
+		"6" : .64
+		"7" : .59
+		"8" : .64 
+		"9" : .64
+		"0" : .645
+ 	}
 	constraintProps : ["height", "width"]
 	constraintTypes: ["top", "leading", "trailing", "bottom"]
 	constraints: {
@@ -127,12 +202,32 @@ defaults = {
 	keyboard: {
 		returnKey:"default"
 	}
-	textProps: ["text", "style", "superLayer"]
 	text: {
-		text: "iOS Text Layer"
-		style: "default"
+		defaults: {
+			text: "iOS Text Layer"
+			x:0
+			y:0
+			width:-1
+			height:-1
+			superLayer:undefined
+			style:"default"
+			lines:1
+			align:"left"
+			backgroundColor:"transparent"
+			color:"black"
+			fontSize: 17
+			fontFamily:"-apple-system, Helvetica, Arial, sans-serif"
+			fontWeight:400
+			lineHeight:"auto"
+			} 
 	}
 }
+
+setProps = (object, dest) ->
+	keys = Object.keys(object)
+	dest["props"] = keys
+
+setProps(defaults.text.defaults, defaults.text)
 ## Conversions
 
 #Pixels to Points
@@ -268,9 +363,6 @@ layoutChange = (layer, type) ->
 
 #Text Layers
 exports.styles = {
-	"default" : {
-		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
-	}
 }
 
 ## Custom Styles
@@ -280,17 +372,16 @@ exports.addStyle = (array) ->
 	exports.styles[key] = array[key]
 
 exports.apply = (layer, style) ->
-	print style
+	style = exports.styles[style]
 	props = Object.keys(style)
-	framerProps = ["width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX"]
-	cssProps = ["fontFamily", "fontSize", "textAlign"]
+	framerProps = ["width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
+	cssProps = ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
 	for p in props
 		if framerProps.indexOf(p) != -1 
 			if style[p] == parseInt(style[p], 10)
-				style[p] = exports.px(style[p])
-			layer[p] = style[p]
-			if p == "superLayer"
-				print p + " " + style[p]
+				layer[p] = exports.px(style[p])
+			else 
+				layer[p] = style[p]
 		if cssProps.indexOf(p) != -1 
 			if p == "fontSize"
 				layer.style["font-size"] = exports.px(style[p]) + "px"
@@ -298,10 +389,34 @@ exports.apply = (layer, style) ->
 				layer.style["font-family"] = style[p]
 			if p == "textAlign"
 				layer.style["text-align"] = style[p]
+			if p == "fontWeight"
+				layer.style["font-weight"] = style[p]
+			if p == "lineHeight"
+				if style[p] == "auto"
+					layer.style["line-height"] = exports.px(style["fontSize"]) * 1.2 + "px"
+				else
+					layer.style["line-height"] = exports.px(style[p]) + "px"
 
-exports.Custom = (style) ->
+exports.Custom = (style, array) ->
 	layer = new Layer 
+	isStyleValid = exports.styles[style]
+	if isStyleValid == undefined
+		if array != undefined
+			exports.addStyle
+				"#{style}" :
+					array
+		else
+			exports.addStyle
+				"#{style}" :
+					width : 100
 	exports.apply(layer, style)
+	if array != undefined && isStyleValid != undefined
+		styleNum = "copy"
+		newStyleName = style + " " + styleNum
+		exports.addStyle
+			"#{newStyleName}" : 
+				array
+		exports.apply(layer, newStyleName)
 	return layer 
 
 #Automatic sizing for text layers
@@ -329,46 +444,60 @@ textSizing = (layer, text, height, style, lines) ->
 	layer.width = stringLength * device.scale
 
 
-# Text Layers
-textProperties = ["style", "text", "lines", "align", "superLayer", "x", "y"]
-textDefaults = {
-	"text" : "Text",
-	"style" : "h3"
-	"lines" : 1
-}
+
+
+textAutoSize = (textLayer) ->
+	#Define Width
+	layerWidth = 0
+	layerHeight = 0
+	if textLayer.height == -2 && textLayer.width == -2
+		layerHeight = parseInt(textLayer.style['font-size'].slice(0,-2))
+	if textLayer.height != -2 && textLayer.width != -2
+		layerHeight = textLayer.height
+	arrayOfChars = textLayer.html.split("")
+	wordCount = textLayer.html.split(" ").length
+	arrayOfWidths = defaults.charWidths
+	fontMultiplier = parseInt(textLayer.style["font-size"].slice(0,-2))/10
+	fontWeightMultiplier = parseInt(textLayer.style["font-weight"])/380
+	for char in arrayOfChars
+		layerWidth = layerWidth + ( arrayOfWidths[char] * fontMultiplier * (8.4 + fontWeightMultiplier)) 
+		layerWidth = Math.round(layerWidth)
+	setWidth = textLayer.width
+	if textLayer.width != -2 && textLayer.height == -2
+		lineCount = Math.ceil(layerWidth/setWidth)
+		if lineCount > wordCount
+			lineCount = wordCount
+		layerHeight = parseInt(textLayer.style["font-size"].slice(0,-2)) * lineCount + parseInt(textLayer.style["line-height"].slice(0,-2)) * (lineCount - 1.5)
+		if layerHeight < parseInt(textLayer.style['font-size'].slice(0,-2))
+			layerHeight = parseInt(textLayer.style['font-size'].slice(0,-2))
+	if textLayer.width != -2
+		layerWidth = setWidth
+		
+	return {
+		width : layerWidth
+		height: layerHeight
+	}
+
 exports.Text = (array) ->
-	device = exports.getDevice()
 	if array == undefined
 		array = []
-	for i in textProperties
+	styleArray = {}
+	for i in defaults.text.props
 		if array[i] != undefined
 			@[i] = array[i]
 		else
-			@[i] = textDefaults[i]
-	switch @.style
-		when "h1" then @.styleObject = exports.h1
-		when "h2" then @.styleObject = exports.h2
-		when "h3" then @.styleObject = exports.h3
-		when "h4" then @.styleObject = exports.h4
-		when "body" then @.styleObject = exports.body
-		when "small" then @.styleObject = exports.small
-		when "link" then @.styleObject = exports.link
-		else  @.styleObject = exports.h3
-	textLayer = new Layer name:@.style + " : " + @.text
-	textSizing(textLayer, @.text, @.styleObject['line-height'], @.style, @.lines)
-	textLayer.style = @.styleObject
-	if @.superLayer != undefined
-		textLayer.props = (superLayer:@.superLayer)
-	if @.align != undefined
-		switch @.align 
-			when "center" then [ textLayer.style['text-align'] = 'center', textLayer.center() ]
-			when "centerX" then [ textLayer.style['text-align'] = 'center', textLayer.centerX() ] 
-			when "centerY" then textLayer.centerY()
-			when "right" then textLayer.style['text-align'] = 'right'
-	if array.x != undefined
-		textLayer.x = array.x
-	if array.y != undefined
-		textLayer.y = array.y
+			@[i] = defaults.text.defaults[i]
+		if i != "style"
+			styleArray[i] = @[i]
+	if exports.styles[@.style] == undefined
+		exports.addStyle
+			"#{@.style}" :
+				styleArray
+	textLayer = new Layer
+	textLayer.html = @text
+	exports.apply(textLayer, @style)
+	textFrame = textAutoSize(textLayer)
+	textLayer.props = (height:textFrame.height, width:textFrame.width)
 	return textLayer
 
 
