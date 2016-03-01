@@ -96,10 +96,15 @@ window.addEventListener("orientationchange" , onResize)
 
 
 
-
-
-
 defaults = {
+	alert: {
+		text:{
+			title: "Title"
+			message:"Message"
+			action:"Action"
+			secondaryAction: "secondaryAction"
+		}
+	}
 	charWidths: {			
 		"A" : .7
 		"B" : .65
@@ -213,13 +218,14 @@ defaults = {
 			superLayer:undefined
 			style:"default"
 			lines:1
-			align:"left"
+			textAlign:"left"
 			backgroundColor:"transparent"
 			color:"black"
 			fontSize: 17
 			fontFamily:"-apple-system, Helvetica, Arial, sans-serif"
-			fontWeight:400
+			fontWeight:"regular"
 			lineHeight:"auto"
+			name:"text layer"
 			} 
 	}
 }
@@ -229,6 +235,11 @@ setProps = (object, dest) ->
 	dest["props"] = keys
 
 setProps(defaults.text.defaults, defaults.text)
+
+setProps(defaults.alert.text, defaults.alert)
+
+
+
 ## Conversions
 
 #Pixels to Points
@@ -445,7 +456,7 @@ exports.addStyle = (array) ->
 exports.apply = (layer, style) ->
 	style = exports.styles[style]
 	props = Object.keys(style)
-	framerProps = ["width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
+	framerProps = ["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
 	cssProps = ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
 	for p in props
 		if framerProps.indexOf(p) != -1 
@@ -583,6 +594,95 @@ exports.Text = (array) ->
 	textLayer.props = (height:textFrame.height, width:textFrame.width)
 	return textLayer
 
+
+##Alerts
+exports.Alert = (array) ->
+	if array == undefined
+		array = []
+	for i in defaults.alert.props
+		if array[i] != undefined
+			@[i] = array[i]
+		else
+			@[i] = defaults.alert.text[i]
+	all = new Layer backgroundColor:"transparent"
+	all.constraints = 
+		leading:0
+		trailing:0
+		top:0
+		bottom:0
+	overlay = new Layer backgroundColor:"black", opacity:.3, superLayer:all
+	overlay.constraints =
+		leading:0
+		trailing:0
+		top:0
+		bottom:0
+	exports.layout()
+	alertBG = new Layer backgroundColor:"white", superLayer:all, borderRadius:exports.px(10), name:"Alert Background"
+	alertBG.constraints =
+		align:"center"
+		width:280
+		height:160
+	exports.layout()
+	title = new exports.Text style:"alertTitle", text:@title, fontWeight:"medium", superLayer:alertBG
+	title.constraints = 
+		align:"horizontal"
+		top:20
+	exports.layout()
+	message = new exports.Text style:"alertMessage", text:@message, fontSize:13, superLayer:alertBG, textAlign:"center", lineHeight:16, width:240
+	message.constraints =
+		top: [title, 10]
+		align:"horizontal"
+	alertBG.constraints["height"] = 20 + exports.pt(title.height) + 10 + exports.pt(message.height) + 64 
+	exports.layout()
+	divider = new Layer superLayer:alertBG, backgroundColor:"#E2E8EB"
+	divider.constraints = 
+		leading:0
+		trailing:0
+		height:1
+		bottom:44
+	exports.layout()
+	actionButton = new exports.Text style:"alertAction", color:"#0076FF", superLayer:alertBG, text:@action, name:"Action"
+	secondaryActionButton = new exports.Text style:"alertAction", text:@secondaryAction
+	if @action != "Action" && @secondaryAction == "secondaryAction"
+		actionButton.constraints = 
+			align:"horizontal"
+			bottom:16
+		exports.layout()
+	else
+		leftBox = new Layer width:alertBG.width/2, superLayer:alertBG, name:@secondaryAction + " box", backgroundColor:"transparent"
+		rightBox = new Layer width:alertBG.width/2, superLayer:alertBG, name:@action + " box", backgroundColor:"transparent"
+		dividerVertical = new Layer superLayer:alertBG, backgroundColor:"#E2E8EB"
+		dividerVertical.constraints = 
+			width:1
+			height:44
+			bottom:0
+			align:"horizontal"
+		leftBox.constraints =
+			height:44
+			bottom:0
+			leading:0
+		rightBox.constraints =
+			height:44
+			bottom:0
+			trailing:0
+		leftBox.addSubLayer(secondaryActionButton)
+		rightBox.addSubLayer(actionButton)
+		exports.layout()
+		actionButton.constraints = 
+			align:"horizontal"
+			bottom:16
+		secondaryActionButton.constraints =
+			align:"center"
+			bottom:16
+		exports.layout()
+	return {
+		all : all
+		overlay : overlay
+		action: actionButton
+		secondaryAction : secondaryActionButton
+		title: title
+		message: message
+	}
 
 
 exports.Keyboard = (array) ->
