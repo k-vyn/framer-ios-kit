@@ -172,6 +172,7 @@ defaults = {
  	}
 	constraintProps : ["height", "width"]
 	constraintTypes: ["top", "leading", "trailing", "bottom"]
+	constraintAligns : ["horizontalCenter", "verticalCenter", "leadingEdges", "trailingEdges", "topEdges", "bottomEdges", "align", "vertical", "horizontal"]
 	constraints: {
 		top: {
 			"prop" : "y"
@@ -247,7 +248,12 @@ exports.px = (pt) ->
 error = (context, code) ->
 	if code == 1 
 		print "Error Invalid Relationship – Layer id:#{context.id} has a relationship with another layer not in the same superLayer."
-
+	if code == 2
+		print "Error #{context} requires a layer"
+	if code == 3
+		print "Error #{context} cannot refer to itself"
+	if code == 4
+		print "Error #{context} is not a valid weight. Please use 100, 200, 300... or Thin, Light, Regular..."
 
 ## AutoLayout
 
@@ -268,13 +274,78 @@ exports.layout = (layer) ->
 		@.array = [layer]
 	for layer in @.array
 		if layer.constraints != undefined
+			for a in defaults.constraintAligns
+				if layer.constraints[a]
+					layoutAlign(layer, a)
 			for p in defaults.constraintProps
 				layoutSize(layer, p)
 			for c in defaults.constraintTypes
-				layoutChange(layer, c)
+				if layer.constraints[c] != undefined
+					layoutChange(layer, c)
+
+#Align constraints
+layoutAlign = (layer, type) ->
+	declaredConstraint = layer.constraints[type]
+	if declaredConstraint == parseInt(declaredConstraint, 10)
+		error(type, 2)
+	if declaredConstraint == layer
+		error(type, 3)
+	if typeof declaredConstraint == "object"
+		for i in declaredConstraint
+			if typeof i == "string"
+				@type = i
+			if typeof i == "object"
+				@layer = i 
+		if @type == "horizontalCenter" || @type == "horizontal"
+			deltaMove = (@layer.width - layer.width) / 2
+			layer.x = @layer.x + deltaMove
+			layer.constraints["leading"] = exports.pt(layer.x)
+		if @type == "verticalCenter" || @type == "vertical"  
+			deltaMove = (@layer.height - layer.height) / 2
+			layer.y = @layer.y + deltaMove
+			layer.constraints["top"] = exports.pt(layer.y)
+		if @type == "leadingEdges" || @type == "leading"
+			layer.x = @layer.x
+			layer.constraints["leading"] = exports.pt(layer.x)
+		if @type == "trailingEdges" || @type == "trailing"
+			layer.maxX = @layer.maxX
+			layer.constraints["trailing"] = exports.pt(exports.width - layer.maxX)
+		if @type == "topEdges" || @type == "top"
+			layer.y = @layer.y
+			layer.constraints["top"] = exports.pt(layer.y)
+		if @type == "bottomEdges" || @type == "bottom"
+			layer.maxY = @layer.maxY
+			layer.constraints["bottom"] = exports.pt(exports.height - layer.maxY)
+	if type == "horizontalCenter" || type == "horizontal"
+		deltaMove = (declaredConstraint.width - layer.width) / 2
+		layer.x = declaredConstraint.x + deltaMove
+	if type == "verticalCenter" || type == "vertical"  
+		deltaMove = (declaredConstraint.height - layer.height) / 2
+		layer.y = declaredConstraint.y + deltaMove
+	if type == "leadingEdges" 
+		layer.x = declaredConstraint.x
+		layer.constraints["leading"] = exports.pt(declaredConstraint.x)
+	if type == "trailingEdges"
+		layer.maxX = declaredConstraint.maxX
+		layer.constraints["trailing"] = exports.pt(exports.width - layer.maxX)
+	if type == "topEdges"
+		layer.y = declaredConstraint.y
+		layer.constraints["top"] = exports.pt(layer.y)
+	if type == "bottomEdges"
+		layer.maxY = declaredConstraint.maxY
+		layer.constraints["bottom"] = exports.pt(exports.height - layer.maxY)
+	if type == "align"
+		if declaredConstraint == "horizontal"
+			layer.centerX()
+		if declaredConstraint == "vertical"
+			layer.centerY()
+		if declaredConstraint == "center"
+			layer.center()
+		if declaredConstraint == "vertical"
+			layer.centerY()
+
 
 #Size Constraints
-
 layoutSize = (layer, type) ->
 	if layer.constraints[type]
 		layer[type] = exports.px(layer.constraints[type])
@@ -316,7 +387,7 @@ layoutChange = (layer, type) ->
 						else 
 							@.objLayer = object
 					layer[prop] = (@.objInt * exports.scale) + @.objLayer[objProp]
-			if layer.constraints[opp]
+			if layer.constraints[opp] != undefined
 				trait = defaults.constraints[opp]["objProp"]
 				if layer.constraints[opp] == parseInt(layer.constraints[opp], 10)
 					layer[trait] = @[superTrait] - (layer[prop] + (exports.scale * layer.constraints[opp]))
@@ -390,7 +461,20 @@ exports.apply = (layer, style) ->
 			if p == "textAlign"
 				layer.style["text-align"] = style[p]
 			if p == "fontWeight"
-				layer.style["font-weight"] = style[p]
+				if style[p] == parseInt(style[p], 10)
+					layer.style["font-weight"] = style[p]
+				else
+					switch style[p]
+						when "ultrathin" then layer.style["font-weight"] = 100
+						when "thin" then layer.style["font-weight"] = 200
+						when "light" then layer.style["font-weight"] = 300
+						when "regular" then layer.style["font-weight"] = 400
+						when "medium" then layer.style["font-weight"] = 500
+						when "semibold" then layer.style["font-weight"] = 600
+						when "bold" then layer.style["font-weight"] = 700
+						when "black" then layer.style["font-weight"] = 800
+						else
+							error(p, 4)
 			if p == "lineHeight"
 				if style[p] == "auto"
 					layer.style["line-height"] = exports.px(style["fontSize"]) * 1.2 + "px"
@@ -450,9 +534,9 @@ textAutoSize = (textLayer) ->
 	#Define Width
 	layerWidth = 0
 	layerHeight = 0
-	if textLayer.height == -2 && textLayer.width == -2
+	if textLayer.height == exports.px(-1) && textLayer.width == exports.px(-1)
 		layerHeight = parseInt(textLayer.style['font-size'].slice(0,-2))
-	if textLayer.height != -2 && textLayer.width != -2
+	if textLayer.height != exports.px(-1) && textLayer.width != exports.px(-1)
 		layerHeight = textLayer.height
 	arrayOfChars = textLayer.html.split("")
 	wordCount = textLayer.html.split(" ").length
@@ -463,16 +547,15 @@ textAutoSize = (textLayer) ->
 		layerWidth = layerWidth + ( arrayOfWidths[char] * fontMultiplier * (8.4 + fontWeightMultiplier)) 
 		layerWidth = Math.round(layerWidth)
 	setWidth = textLayer.width
-	if textLayer.width != -2 && textLayer.height == -2
+	if textLayer.width != exports.px(-1) && textLayer.height == exports.px(-1)
 		lineCount = Math.ceil(layerWidth/setWidth)
 		if lineCount > wordCount
 			lineCount = wordCount
 		layerHeight = parseInt(textLayer.style["font-size"].slice(0,-2)) * lineCount + parseInt(textLayer.style["line-height"].slice(0,-2)) * (lineCount - 1.5)
 		if layerHeight < parseInt(textLayer.style['font-size'].slice(0,-2))
 			layerHeight = parseInt(textLayer.style['font-size'].slice(0,-2))
-	if textLayer.width != -2
+	if textLayer.width != exports.px(-1)
 		layerWidth = setWidth
-		
 	return {
 		width : layerWidth
 		height: layerHeight
@@ -511,7 +594,7 @@ exports.Keyboard = (array) ->
 		else 
 			@[prop] = defaults.keyboardProps[prop]
 	board = new Layer backgroundColor:"#D1D5DA", name:"keyboard"
-	board.constraints = (bottom:0, height:216, trailing:1, leading:1)
+	board.constraints = (bottom:0, height:216, trailing:0, leading:0)
 	exports.layout()
 	lettersArray = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v",  "b", "n", "m"]
 	keysArray = []

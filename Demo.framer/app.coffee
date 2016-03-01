@@ -4,10 +4,17 @@ ios = require 'iOSKit'
 whiteBG = new BackgroundLayer
 
 
-text = new ios.Text style:"h1", fontSize:30, text:"yo, this is cool!", fontWeight:100
+box = new ios.Text style:"h1", fontSize:"30", fontWeight:"light", text:"Yo, how's it going?"
 
-text.constraints =
+box2 = new ios.Text style:"h1", text:"Good, thanks"
+
+box.constraints = 
+	top:200
 	leading:50
-	top:50
+ios.layout()
 
+box2.constraints =
+	top:[box,10]
+	horizontalCenter : box
+	
 ios.layout()
