@@ -46,7 +46,7 @@ framerDevices = {
 "apple-ipad-pro-silver": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
 "apple-ipad-pro-space-gray" : { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
 }
-
+exports.device = 0
 exports.name = 0
 exports.scale = 0
 exports.height = 0
@@ -54,9 +54,12 @@ exports.width = 0
 exports.mobile = 0
 exports.platform = 0
 exports.orientation = 0
+screen = {}
 
 exports.getDevice = ->
 	device = Framer.Device.deviceType
+	if innerWidth == 1242
+		device = "apple-iphone-6s-plus-silver"
 	exports.scale = framerDevices[device].scale
 	if device == "fullscreen"
 		exports.width = window.innerWidth
@@ -71,6 +74,21 @@ exports.getDevice = ->
 	exports.mobile = framerDevices[device].mobile
 	exports.platform = framerDevices[device].platform
 	exports.orientation =  Framer.Device.orientation
+	device = device.replace("apple-", "")
+	device = device.replace("-gold", "")
+	device = device.replace("-green", "")
+	device = device.replace("-blue", "")
+	device = device.replace("-red", "")
+	device = device.replace("-white", "")
+	device = device.replace("-yellow", "")
+	device = device.replace("-pink", "")
+	device = device.replace("-space-grey", "")
+	device = device.replace("-rose", "")
+	exports.device = device.replace("-silver", "")
+	screen = {
+		width:exports.width
+		height:exports.height
+	}
 
 
 exports.orient = () ->
@@ -103,6 +121,15 @@ defaults = {
 			message:"Message"
 			action:"Action"
 			secondaryAction: "secondaryAction"
+		}
+	}
+	alertBanner: {
+		text:{
+			title: "Title"
+			message:"Message"
+			action:"Action"
+			time:"now"
+			icon:undefined
 		}
 	}
 	charWidths: {			
@@ -235,9 +262,8 @@ setProps = (object, dest) ->
 	dest["props"] = keys
 
 setProps(defaults.text.defaults, defaults.text)
-
 setProps(defaults.alert.text, defaults.alert)
-
+setProps(defaults.alertBanner.text, defaults.alertBanner)
 
 
 ## Conversions
@@ -297,6 +323,10 @@ exports.layout = (layer) ->
 #Align constraints
 layoutAlign = (layer, type) ->
 	declaredConstraint = layer.constraints[type]
+	if layer.superLayer
+		@superLayer = layer.superLayer
+	else
+		@superLayer = screen
 	if declaredConstraint == parseInt(declaredConstraint, 10)
 		error(type, 2)
 	if declaredConstraint == layer
@@ -320,13 +350,13 @@ layoutAlign = (layer, type) ->
 			layer.constraints["leading"] = exports.pt(layer.x)
 		if @type == "trailingEdges" || @type == "trailing"
 			layer.maxX = @layer.maxX
-			layer.constraints["trailing"] = exports.pt(exports.width - layer.maxX)
+			layer.constraints["trailing"] = exports.pt(@superLayer.width - layer.maxX)
 		if @type == "topEdges" || @type == "top"
 			layer.y = @layer.y
 			layer.constraints["top"] = exports.pt(layer.y)
 		if @type == "bottomEdges" || @type == "bottom"
 			layer.maxY = @layer.maxY
-			layer.constraints["bottom"] = exports.pt(exports.height - layer.maxY)
+			layer.constraints["bottom"] = exports.pt(@superLayer.height - layer.maxY)
 	if type == "horizontalCenter" || type == "horizontal"
 		deltaMove = (declaredConstraint.width - layer.width) / 2
 		layer.x = declaredConstraint.x + deltaMove
@@ -338,13 +368,13 @@ layoutAlign = (layer, type) ->
 		layer.constraints["leading"] = exports.pt(declaredConstraint.x)
 	if type == "trailingEdges"
 		layer.maxX = declaredConstraint.maxX
-		layer.constraints["trailing"] = exports.pt(exports.width - layer.maxX)
+		layer.constraints["trailing"] = exports.pt(@superLayer.height - layer.maxX)
 	if type == "topEdges"
 		layer.y = declaredConstraint.y
 		layer.constraints["top"] = exports.pt(layer.y)
 	if type == "bottomEdges"
 		layer.maxY = declaredConstraint.maxY
-		layer.constraints["bottom"] = exports.pt(exports.height - layer.maxY)
+		layer.constraints["bottom"] = exports.pt(@superLayer.height - layer.maxY)
 	if type == "align"
 		if declaredConstraint == "horizontal"
 			layer.centerX()
@@ -595,6 +625,7 @@ exports.Text = (array) ->
 	return textLayer
 
 
+
 ##Alerts
 exports.Alert = (array) ->
 	if array == undefined
@@ -647,7 +678,21 @@ exports.Alert = (array) ->
 		actionButton.constraints = 
 			align:"horizontal"
 			bottom:16
+		box = new Layer superLayer:alertBG, backgroundColor:"transparent"
+		box.constraints = 
+			leading:0
+			trailing:0
+			bottom:0
+			height:44
+		secondaryActionButton.visible = false
 		exports.layout()
+		return {
+			all : all
+			overlay : overlay
+			action: box
+			title: title
+			message: message
+		}
 	else
 		leftBox = new Layer width:alertBG.width/2, superLayer:alertBG, name:@secondaryAction + " box", backgroundColor:"transparent"
 		rightBox = new Layer width:alertBG.width/2, superLayer:alertBG, name:@action + " box", backgroundColor:"transparent"
@@ -675,14 +720,88 @@ exports.Alert = (array) ->
 			align:"center"
 			bottom:16
 		exports.layout()
-	return {
-		all : all
-		overlay : overlay
-		action: actionButton
-		secondaryAction : secondaryActionButton
-		title: title
-		message: message
-	}
+		return {
+			all : all
+			overlay : overlay
+			action: rightBox
+			secondaryAction : leftBox
+			title: title
+			message: message
+		}
+
+exports.AlertBanner = (array) ->
+	if array == undefined
+		array = []
+	for i in defaults.alertBanner.props
+		if array[i] != undefined
+			@[i] = array[i]
+		else
+			@[i] = defaults.alertBanner.text[i]
+	bannerBG = new Layer backgroundColor:"transparent", name:"alert banner all"
+	if exports.device == "iphone-6s"
+		bannerBG.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.width}px' height='#{exports.px(68)}px' viewBox='0 0 375 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			    <!-- Generator: Sketch 3.6 (26304) - http://www.bohemiancoding.com/sketch -->
+			    <title>Notification background</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.95'>
+			        <g id='iOS8-Push-Notification' transform='translate(-58.000000, -23.000000)' fill='#1A1A1C'>
+			            <g transform='translate(58.000000, 7.000000)' id='Notification-container'>
+			                <g>
+			                    <path d='M0,16 L375,16 L375,84 L0,84 L0,16 Z M169,77.0048815 C169,75.897616 169.896279,75 171.0024,75 L203.9976,75 C205.103495,75 206,75.8938998 206,77.0048815 L206,77.9951185 C206,79.102384 205.103721,80 203.9976,80 L171.0024,80 C169.896505,80 169,79.1061002 169,77.9951185 L169,77.0048815 Z' id='Notification-background'></path>
+			                </g>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+	if exports.device == "iphone-6s-plus"
+		bannerBG.html = "
+		<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.width}px' height='#{exports.px(68)}px' viewBox='0 0 414 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+		    <!-- Generator: Sketch 3.6 (26304) - http://www.bohemiancoding.com/sketch -->
+		    <title>Notification background Copy</title>
+		    <desc>Created with Sketch.</desc>
+		    <defs></defs>
+		    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.95'>
+		        <g id='iOS8-Push-Notification' transform='translate(-43.000000, -74.000000)' fill='#1A1A1C'>
+		            <g transform='translate(43.000000, 74.000000)' id='Notification-container'>
+		                <g>
+		                    <path d='M0,0 L414,0 L414,68 L0,68 L0,0 Z M189,61.0048815 C189,59.897616 189.896279,59 191.0024,59 L223.9976,59 C225.103495,59 226,59.8938998 226,61.0048815 L226,61.9951185 C226,63.102384 225.103721,64 223.9976,64 L191.0024,64 C189.896505,64 189,63.1061002 189,61.9951185 L189,61.0048815 Z' id='Notification-background-Copy'></path>
+		                </g>
+		            </g>
+		        </g>
+		    </g>
+		</svg>
+		"
+	bannerBG.constraints =
+		leading:0
+		trailing:0
+		top:0
+		height:68
+	icon = new Layer superLayer:bannerBG, name:"alert icon", borderRadius:exports.px(4.5)
+	if @icon == undefined
+		icon.style["background"] = "linear-gradient(-180deg, #67FF81 0%, #01B41F 100%)"
+	icon.constraints =
+		height:20
+		width:20
+		leading:15
+		top:8
+	title = new exports.Text style:"alertBannerTitle", text:@title, color:"white", fontWeight:"medium", fontSize:13, superLayer:bannerBG, name:"alert title"
+	title.constraints = 
+		top:5
+		leading:[icon, 11]
+	message = new exports.Text style:"alertBannerMessage", text:@message, color:"white", fontSize:13, superLayer:bannerBG, name:"alert message"
+	message.constraints =
+		leadingEdges:title
+		top:[title, 2]
+	time = new exports.Text style:"alertBannerTime", text:@time, color:"white", fontSize:11, superLayer:bannerBG, name:"alert time"
+	time.constraints =
+		leading:[title, 5]
+		bottomEdges: title
+
+	exports.layout()
+
 
 
 exports.Keyboard = (array) ->
