@@ -635,45 +635,41 @@ exports.Alert = (array) ->
 			@[i] = array[i]
 		else
 			@[i] = defaults.alert.text[i]
-	all = new Layer backgroundColor:"transparent"
+	all = new Layer backgroundColor:"transparent", name:"alert all"
 	all.constraints = 
 		leading:0
 		trailing:0
 		top:0
 		bottom:0
-	overlay = new Layer backgroundColor:"black", opacity:.3, superLayer:all
+	overlay = new Layer backgroundColor:"black", opacity:.3, superLayer:all, name:"overlay"
 	overlay.constraints =
 		leading:0
 		trailing:0
 		top:0
 		bottom:0
-	exports.layout()
-	alertBG = new Layer backgroundColor:"white", superLayer:all, borderRadius:exports.px(10), name:"Alert Background"
+	alertBG = new Layer backgroundColor:"white", superLayer:all, borderRadius:exports.px(10), name:"alert bg"
 	alertBG.constraints =
 		align:"center"
 		width:280
 		height:160
-	exports.layout()
-	title = new exports.Text style:"alertTitle", text:@title, fontWeight:"medium", superLayer:alertBG
-	title.constraints = 
-		align:"horizontal"
-		top:20
-	exports.layout()
-	message = new exports.Text style:"alertMessage", text:@message, fontSize:13, superLayer:alertBG, textAlign:"center", lineHeight:16, width:240
-	message.constraints =
-		top: [title, 10]
-		align:"horizontal"
-	alertBG.constraints["height"] = 20 + exports.pt(title.height) + 10 + exports.pt(message.height) + 64 
-	exports.layout()
-	divider = new Layer superLayer:alertBG, backgroundColor:"#E2E8EB"
+	divider = new Layer superLayer:alertBG, backgroundColor:"#E2E8EB", name:"horizontal divider"
 	divider.constraints = 
 		leading:0
 		trailing:0
 		height:1
 		bottom:44
-	exports.layout()
 	actionButton = new exports.Text style:"alertAction", color:"#0076FF", superLayer:alertBG, text:@action, name:"Action"
 	secondaryActionButton = new exports.Text style:"alertAction", text:@secondaryAction
+	title = new exports.Text style:"alertTitle", text:@title, fontWeight:"medium", superLayer:alertBG, name:"title"
+	title.constraints = 
+		align:"horizontal"
+		top:20
+	message = new exports.Text style:"alertMessage", text:@message, fontSize:13, superLayer:alertBG, textAlign:"center", lineHeight:16, width:240, name:"message"
+	message.constraints =
+		top: [title, 10]
+		align:"horizontal"
+	alertBG.constraints["height"] = 20 + exports.pt(title.height) + 10 + exports.pt(message.height) + 64 
+	exports.layout()
 	if @action != "Action" && @secondaryAction == "secondaryAction"
 		actionButton.constraints = 
 			align:"horizontal"

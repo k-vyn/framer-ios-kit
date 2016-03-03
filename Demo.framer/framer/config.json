@@ -3,8 +3,8 @@
   "sharedPrototype" : 1,
   "contentScale" : 1,
   "deviceType" : "apple-iphone-6s-gold",
-  "selectedHand" : "",
-  "updateDelay" : 0.1,
+  "selectedHand" : "iphone-hands-2",
+  "updateDelay" : 0.3,
   "deviceScale" : "fit",
   "orientation" : 0,
   "fullScreen" : false
