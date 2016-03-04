@@ -12,26 +12,16 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 ### Alert 
 To create an alert, you'll want to call .Alert.
-```alert = new ios.Alert```
+```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
 
-#### Title 
-*String* 
-This the text the appears at the very top of the alert.
-```alert = new ios.Alert title:"Hold up"```
+#### Properties
+**Title*** *String* 
+Text that appears at the top.
+**Message** *String***
+Text that appears below Title.
+**Action** *String*
+This is the primary action button. It’ll be centered in the alert if no secondary action is declared
+**Secondary Action** *String*
+If declared, this will formatted on the left. 
 
-#### Message
-*String* 
-This is the text that appears just below the **Title**
-```alert = new ios.Alert message:"Don't do what you're doing now"```
-
-#### Action (Must)
-*String*
-This is will always appear. If no secondaryAction is declared, it will be centered in the Alert.
-
-```alert = new ios.Alert action:"OK"```
-
-#### Secondary Action (Optional)
-*String* 
-This will appear to the left of the action. It will not appear if not declared.
-
-```alert = new ios.Alert secondaryAction:"Cancel"```
+### Alert Banner
