@@ -132,6 +132,8 @@ defaults = {
 			icon:undefined
 		}
 	}
+	framerProps :["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
+	cssProps : ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
 	constraintProps : ["height", "width"]
 	constraintTypes: ["top", "leading", "trailing", "bottom"]
 	constraintAligns : ["horizontalCenter", "verticalCenter", "leadingEdges", "trailingEdges", "topEdges", "bottomEdges", "align", "vertical", "horizontal"]
@@ -252,6 +254,7 @@ exports.layout = (layer) ->
 
 #Align constraints
 layoutAlign = (layer, type) ->
+	# print layer.name + ": constraints width " + layer.constraints.width
 	declaredConstraint = layer.constraints[type]
 	if layer.superLayer
 		@superLayer = layer.superLayer
@@ -478,23 +481,29 @@ exports.Custom = (style, array) ->
 		exports.apply(layer, newStyleName)
 	return layer 
 
+makeStyleChange = (layer, style, change) ->
+	if defaults.cssProps.indexOf(style) != -1
+		if style == "fontSize"
+			layer.style["font-size"] = exports.px(change) + "px"
+	if defaults.framerProps.indexOf(style) != -1
+		layer[style] = change
+ 
 
 textAutoSize = (textLayer) ->
 	#Define Width
+	constraints = {}
 	if textLayer.constraints 
-		print textLayer.constraints
-		@constraints =  {}
 		if textLayer.constraints.height
-			@constraints.height = textLayer.constraints.height
+			constraints.height = exports.px(textLayer.constraints.height)
 		if textLayer.constraints.width
-			@constraints.width = textLayer.constraints.width
+			constraints.width = exports.px(textLayer.constraints.width)
 	styles =
 		fontSize: textLayer.style["font-size"]
 		fontFamily: textLayer.style["font-family"]
 		fontWeight: textLayer.style["font-weight"]
 		lineHeight: textLayer.style["line-height"]
 		letterSpacing: textLayer.style["letter-spacing"]
-	textWidth = Utils.textSize textLayer.html, styles, @constraints
+	textWidth = Utils.textSize textLayer.html, styles, constraints
 	return {
 		width : textWidth.width
 		height: textWidth.height
@@ -503,6 +512,7 @@ textAutoSize = (textLayer) ->
 exports.Text = (array) ->
 	if array == undefined
 		array = []
+	exceptions = Object.keys(array)
 	styleArray = {}
 	for i in defaults.text.props
 		if array[i] != undefined
@@ -511,14 +521,20 @@ exports.Text = (array) ->
 			@[i] = defaults.text.defaults[i]
 		if i != "style"
 			styleArray[i] = @[i]
-	if exports.styles[@.style] == undefined
-		exports.addStyle
-			"#{@.style}" :
-				styleArray
 	textLayer = new Layer
 	textLayer.type = "text"
 	textLayer.html = @text
-	exports.apply(textLayer, @style)
+	textStyle = 
+		"#{@.style}" : 
+			styleArray
+	if exports.styles[@.style] == undefined
+		exports.addStyle textStyle
+		exports.apply(textLayer, @style)
+	else
+		exports.apply(textLayer, @style)
+		for change in exceptions
+			if change != "style"
+				makeStyleChange(textLayer, change, array[change])		
 	textFrame = textAutoSize(textLayer)
 	textLayer.props = (height:textFrame.height, width:textFrame.width)
 	return textLayer
@@ -546,20 +562,12 @@ exports.Alert = (array) ->
 		trailing:0
 		top:0
 		bottom:0
-	alertBG = new Layer backgroundColor:"white", superLayer:all, borderRadius:exports.px(10), name:"alert bg"
+	alertBG = new Layer backgroundColor:"white", superLayer:all, borderRadius:exports.px(10), name:"alert bg", x:92, y:537
 	alertBG.constraints =
 		align:"center"
 		width:280
-		height:160
-	divider = new Layer superLayer:alertBG, backgroundColor:"#E2E8EB", name:"horizontal divider"
-	divider.constraints = 
-		leading:0
-		trailing:0
-		height:1
-		bottom:44
-	actionButton = new exports.Text style:"alertAction", color:"#0076FF", superLayer:alertBG, text:@action, name:"Action"
-	secondaryActionButton = new exports.Text style:"alertAction", text:@secondaryAction
-	title = new exports.Text style:"alertTitle", text:@title, fontWeight:"medium", superLayer:alertBG, name:"title"
+		height:400
+	title = new exports.Text style:"alertTitle", superLayer:alertBG, text:@title, fontWeight:"medium",  name:"title"
 	title.constraints = 
 		align:"horizontal"
 		top:20
@@ -567,6 +575,16 @@ exports.Alert = (array) ->
 	message.constraints =
 		top: [title, 10]
 		align:"horizontal"
+		width: 220
+	divider = new Layer superLayer:alertBG, backgroundColor:"#E2E8EB", name:"horizontal divider"
+	divider.constraints = 
+		leading:0
+		trailing:0
+		height:1
+		bottom:44
+	exports.layout()
+	actionButton = new exports.Text style:"alertAction", color:"#0076FF", superLayer:alertBG, text:@action, name:"action"
+	secondaryActionButton = new exports.Text style:"alertAction", text:@secondaryAction, name:"secondaryAction"
 	alertBG.constraints["height"] = 20 + exports.pt(title.height) + 10 + exports.pt(message.height) + 64 
 	exports.layout()
 	if @action != "Action" && @secondaryAction == "secondaryAction"
