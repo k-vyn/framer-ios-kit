@@ -12,6 +12,7 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 ### Alert 
 To create an alert, you'll want to call .Alert.
+
 ```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
 
 #### Properties
