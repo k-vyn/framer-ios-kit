@@ -14,6 +14,7 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 To create an alert, you'll want to call .Alert.
 
 ![alt tag](https://www.dropbox.com/s/sizngjnnm8s83ip/Screenshot%202016-03-04%2014.26.26.png)
+
 ```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
 
 #### Properties
