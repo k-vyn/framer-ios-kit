@@ -15,13 +15,16 @@ To create an alert, you'll want to call .Alert.
 ```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
 
 #### Properties
-**Title*** *String* 
+**Title** *String* –
 Text that appears at the top.
-**Message** *String***
+
+**Message** *String* –
 Text that appears below Title.
-**Action** *String*
+
+**Action** *String* –
 This is the primary action button. It’ll be centered in the alert if no secondary action is declared
-**Secondary Action** *String*
+
+**Secondary Action** *String* –
 If declared, this will formatted on the left. 
 
 ### Alert Banner
