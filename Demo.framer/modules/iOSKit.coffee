@@ -132,76 +132,6 @@ defaults = {
 			icon:undefined
 		}
 	}
-	charWidths: {			
-		"A" : .7
-		"B" : .65
-		"C" : .78
-		"D" : .77
-		"E" : .58
-		"F" : .57
-		"G" : .77
-		"H" : .71
-		"I" : .1
-		"J" : .49
-		"K" : .65
-		"L" : .57
-		"M" : .87
-		"N" : .71
-		"O" : .8
-		"P" : .62
-		"Q" : .8
-		"R" : .63
-		"S" : .63
-		"T" : .66
-		"U" : .7
-		"V" : .7
-		"W" : 1.03
-		"X" : .68
-		"Y" : .67
-		"Z" : .645
-		"a" : .54
-		"b" : .63
-		"c" : .57
-		"d" : .59
-		"e" : .59
-		"f" : .28
-		"g" : .59
-		"h" : .57
-		"i" : .12
-		"j" : .12
-		"k" : .53
-		"l" : .105
-		"m" : .9
-		"n" : .56
-		"o" : .6
-		"p" : .62
-		"q" : .59
-		"r" : .34
-		"s" : .505
-		"t" : .28
-		"u" : .56
-		"v" : .53
-		"w" : .835
-		"x" : .515
-		"y" : .528
-		"z" : .51
-		" " : .44
-		"?" : .495
-		"!" : .18
-		"." : .18
-		"," : .17
-		"'" : .09
-		"1" : .32
-		"2" : .63
-		"3" : .62
-		"4" : .655
-		"5" : .64
-		"6" : .64
-		"7" : .59
-		"8" : .64 
-		"9" : .64
-		"0" : .645
- 	}
 	constraintProps : ["height", "width"]
 	constraintTypes: ["top", "leading", "trailing", "bottom"]
 	constraintAligns : ["horizontalCenter", "verticalCenter", "leadingEdges", "trailingEdges", "topEdges", "bottomEdges", "align", "vertical", "horizontal"]
@@ -311,14 +241,14 @@ exports.layout = (layer) ->
 		@.array = [layer]
 	for layer in @.array
 		if layer.constraints != undefined
-			for a in defaults.constraintAligns
-				if layer.constraints[a]
-					layoutAlign(layer, a)
 			for p in defaults.constraintProps
 				layoutSize(layer, p)
 			for c in defaults.constraintTypes
 				if layer.constraints[c] != undefined
 					layoutChange(layer, c)
+			for a in defaults.constraintAligns
+				if layer.constraints[a]
+					layoutAlign(layer, a)
 
 #Align constraints
 layoutAlign = (layer, type) ->
@@ -390,6 +320,10 @@ layoutAlign = (layer, type) ->
 layoutSize = (layer, type) ->
 	if layer.constraints[type]
 		layer[type] = exports.px(layer.constraints[type])
+		if layer.type == "text"
+			textFrame = textAutoSize(layer)
+			layer.width = textFrame.width
+			layer.height = textFrame.height
 
 
 #Move & Resizes Layers
@@ -544,62 +478,26 @@ exports.Custom = (style, array) ->
 		exports.apply(layer, newStyleName)
 	return layer 
 
-#Automatic sizing for text layers
-textSizing = (layer, text, height, style, lines) ->
-	device = exports.getDevice()
-	layer.height = parseInt(height[0] + height[1]) + 2
-	if lines != undefined
-		layer.height = layer.height * lines
-	layer.html = text 
-	stringLength = 0
-	lookingForBreak = text.search("<br>")
-	pureText = ""
-	if lookingForBreak != -1
-		line1 = text.substring(0,lookingForBreak)
-		line2 =  text.substring(lookingForBreak + 5, text.length)
-		if line1.length > line2.length
-			text = line1
-		if line2.length > line1.length
-			text = line2
-	invalidText = /(<([^>]+)>)/ig
-	pureText = text.replace(invalidText, "")
-	characterArray = pureText.split('')
-	for c in characterArray
-		stringLength = chars[c][style] + stringLength
-	layer.width = stringLength * device.scale
-
-
-
 
 textAutoSize = (textLayer) ->
 	#Define Width
-	layerWidth = 0
-	layerHeight = 0
-	if textLayer.height == exports.px(-1) && textLayer.width == exports.px(-1)
-		layerHeight = parseInt(textLayer.style['font-size'].slice(0,-2))
-	if textLayer.height != exports.px(-1) && textLayer.width != exports.px(-1)
-		layerHeight = textLayer.height
-	arrayOfChars = textLayer.html.split("")
-	wordCount = textLayer.html.split(" ").length
-	arrayOfWidths = defaults.charWidths
-	fontMultiplier = parseInt(textLayer.style["font-size"].slice(0,-2))/10
-	fontWeightMultiplier = parseInt(textLayer.style["font-weight"])/380
-	for char in arrayOfChars
-		layerWidth = layerWidth + ( arrayOfWidths[char] * fontMultiplier * (8.4 + fontWeightMultiplier)) 
-		layerWidth = Math.round(layerWidth)
-	setWidth = textLayer.width
-	if textLayer.width != exports.px(-1) && textLayer.height == exports.px(-1)
-		lineCount = Math.ceil(layerWidth/setWidth)
-		if lineCount > wordCount
-			lineCount = wordCount
-		layerHeight = parseInt(textLayer.style["font-size"].slice(0,-2)) * lineCount + parseInt(textLayer.style["line-height"].slice(0,-2)) * (lineCount - 1.5)
-		if layerHeight < parseInt(textLayer.style['font-size'].slice(0,-2))
-			layerHeight = parseInt(textLayer.style['font-size'].slice(0,-2))
-	if textLayer.width != exports.px(-1)
-		layerWidth = setWidth
+	if textLayer.constraints 
+		print textLayer.constraints
+		@constraints =  {}
+		if textLayer.constraints.height
+			@constraints.height = textLayer.constraints.height
+		if textLayer.constraints.width
+			@constraints.width = textLayer.constraints.width
+	styles =
+		fontSize: textLayer.style["font-size"]
+		fontFamily: textLayer.style["font-family"]
+		fontWeight: textLayer.style["font-weight"]
+		lineHeight: textLayer.style["line-height"]
+		letterSpacing: textLayer.style["letter-spacing"]
+	textWidth = Utils.textSize textLayer.html, styles, @constraints
 	return {
-		width : layerWidth
-		height: layerHeight
+		width : textWidth.width
+		height: textWidth.height
 	}
 
 exports.Text = (array) ->
@@ -618,6 +516,7 @@ exports.Text = (array) ->
 			"#{@.style}" :
 				styleArray
 	textLayer = new Layer
+	textLayer.type = "text"
 	textLayer.html = @text
 	exports.apply(textLayer, @style)
 	textFrame = textAutoSize(textLayer)
