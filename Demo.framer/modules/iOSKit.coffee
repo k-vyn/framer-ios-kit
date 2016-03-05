@@ -37,9 +37,9 @@ framerDevices = {
 "apple-ipad-air-2-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
 
 #mini
-"apple-ipad-mini-4-gold": { height: 2048, width: 1536,	scale: 1, mobile:true, platform:"iOS"}
-"apple-ipad-mini-4-space-gray": { height: 2048, width: 1536,	scale: 1, mobile:true, platform:"iOS"}
-"apple-ipad-mini-4-silver":{ height: 2048, width: 1536, scale: 1, mobile:true, platform:"iOS"}
+"apple-ipad-mini-4-gold": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+"apple-ipad-mini-4-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+"apple-ipad-mini-4-silver":{ height: 2048, width: 1536, scale: 2, mobile:true, platform:"iOS"}
 
 #Pro
 "apple-ipad-pro-gold": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
@@ -84,6 +84,8 @@ exports.getDevice = ->
 	device = device.replace("-pink", "")
 	device = device.replace("-space-grey", "")
 	device = device.replace("-rose", "")
+	device = device.replace("5s", "5")
+	device = device.replace("5c", "5")
 	exports.device = device.replace("-silver", "")
 	screen = {
 		width:exports.width
@@ -123,7 +125,7 @@ defaults = {
 			secondaryAction: "secondaryAction"
 		}
 	}
-	alertBanner: {
+	banner: {
 		text:{
 			title: "Title"
 			message:"Message"
@@ -163,6 +165,11 @@ defaults = {
 			"opp" : "leading"
 		}
 	}
+	lockScreen: {
+		time:"default"
+		date:"default"
+		passcode:"false"
+	}
 	keyboardProps: ["returnKey"]
 	keyboard: {
 		returnKey:"default"
@@ -170,6 +177,7 @@ defaults = {
 	text: {
 		defaults: {
 			text: "iOS Text Layer"
+			type:"text"
 			x:0
 			y:0
 			width:-1
@@ -185,6 +193,7 @@ defaults = {
 			fontWeight:"regular"
 			lineHeight:"auto"
 			name:"text layer"
+			opacity:1
 			} 
 	}
 }
@@ -193,9 +202,22 @@ setProps = (object, dest) ->
 	keys = Object.keys(object)
 	dest["props"] = keys
 
+
 setProps(defaults.text.defaults, defaults.text)
 setProps(defaults.alert.text, defaults.alert)
-setProps(defaults.alertBanner.text, defaults.alertBanner)
+setProps(defaults.banner.text, defaults.banner)
+setProps(defaults.lockScreen, defaults.lockScreen)
+
+setupComponent = (component, array) ->
+	if array == undefined
+		array = []
+	obj = {}
+	for i in defaults[component].props
+		if array[i] != undefined
+			obj[i] = array[i]
+		else
+			obj[i] = defaults[component][i]
+	return obj
 
 
 ## Conversions
@@ -234,6 +256,25 @@ exports.sameParent = (layer1, layer2) ->
 		return true
 	else 
 		return false
+
+exports.getTime = ->
+	daysOfTheWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+	monthsOfTheYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+	dateObj = new Date()
+	month = monthsOfTheYear[dateObj.getMonth()]
+	date = dateObj.getDay()
+	day = daysOfTheWeek[dateObj.getDate()]
+	hours = dateObj.getHours()
+	mins = dateObj.getMinutes()
+	secs = dateObj.getSeconds()
+	return {
+		month:month
+		day:day
+		date:date
+		hours:hours
+		mins:mins
+		secs:secs
+	}
 
 #Refreshes Layer or All Layers
 exports.layout = (layer) ->
@@ -411,8 +452,7 @@ layoutChange = (layer, type) ->
 
 
 #Text Layers
-exports.styles = {
-}
+exports.styles = {}
 
 ## Custom Styles
 
@@ -539,7 +579,32 @@ exports.Text = (array) ->
 	textLayer.props = (height:textFrame.height, width:textFrame.width)
 	return textLayer
 
+exports.update = (layer, array) ->
+	if array == undefined
+		array = []
+	if layer.type == "text"
+		for change in array
+			key = Object.keys(change)[0]
+			value = change[key]
+			if key == "text"
+				layer.html = value
+				textFrame = textAutoSize(layer)
+				layer.width = textFrame.width
+				layer.height = textFrame.height
 
+exports.timeDelegate = (layer) ->
+	@time = exports.getTime()
+	Utils.delay 60 - @time.secs, ->
+		@time = exports.getTime()
+		exports.update(layer, [text:exports.timeFormatter(@time)])
+		Utils.interval 60, ->
+			@time = exports.getTime()
+			exports.update(layer, [text:exports.timeFormatter(@time)])
+ 
+exports.timeFormatter = (timeObj) ->
+	if timeObj.mins < 10
+		timeObj.mins = "0" + timeObj.mins
+	return timeObj.hours + ":" + timeObj.mins
 
 ##Alerts
 exports.Alert = (array) ->
@@ -628,10 +693,10 @@ exports.Alert = (array) ->
 		exports.layout()
 		actionButton.constraints = 
 			align:"horizontal"
-			bottom:16
+			bottom:14
 		secondaryActionButton.constraints =
-			align:"center"
-			bottom:16
+			align:"horizontal"
+			bottom:14
 		exports.layout()
 		return {
 			all : all
@@ -642,15 +707,15 @@ exports.Alert = (array) ->
 			message: message
 		}
 
-exports.AlertBanner = (array) ->
+exports.Banner = (array) ->
 	if array == undefined
 		array = []
-	for i in defaults.alertBanner.props
+	for i in defaults.banner.props
 		if array[i] != undefined
 			@[i] = array[i]
 		else
-			@[i] = defaults.alertBanner.text[i]
-	bannerBG = new Layer backgroundColor:"transparent", name:"alert banner all"
+			@[i] = defaults.banner.text[i]
+	bannerBG = new Layer backgroundColor:"transparent", name:"banner all"
 	if exports.device == "iphone-6s"
 		bannerBG.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 			<svg width='#{exports.width}px' height='#{exports.px(68)}px' viewBox='0 0 375 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
@@ -700,18 +765,96 @@ exports.AlertBanner = (array) ->
 		width:20
 		leading:15
 		top:8
-	title = new exports.Text style:"alertBannerTitle", text:@title, color:"white", fontWeight:"medium", fontSize:13, superLayer:bannerBG, name:"alert title"
+	title = new exports.Text style:"bannerTitle", text:@title, color:"white", fontWeight:"medium", fontSize:13, superLayer:bannerBG, name:"alert title"
 	title.constraints = 
 		top:5
 		leading:[icon, 11]
-	message = new exports.Text style:"alertBannerMessage", text:@message, color:"white", fontSize:13, superLayer:bannerBG, name:"alert message"
+	message = new exports.Text style:"bannerMessage", text:@message, color:"white", fontSize:13, superLayer:bannerBG, name:"alert message"
 	message.constraints =
 		leadingEdges:title
 		top:[title, 2]
-	time = new exports.Text style:"alertBannerTime", text:@time, color:"white", fontSize:11, superLayer:bannerBG, name:"alert time"
+	time = new exports.Text style:"bannerTime", text:@time, color:"white", fontSize:11, superLayer:bannerBG, name:"alert time"
 	time.constraints =
 		leading:[title, 5]
 		bottomEdges: title
+
+	exports.layout()
+	return {
+		all : bannerBG
+		icon:icon
+		title:title
+		message:message
+	}
+
+exports.LockScreen = (array) ->
+	switch exports.device
+		when "iphone-6s" 
+			@timeFontSize = 88
+			@dateFontSize = 19
+		when "iphone-6s-plus" 
+			@timeFontSize = 88
+			@dateFontSize = 19
+		when "iphone-5" 
+			@timeFontSize = 80
+			@dateFontSize = 19
+		when "ipad-mini-4"
+			@timeFontSize = 120
+			@dateFontSize = 24
+		when "ipad-air-2"
+			@timeFontSize = 120
+			@dateFontSize = 24
+		when "ipad-pro"
+			@timeFontSize = 120
+			@dateFontSize = 24
+		else 
+			@timeFontSize = 50
+			@dateFontSize = 19
+	setup = setupComponent("lockScreen", array)
+	@time = exports.getTime()
+	BG = new Layer name:"lockScreen Background", width:exports.width, height:exports.height
+	BG.style["background"] = "linear-gradient(-180deg, #00C4D0 0%, #F3DABC 100%)"
+	if setup.time == "default"
+		@timeLayer = new exports.Text style:"lockScreenTime", text:exports.timeFormatter(@time), fontSize:@timeFontSize, fontWeight:"thin", color:"white"
+		exports.timeDelegate(@timeLayer)
+	else  
+		@timeLayer = new exports.Text style:"lockScreenTime", text:setup.time, fontSize:@timeFontSize, fontWeight:"thin", color:"white"
+	@timeLayer.constraints = 
+		align:"horizontal"
+		top:60
+	if setup.date == "default"
+		@dateLayer = new exports.Text style:"lockScreenDate", text:@time.day + ", " + @time.month + " " + @time.date, fontSize:@dateFontSize, color:"white"
+	else
+		@dateLayer = new exports.Text style:"lockScreenDate", text:setup.date, fontSize:@dateFontSize, color:"white"
+	@dateLayer.constraints =
+		horizontalCenter:@timeLayer
+		top:[@timeLayer]
+
+	slideToUnlock = new exports.Text style:"lockScreenSlide", text:"slide to unlock", fontSize:24, fontWeight:"medium", opacity:.5
+	slideToUnlock.constraints = 
+		align:"horizontal"
+		bottom:70
+
+	arrow = new Layer backgroundColor:"transparent"
+	arrow.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+		<svg width='#{exports.px(11)}px' height='#{exports.px(24)}px' viewBox='0 0 11 24' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+		    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+		    <title>Slide to Unlock Arrow</title>
+		    <desc>Created with Sketch.</desc>
+		    <defs></defs>
+		    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+		        <g id='iPhone-6/6S-Lock-Screen' transform='translate(-92.000000, -597.000000)' fill='#000000'>
+		            <g id='Slide-to-Unlock' transform='translate(92.000000, 597.000000)'>
+		                <path d='M10.9877324,12.0257422 L2.19629058,0.793908206 C1.85240438,0.353753949 1.22321708,0.275641031 0.788010754,0.615661475 C0.349770253,0.958052479 0.277703922,1.58676776 0.62026907,2.02523116 L8.43352455,12.0257421 L0.62026907,22.0262531 C0.277703922,22.4647165 0.349770253,23.0934318 0.788010754,23.4358228 C1.22321708,23.7758432 1.85240438,23.6977303 2.19629058,23.257576 L10.9877324,12.0257422 Z' id='Slide-to-Unlock-Arrow'></path>
+		            </g>
+		        </g>
+		    </g>
+		</svg>"
+	arrow.constraints = 
+		height:24
+		width:11
+		verticalCenter:slideToUnlock
+		trailing:[slideToUnlock, 12]
+	
 
 	exports.layout()
 
