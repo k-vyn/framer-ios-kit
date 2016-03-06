@@ -168,11 +168,45 @@ defaults = {
 	lockScreen: {
 		time:"default"
 		date:"default"
-		passcode:"false"
+		passcode:false
+		clock24:false
+		type:"lockScreen"
 	}
 	keyboardProps: ["returnKey"]
 	keyboard: {
 		returnKey:"default"
+	}
+	statusBar: {
+		carrier:""
+		network:"LTE"
+		battery:100
+		signal:5
+		style:"dark"
+		clock24:false
+		type:"statusBar"
+	}
+	tabBar : {
+		tabs: []
+	}
+	tab : {
+		label: "label"
+		icon:"<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='25px' height='25px' viewBox='0 0 25 25' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+			    <title>1</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.5'>
+			        <g id='Bottom-Bar/Tab-Bar' transform='translate(-25.000000, -7.000000)' fill='#0076FF'>
+			            <g id='Placeholders' transform='translate(25.000000, 7.000000)'>
+			                <rect id='1' x='0' y='0' width='25' height='25' rx='3'></rect>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+		active: undefined
+		unactive: undefined
+		tabBar: undefined
 	}
 	text: {
 		defaults: {
@@ -207,6 +241,8 @@ setProps(defaults.text.defaults, defaults.text)
 setProps(defaults.alert.text, defaults.alert)
 setProps(defaults.banner.text, defaults.banner)
 setProps(defaults.lockScreen, defaults.lockScreen)
+setProps(defaults.statusBar, defaults.statusBar)
+setProps(defaults.tab, defaults.tab)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -258,12 +294,12 @@ exports.sameParent = (layer1, layer2) ->
 		return false
 
 exports.getTime = ->
-	daysOfTheWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
+	daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 	monthsOfTheYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 	dateObj = new Date()
 	month = monthsOfTheYear[dateObj.getMonth()]
-	date = dateObj.getDay()
-	day = daysOfTheWeek[dateObj.getDate()]
+	date = dateObj.getDate()
+	day = daysOfTheWeek[dateObj.getDay()]
 	hours = dateObj.getHours()
 	mins = dateObj.getMinutes()
 	secs = dateObj.getSeconds()
@@ -591,17 +627,21 @@ exports.update = (layer, array) ->
 				textFrame = textAutoSize(layer)
 				layer.width = textFrame.width
 				layer.height = textFrame.height
+	exports.layout()
 
-exports.timeDelegate = (layer) ->
+exports.timeDelegate = (layer, clockType) ->
 	@time = exports.getTime()
 	Utils.delay 60 - @time.secs, ->
 		@time = exports.getTime()
-		exports.update(layer, [text:exports.timeFormatter(@time)])
+		exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
 		Utils.interval 60, ->
 			@time = exports.getTime()
-			exports.update(layer, [text:exports.timeFormatter(@time)])
+			exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
  
-exports.timeFormatter = (timeObj) ->
+exports.timeFormatter = (timeObj, clockType) ->
+	if clockType == false 
+		if timeObj.hours > 12
+			timeObj.hours = timeObj.hours - 12
 	if timeObj.mins < 10
 		timeObj.mins = "0" + timeObj.mins
 	return timeObj.hours + ":" + timeObj.mins
@@ -757,7 +797,7 @@ exports.Banner = (array) ->
 		trailing:0
 		top:0
 		height:68
-	icon = new Layer superLayer:bannerBG, name:"alert icon", borderRadius:exports.px(4.5)
+	icon = new Layer superLayer:bannerBG, name:"icon", borderRadius:exports.px(4.5)
 	if @icon == undefined
 		icon.style["background"] = "linear-gradient(-180deg, #67FF81 0%, #01B41F 100%)"
 	icon.constraints =
@@ -765,15 +805,15 @@ exports.Banner = (array) ->
 		width:20
 		leading:15
 		top:8
-	title = new exports.Text style:"bannerTitle", text:@title, color:"white", fontWeight:"medium", fontSize:13, superLayer:bannerBG, name:"alert title"
+	title = new exports.Text style:"bannerTitle", text:@title, color:"white", fontWeight:"medium", fontSize:13, superLayer:bannerBG, name:"title"
 	title.constraints = 
 		top:5
 		leading:[icon, 11]
-	message = new exports.Text style:"bannerMessage", text:@message, color:"white", fontSize:13, superLayer:bannerBG, name:"alert message"
+	message = new exports.Text style:"bannerMessage", text:@message, color:"white", fontSize:13, superLayer:bannerBG, name:"message"
 	message.constraints =
 		leadingEdges:title
 		top:[title, 2]
-	time = new exports.Text style:"bannerTime", text:@time, color:"white", fontSize:11, superLayer:bannerBG, name:"alert time"
+	time = new exports.Text style:"bannerTime", text:@time, color:"white", fontSize:11, superLayer:bannerBG, name:"time"
 	time.constraints =
 		leading:[title, 5]
 		bottomEdges: title
@@ -812,24 +852,24 @@ exports.LockScreen = (array) ->
 	setup = setupComponent("lockScreen", array)
 	@time = exports.getTime()
 	BG = new Layer name:"lockScreen Background", width:exports.width, height:exports.height
+	BG.type = "lockScreen"
 	BG.style["background"] = "linear-gradient(-180deg, #00C4D0 0%, #F3DABC 100%)"
 	if setup.time == "default"
-		@timeLayer = new exports.Text style:"lockScreenTime", text:exports.timeFormatter(@time), fontSize:@timeFontSize, fontWeight:"thin", color:"white"
-		exports.timeDelegate(@timeLayer)
+		@timeLayer = new exports.Text style:"lockScreenTime", text:exports.timeFormatter(@time, setup.clock24), fontSize:@timeFontSize, fontWeight:"thin", color:"white", superLayer:BG
+		exports.timeDelegate(@timeLayer, setup.clock24)
 	else  
-		@timeLayer = new exports.Text style:"lockScreenTime", text:setup.time, fontSize:@timeFontSize, fontWeight:"thin", color:"white"
+		@timeLayer = new exports.Text style:"lockScreenTime", text:setup.time, fontSize:@timeFontSize, fontWeight:"thin", color:"white", superLayer:BG
 	@timeLayer.constraints = 
 		align:"horizontal"
 		top:60
 	if setup.date == "default"
-		@dateLayer = new exports.Text style:"lockScreenDate", text:@time.day + ", " + @time.month + " " + @time.date, fontSize:@dateFontSize, color:"white"
+		@dateLayer = new exports.Text style:"lockScreenDate", text:@time.day + ", " + @time.month + " " + @time.date, fontSize:@dateFontSize, color:"white", superLayer:BG
 	else
-		@dateLayer = new exports.Text style:"lockScreenDate", text:setup.date, fontSize:@dateFontSize, color:"white"
+		@dateLayer = new exports.Text style:"lockScreenDate", text:setup.date, fontSize:@dateFontSize, color:"white", superLayer:BG
 	@dateLayer.constraints =
 		horizontalCenter:@timeLayer
 		top:[@timeLayer]
-
-	slideToUnlock = new exports.Text style:"lockScreenSlide", text:"slide to unlock", fontSize:24, fontWeight:"medium", opacity:.5
+	slideToUnlock = new exports.Text style:"lockScreenSlide", text:"slide to unlock", fontSize:24, fontWeight:"medium", opacity:.5, superLayer:BG
 	slideToUnlock.constraints = 
 		align:"horizontal"
 		bottom:70
@@ -854,10 +894,187 @@ exports.LockScreen = (array) ->
 		width:11
 		verticalCenter:slideToUnlock
 		trailing:[slideToUnlock, 12]
-	
-
 	exports.layout()
 
+
+exports.StatusBar = (array) ->
+	setup = setupComponent("statusBar", array)
+	statusBarBG = new Layer backgroundColor:"transparent", name:"statusBar.all"
+	statusBarBG.constraints = 
+		leading:0
+		trailing:0
+		height:20
+	switch exports.device
+		when "iphone-6s-plus"
+			@topConstraint = 5
+		else
+			@topConstraint = 3
+	if setup.style == "light"
+		@color = "white"
+	else
+		@color = "black"
+	for layer in Framer.CurrentContext.layers
+		if layer.type == "lockScreen"
+			@isLockScreenPresent = true
+	if @isLockScreenPresent
+		gripper = new Layer superLayer:statusBarBG, width:exports.px(37), height:exports.px(5), name:"gripper", backgroundColor:"transparent", opacity:.5, name:"gripper"
+		gripper.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(37)}px' height='#{exports.px(5)}px' viewBox='0 0 37 5' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+			    <title>Gripper</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+			        <g id='Keyboard/Auto-Complete-Bar-Closed' transform='translate(-169.000000, -2.000000)' fill='#FFFFFF'>
+			            <rect id='Gripper' x='169.5' y='2.5' width='36' height='4' rx='2.5'></rect>
+			        </g>
+			    </g>
+			</svg>"
+		gripper.constraints = 
+			align:"horizontal"
+			top:2
+	else 
+		@time = exports.getTime()
+		if setup.clock24 == false
+			if @time.hours > 11 
+				@time.stamp = "PM"
+			else
+				@time.stamp = "AM"
+		else
+			@time.stamp = ""
+		time = new exports.Text style:"statusBarTime", text:exports.timeFormatter(@time, setup.clock24) + " " + @time.stamp, fontSize:12, fontWeight:"semibold", superLayer:statusBarBG, color:@color, name:"time"
+		time.constraints =
+			align:"center"
+	signal = []
+	if setup.signal < 1
+		noNetwork = new exports.Text superLayer:statusBarBG, fontSize:12, text:"No Network"
+		noNetwork.constraints =
+			leading:7
+			top:3
+	else
+		for i in [0...setup.signal]
+			dot = new Layer height:exports.px(5.5), width:exports.px(5.5), backgroundColor:"black", superLayer:statusBarBG, borderRadius:exports.px(5.5)/2, backgroundColor:@color, name:"signal[#{i}]"
+			if i == 0
+				dot.constraints =
+					leading:7
+					top:7	
+			else
+				dot.constraints =
+					leading:[signal[i - 1 ], 1]
+					top:7					
+			signal.push dot 
+			exports.layout()
+		if setup.signal < 5
+			nonDots = 5 - setup.signal
+			for i in [0...nonDots]
+				nonDot = new Layer height:exports.px(5.5), width:exports.px(5.5), superLayer:statusBarBG, borderRadius:exports.px(5.5)/2, backgroundColor:"white", name:"signal[#{signal.length}]"
+				nonDot.style.border = "#{exports.px(1)}px solid #{@color}"
+				nonDot.constraints =
+					leading:[signal[signal.length - 1], 1]
+					top:7
+				signal.push nonDot
+				exports.layout()	
+		carrier = new exports.Text style:"statusBarCarrier", text:setup.carrier, superLayer:statusBarBG, fontSize:12, color:@color, name:"carrier"
+		carrier.constraints = 
+			leading:[signal[signal.length - 1], 7]
+			top:3
+		exports.layout()
+		if setup.carrier
+			network = new exports.Text style:"statusBarNetwork", text:setup.network, superLayer:statusBarBG, fontSize:12, color:@color, name:"network"
+			network.constraints =
+				leading:[carrier, 5]
+				top:3
+		if setup.carrier == "" || setup.carrier == "wifi"
+			network = new Layer width:exports.px(14), height:exports.px(10), superLayer:statusBarBG, backgroundColor:"transparent", name:"network"
+			network.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+				<svg width='#{exports.px(14)}px' height='#{exports.px(10)}px' viewBox='0 0 14 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+				    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+				    <title>Wi-Fi</title>
+				    <desc>Created with Sketch.</desc>
+				    <defs></defs>
+				    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+				        <g id='Status-Bar/Black/Charging' transform='translate(-87.000000, -5.000000)' fill='#{@color}'>
+				            <path d='M96.1444208,12.4385043 C95.626374,11.8454456 94.8523616,11.4689119 93.987563,11.4689119 C93.1390073,11.4689119 92.3778594,11.8314341 91.8601652,12.4053177 L94.0225391,14.5 L96.1444208,12.4385043 Z M98.3234964,10.3214425 C97.2447794,9.19174563 95.7014387,8.48445596 93.987563,8.48445596 C92.2882723,8.48445596 90.7566264,9.17975893 89.6792698,10.2926936 L90.7692987,11.3486 C91.567205,10.5053708 92.713648,9.97668394 93.987563,9.97668394 C95.2768836,9.97668394 96.4356305,10.518235 97.2346215,11.3793293 L98.3234964,10.3214425 L98.3234964,10.3214425 Z M100.5,8.20687933 C98.8629578,6.53943672 96.5505699,5.5 93.987563,5.5 C91.4375103,5.5 89.1355496,6.52895605 87.5,8.18164431 L88.5895579,9.23709441 C89.9460798,7.85431655 91.8628921,6.99222798 93.987563,6.99222798 C96.1260026,6.99222798 98.0538809,7.86552609 99.4118698,9.26404272 L100.5,8.20687933 Z' id='Wi-Fi'></path>
+				        </g>
+				    </g>
+				</svg>"
+			network.constraints = 
+				leading:[signal[signal.length - 1], 7]
+				top:@topConstraint
+	batteryIcon = new Layer width:exports.px(25), height:exports.px(10), superLayer:statusBarBG, backgroundColor:"transparent", name:"batteryIcon"
+	if setup.battery > 70 
+		batteryIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(25)}px' height='#{exports.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+			    <title>Battery</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+			        <g id='Status-Bar/Black/100%' transform='translate(-345.000000, -5.000000)' fill='#{@color}'>
+			            <path d='M346.493713,5.5 C345.668758,5.5 345,6.16802155 345,7.00530324 L345,13.4946968 C345,14.3260528 345.67338,15 346.493713,15 L366.006287,15 C366.831242,15 367.5,14.3319784 367.5,13.4946968 L367.5,7.00530324 C367.5,6.17394722 366.82662,5.5 366.006287,5.5 L346.493713,5.5 Z M368,8.5 L368,12 L368.75,12 C369.164214,12 369.5,11.6644053 369.5,11.25774 L369.5,9.24225998 C369.5,8.83232111 369.167101,8.5 368.75,8.5 L368,8.5 Z M346.508152,6 C345.951365,6 345.5,6.45699692 345.5,7.00844055 L345.5,13.4915594 C345.5,14.0485058 345.949058,14.5 346.508152,14.5 L365.991848,14.5 C366.548635,14.5 367,14.0430031 367,13.4915594 L367,7.00844055 C367,6.45149422 366.550942,6 365.991848,6 L346.508152,6 Z M346.506744,6.5 C346.226877,6.5 346,6.71637201 346,6.99209595 L346,13.5079041 C346,13.7796811 346.230225,14 346.506744,14 L365.993256,14 C366.273123,14 366.5,13.783628 366.5,13.5079041 L366.5,6.99209595 C366.5,6.72031886 366.269775,6.5 365.993256,6.5 L346.506744,6.5 Z' id='Battery'></path>
+			        </g>
+			    </g>
+			</svg>"
+	if setup.battery <= 70 && setup.battery > 20
+		batteryIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(25)}px' height='#{exports.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+			    <title>Battery</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+			        <g id='Status-Bar/White/100%' transform='translate(-345.000000, -5.000000)' fill='#{@color}'>
+			            <path d='M346.493713,5.5 C345.668758,5.5 345,6.16802155 345,7.00530324 L345,13.4946968 C345,14.3260528 345.67338,15 346.493713,15 L366.006287,15 C366.831242,15 367.5,14.3319784 367.5,13.4946968 L367.5,7.00530324 C367.5,6.17394722 366.82662,5.5 366.006287,5.5 L346.493713,5.5 Z M368,8.5 L368,12 L368.75,12 C369.164214,12 369.5,11.6644053 369.5,11.25774 L369.5,9.24225998 C369.5,8.83232111 369.167101,8.5 368.75,8.5 L368,8.5 Z M346.508152,6 C345.951365,6 345.5,6.45699692 345.5,7.00844055 L345.5,13.4915594 C345.5,14.0485058 345.949058,14.5 346.508152,14.5 L365.991848,14.5 C366.548635,14.5 367,14.0430031 367,13.4915594 L367,7.00844055 C367,6.45149422 366.550942,6 365.991848,6 L346.508152,6 Z M346.501231,6.5 C346.224409,6.5 346,6.71637201 346,6.99209595 L346,13.5079041 C346,13.7796811 346.229751,14 346.501231,14 L356.498769,14 C356.775591,14 357,13.783628 357,13.5079041 L357,6.99209595 C357,6.72031886 356.770249,6.5 356.498769,6.5 L346.501231,6.5 Z' id='Battery'></path>
+			        </g>
+			    </g>
+			</svg>"
+	if setup.battery <= 20
+		batteryIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(25)}px' height='#{exports.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+			    <title>Battery</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+			        <g id='Status-Bar/White/100%' transform='translate(-345.000000, -5.000000)' fill='#{@color}'>
+			            <path d='M346.493713,5.5 C345.668758,5.5 345,6.16802155 345,7.00530324 L345,13.4946968 C345,14.3260528 345.67338,15 346.493713,15 L366.006287,15 C366.831242,15 367.5,14.3319784 367.5,13.4946968 L367.5,7.00530324 C367.5,6.17394722 366.82662,5.5 366.006287,5.5 L346.493713,5.5 Z M368,8.5 L368,12 L368.75,12 C369.164214,12 369.5,11.6644053 369.5,11.25774 L369.5,9.24225998 C369.5,8.83232111 369.167101,8.5 368.75,8.5 L368,8.5 Z M346.508152,6 C345.951365,6 345.5,6.45699692 345.5,7.00844055 L345.5,13.4915594 C345.5,14.0485058 345.949058,14.5 346.508152,14.5 L365.991848,14.5 C366.548635,14.5 367,14.0430031 367,13.4915594 L367,7.00844055 C367,6.45149422 366.550942,6 365.991848,6 L346.508152,6 Z M346.490479,6.5 C346.219595,6.5 346,6.71637201 346,6.99209595 L346,13.5079041 C346,13.7796811 346.215057,14 346.490479,14 L349.509521,14 C349.780405,14 350,13.783628 350,13.5079041 L350,6.99209595 C350,6.72031886 349.784943,6.5 349.509521,6.5 L346.490479,6.5 Z' id='Battery'></path>
+			        </g>
+			    </g>
+			</svg>"
+	batteryIcon.constraints =
+		trailing : 7
+		top:@topConstraint
+	batteryPercent = new exports.Text style:"statusBarBatteryPercent", text:setup.battery + "%", superLayer:statusBarBG, fontSize:12, color:@color, name:"batteryPercent"
+	batteryPercent.constraints = 
+		trailing: [batteryIcon, 3]
+		top:3
+	bluetooth = new Layer width:exports.px(8), height:exports.px(15), superLayer:statusBarBG, opacity:.5, backgroundColor:"transparent", name:"bluetooth"
+	bluetooth.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+		<svg width='#{exports.px(8)}px' height='#{exports.px(15)}px' viewBox='0 0 8 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+		    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+		    <title>Bluetooth</title>
+		    <desc>Created with Sketch.</desc>
+		    <defs></defs>
+		    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+		        <g id='Status-Icons-(White)' transform='translate(-137.000000, 0.000000)' fill='#{@color}'>
+		            <path d='M140.5,14.5 L145,10.25 L141.8,7.5 L145,4.75 L140.5,0.5 L140.5,6.07142857 L137.8,3.75 L137,4.5 L140.258333,7.375 L137,10.25 L137.8,11 L140.5,8.67857143 L140.5,14.5 Z M141.5,3 L143.366667,4.75 L141.5,6.25 L141.5,3 Z M141.5,8.5 L143.366667,10.25 L141.5,12 L141.5,8.5 Z' id='Bluetooth'></path>
+		        </g>
+		    </g>
+		</svg>"
+	bluetooth.constraints = 
+		top: 3
+		trailing: [batteryPercent, 7]
+	exports.layout()
+	return {
+		all:statusBarBG
+		batteryPercent:batteryPercent
+		batteryIcon:batteryIcon
+		signal: signal
+		carrier:carrier
+		network:network
+		time:time
+		bluetooth:bluetooth
+	}
 
 
 exports.Keyboard = (array) ->
@@ -1656,3 +1873,10 @@ exports.Keyboard = (array) ->
 	}
 
 
+exports.Tab = (array) ->
+	setup = setupComponent("tab", array)
+	tabBox = new Layer 
+	tabBox.constraints =
+		width:50
+		height:50
+	if setup.tabBar
