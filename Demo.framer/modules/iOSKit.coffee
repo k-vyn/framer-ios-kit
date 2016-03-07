@@ -56,6 +56,7 @@ exports.platform = 0
 exports.orientation = 0
 screen = {}
 
+
 exports.getDevice = ->
 	device = Framer.Device.deviceType
 	if innerWidth == 1242
@@ -187,6 +188,13 @@ defaults = {
 	}
 	tabBar : {
 		tabs: []
+		start:0
+		tyep:"tabBar"
+		backgroundColor:"white"
+		activeLabelColor:"#0076FF"
+		activeFillColor:"#0076FF"
+		inactiveLabelColor:"#929292"
+		inactiveFillColor:"#929292"
 	}
 	tab : {
 		label: "label"
@@ -196,7 +204,7 @@ defaults = {
 			    <title>1</title>
 			    <desc>Created with Sketch.</desc>
 			    <defs></defs>
-			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.5'>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='1'>
 			        <g id='Bottom-Bar/Tab-Bar' transform='translate(-25.000000, -7.000000)' fill='#0076FF'>
 			            <g id='Placeholders' transform='translate(25.000000, 7.000000)'>
 			                <rect id='1' x='0' y='0' width='25' height='25' rx='3'></rect>
@@ -207,6 +215,7 @@ defaults = {
 		active: undefined
 		unactive: undefined
 		tabBar: undefined
+		type:"tab"
 	}
 	text: {
 		defaults: {
@@ -228,6 +237,7 @@ defaults = {
 			lineHeight:"auto"
 			name:"text layer"
 			opacity:1
+			textTransform:"none"
 			} 
 	}
 }
@@ -243,6 +253,7 @@ setProps(defaults.banner.text, defaults.banner)
 setProps(defaults.lockScreen, defaults.lockScreen)
 setProps(defaults.statusBar, defaults.statusBar)
 setProps(defaults.tab, defaults.tab)
+setProps(defaults.tabBar, defaults.tabBar)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -270,6 +281,71 @@ exports.px = (pt) ->
 	px = Math.round(px)
 	return px
 
+exports.svg = (svg) ->
+	# Find String
+	startIndex = svg.search("<svg width=") 
+	endIndex = svg.search(" viewBox")
+	string = svg.slice(startIndex, endIndex)
+
+	#Find width
+	wStartIndex = string.search("=") + 2
+	wEndIndex =  string.search("px")
+	width = string.slice(wStartIndex, wEndIndex)
+	newWidth = exports.px(width)
+
+	# Find Height
+	heightString = string.slice(wEndIndex + 4, string.length)
+	hStartIndex = heightString.search("=")+ 2
+	hEndIndex = heightString.search("px") 
+	height = heightString.slice(hStartIndex, hEndIndex)
+	newHeight = exports.px(height)
+
+	#Create new string
+	newString = string.replace(width, newWidth)
+	newString = newString.replace(height, newHeight)
+
+	#Replace strings
+	svg = svg.replace(string, newString)
+
+	return {
+		svg:svg
+		width:newWidth
+		height:newHeight
+	}
+
+exports.changeFill = (layer, color) ->
+	switch color
+		when "red"
+			color = "#FE3824"
+		when "blue"
+			color = "#0076FF"
+		when "pink"
+			color = "#FE2851"
+		when "grey"
+			color = "#929292"
+		when "gray"
+			color = "#929292"
+		when "black"
+			color = "#030303"
+		when "white"
+			color = "#EFEFF4"
+		when "orange"
+			color = "#FF9600"
+		when "green"
+			color = "#44DB5E"
+		when "light-blue"
+			color = "#54C7FC"
+		when "yellow"
+			color = "#FFCD00"
+
+
+	startIndex = layer.html.search("fill=\"#")
+	fillString = layer.html.slice(startIndex, layer.html.length)
+	endIndex = fillString.search("\">")
+	string = fillString.slice(0, endIndex)
+	newString = "fill=\"" + color
+	layer.html = layer.html.replace(string, newString)
+
 ## Errors
 
 error = (context, code) ->
@@ -281,6 +357,8 @@ error = (context, code) ->
 		print "Error #{context} cannot refer to itself"
 	if code == 4
 		print "Error #{context} is not a valid weight. Please use 100, 200, 300... or Thin, Light, Regular..."
+	if code == 5
+		print "Error Layer id:#{context} is not a valid Tab object. Please create a Tab using new module.Tab."
 
 ## AutoLayout
 
@@ -500,7 +578,7 @@ exports.apply = (layer, style) ->
 	style = exports.styles[style]
 	props = Object.keys(style)
 	framerProps = ["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
-	cssProps = ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
+	cssProps = ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight", "textTransform"]
 	for p in props
 		if framerProps.indexOf(p) != -1 
 			if style[p] == parseInt(style[p], 10)
@@ -514,6 +592,8 @@ exports.apply = (layer, style) ->
 				layer.style["font-family"] = style[p]
 			if p == "textAlign"
 				layer.style["text-align"] = style[p]
+			if p == "textTransform"
+				layer.style["text-transform"] = style[p]
 			if p == "fontWeight"
 				if style[p] == parseInt(style[p], 10)
 					layer.style["font-weight"] = style[p]
@@ -579,6 +659,7 @@ textAutoSize = (textLayer) ->
 		fontWeight: textLayer.style["font-weight"]
 		lineHeight: textLayer.style["line-height"]
 		letterSpacing: textLayer.style["letter-spacing"]
+		textTransform: textLayer.style["text-transform"]
 	textWidth = Utils.textSize textLayer.html, styles, constraints
 	return {
 		width : textWidth.width
@@ -1875,8 +1956,120 @@ exports.Keyboard = (array) ->
 
 exports.Tab = (array) ->
 	setup = setupComponent("tab", array)
-	tabBox = new Layer 
+	switch exports.device 
+		when "iphone-5"
+			@tabWidth = 55
+		else
+			@tabWidth = 75
+	tabView = new Layer name:setup.label + " view", backgroundColor:"transparent"
+	tabView.constraints = 
+		leading:0
+		trailing:0
+		top:0
+		bottom:0
+	tabBox = new Layer backgroundColor:"transparent", name:setup.label + " tab"
 	tabBox.constraints =
-		width:50
-		height:50
-	if setup.tabBar
+		width:@tabWidth
+		height:49
+	icon = new Layer width:exports.px(25), height:exports.px(25), backgroundColor:"transparent", name:"icon", superLayer:tabBox
+	icon.constraints =
+		align:"horizontal"
+		top:7
+
+	svgFrame = exports.svg(setup.icon)
+	icon.html = svgFrame.svg
+	icon.width = svgFrame.width
+	icon.height = svgFrame.height
+	label = new exports.Text text:setup.label, superLayer:tabBox, color:"#929292", fontSize:10, name:"label", textTransform:"capitalize"
+	label.constraints = 
+		bottom:2
+		horizontalCenter:icon
+	exports.layout()
+	tabBox.type = "tab"
+	return {
+		tab:tabBox
+		icon:icon
+		label:label
+		view:tabView
+	}
+
+exports.TabBar = (array) ->
+	setup = setupComponent("tabBar", array)
+	if setup.tabs.length == 0
+		dummyTab = new exports.Tab
+		dummyTab2 = new exports.Tab
+		setup.tabs.push dummyTab
+		setup.tabs.push dummyTab2
+	tabWidth = 75
+	switch exports.device 
+		when "iphone-5"
+			tabWidth = 55
+		else
+			tabWidth = 75
+	tabBar = new Layer backgroundColor:"transparent"
+	tabBarBG = new BackgroundLayer backgroundColor:"white", opacity:.9, superLayer:tabBar, name:"tabBar background"
+	tabBar.constraints =
+		leading:0
+		trailing:0
+		bottom:0
+		height:49
+	tabBarBG.constraints =
+		leading:0
+		trailing:0
+		bottom:0
+		height:49
+	divider = new Layer backgroundColor:"#B2B2B2", name:"tabDivider", superLayer:tabBar
+	divider.constraints = 
+		top:0
+		leading:0
+		trailing:0
+		height:.5
+	tabBarBox = new Layer superLayer:tabBar, backgroundColor:"transparent", name:"tabBar box"
+	tabBarBox.constraints = 
+		height:49
+		width:setup.tabs.length * tabWidth
+
+	exports.layout()
+
+	setActive = (tabIndex) ->
+		for tab, index in setup.tabs
+			if index == tabIndex
+				exports.changeFill(tab.icon, setup.activeFillColor)
+				tab.label.color = setup.activeLabelColor
+				tab.view.visible = true
+			else
+				exports.changeFill(tab.icon, setup.inactiveFillColor)
+				tab.label.color = setup.inactiveLabelColor
+				tab.view.visible = false
+	for tab, index in setup.tabs
+		#Check for vaild tab object
+		if tab.tab.type != "tab"
+			error(tab.tab.id, 5)
+
+		tabBarBox.addSubLayer(tab.tab)
+		# Change colors
+		exports.changeFill(tab.icon, setup.inactiveFillColor)
+		tab.label.color = setup.inactiveLabelColor
+		tabBarBG.backgroundColor = setup.backgroundColor
+
+		if index != 0
+			tab.tab.constraints = 
+				leading:setup.tabs[index - 1].tab
+			exports.layout()
+
+		tab.tab.on Events.TouchStart, ->
+			tabIndex = @.x / exports.px(tabWidth)
+			setActive(tabIndex)
+	tabBarBox.constraints =
+		align:"horizontal"
+
+	setActive(setup.start)	
+
+	exports.layout()
+	return tabBar
+
+
+
+
+
+
