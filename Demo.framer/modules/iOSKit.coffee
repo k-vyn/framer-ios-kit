@@ -1055,13 +1055,13 @@ exports.StatusBar = (array) ->
 					top:7
 				signal.push nonDot
 				exports.layout()	
-		carrier = new exports.Text style:"statusBarCarrier", text:setup.carrier, superLayer:statusBarBG, fontSize:12, color:@color, name:"carrier"
+		carrier = new exports.Text style:"statusBarCarrier", text:setup.carrier, superLayer:statusBarBG, fontSize:12, color:@color, name:"carrier", textTransform:"capitalize"
 		carrier.constraints = 
 			leading:[signal[signal.length - 1], 7]
 			top:3
 		exports.layout()
 		if setup.carrier
-			network = new exports.Text style:"statusBarNetwork", text:setup.network, superLayer:statusBarBG, fontSize:12, color:@color, name:"network"
+			network = new exports.Text style:"statusBarNetwork", text:setup.network, superLayer:statusBarBG, fontSize:12, color:@color, name:"network", textTransform:"uppercase"
 			network.constraints =
 				leading:[carrier, 5]
 				top:3
@@ -1975,7 +1975,6 @@ exports.Tab = (array) ->
 	icon.constraints =
 		align:"horizontal"
 		top:7
-
 	svgFrame = exports.svg(setup.icon)
 	icon.html = svgFrame.svg
 	icon.width = svgFrame.width
