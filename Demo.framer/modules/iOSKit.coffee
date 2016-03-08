@@ -135,6 +135,16 @@ defaults = {
 			icon:undefined
 		}
 	}
+	button:{
+		text:"text"
+		type:"text"
+		style:"light"
+		backgroundColor:"white"
+		color:"#007AFF"
+		fontSize:17
+		fontWeight:"regular"
+		name:"button"
+	}
 	framerProps :["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
 	cssProps : ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
 	constraintProps : ["height", "width"]
@@ -176,6 +186,11 @@ defaults = {
 	keyboardProps: ["returnKey"]
 	keyboard: {
 		returnKey:"default"
+	}
+	navBar: {
+		title:"title"
+		leftAction:"leftAction"
+		rightAction:"rightAction"
 	}
 	statusBar: {
 		carrier:""
@@ -254,6 +269,8 @@ setProps(defaults.lockScreen, defaults.lockScreen)
 setProps(defaults.statusBar, defaults.statusBar)
 setProps(defaults.tab, defaults.tab)
 setProps(defaults.tabBar, defaults.tabBar)
+setProps(defaults.navBar, defaults.navBar)
+setProps(defaults.button, defaults.button)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -906,6 +923,88 @@ exports.Banner = (array) ->
 		title:title
 		message:message
 	}
+
+exports.Button = (array) ->
+	setup = setupComponent("button", array)
+	button = new Layer name:setup.name
+	switch setup.type
+		when "big"
+			@fontSize = 20
+			@top = 16
+			@fontWeight = "medium"
+			button.constraints =
+				leading:20
+				trailing:20
+				height:57
+			button.borderRadius = exports.px(12.5)
+			backgroundColor = ""
+			switch setup.style
+				when "light"
+					@color = "#007AFF"
+					backgroundColor = "rgba(255, 255, 255, .8)"
+					button.style["-webkit-backdrop-filter"] = "blur(#{exports.px(5)}px)"
+				when "dark"
+					@color = "#FFF"
+					backgroundColor = "#2B2B2B"
+				else
+					@color = setup.color
+					backgroundColor = setup.backgroundColor
+
+			button.backgroundColor = backgroundColor
+
+			button.on Events.TouchStart, ->
+				newColor = button.backgroundColor.darken(10)
+				button.animate 
+					properties:(backgroundColor:newColor)
+					time:.5
+			button.on Events.TouchEnd, ->
+				button.animate
+					properties:(backgroundColor:backgroundColor)
+					time:.5
+
+		when "small"
+			@fontSize = 16
+			@top = 4
+			button.borderRadius = exports.px(2.5)
+			switch setup.style
+				when "light"
+					@color = "#007AFF"
+					button.borderColor = "#007AFF"
+				when "dark"
+					@color = "#FFF"
+					button.borderColor = "#FFF"
+				else
+					@color = setup.color
+					button.borderColor = setup.color
+			button.backgroundColor = "transparent"
+			button.borderWidth = exports.px(1)
+		else
+			button.backgroundColor = "transparent"
+			@color = setup.color
+			@fontSize = setup.fontSize
+			@fontWeight = setup.fontWeight
+
+			button.on Events.TouchStart, ->
+				newColor = button.subLayers[0].color.lighten(30)
+				button.subLayers[0].animate 
+					properties:(color:newColor)
+					time:.5
+			button.on Events.TouchEnd, ->
+				button.subLayers[0].animate
+					properties:(color:setup.color)
+					time:.5
+
+	textLayer = new exports.Text style:"button#{setup.type}#{setup.style}", text:setup.text, color:@color, superLayer:button, fontSize:@fontSize, fontWeight:@fontWeight
+	textLayer.constraints =
+		align:"horizontal"
+		top:@top
+	switch setup.type 
+		when "small"
+			button.props = (width:textLayer.width + exports.px(60), height: textLayer.height + exports.px(10))
+		else 
+			button.props = (width:textLayer.width, height:textLayer.height)
+	exports.layout()
+	return button
 
 exports.LockScreen = (array) ->
 	switch exports.device
@@ -1953,6 +2052,10 @@ exports.Keyboard = (array) ->
 		}
 	}
 
+
+exports.NavBar = (array) ->
+	setup = setupComponent("navBar", array)
+	print setup
 
 exports.Tab = (array) ->
 	setup = setupComponent("tab", array)
