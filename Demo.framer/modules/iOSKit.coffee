@@ -199,6 +199,9 @@ defaults = {
 		title:"title"
 		leftAction:"leftAction"
 		rightAction:"rightAction"
+		blur:true
+		superLayer:undefined
+		type:"navBar"
 	}
 	statusBar: {
 		carrier:""
@@ -1126,11 +1129,13 @@ exports.LockScreen = (array) ->
 		verticalCenter:slideToUnlock
 		trailing:[slideToUnlock, 12]
 	exports.layout()
+	return BG
 
 
 exports.StatusBar = (array) ->
 	setup = setupComponent("statusBar", array)
 	statusBarBG = new Layer backgroundColor:"transparent", name:"statusBar.all"
+	statusBarBG.type = setup.type
 	statusBarBG.constraints = 
 		leading:0
 		trailing:0
@@ -1198,7 +1203,7 @@ exports.StatusBar = (array) ->
 		if setup.signal < 5
 			nonDots = 5 - setup.signal
 			for i in [0...nonDots]
-				nonDot = new Layer height:exports.px(5.5), width:exports.px(5.5), superLayer:statusBarBG, borderRadius:exports.px(5.5)/2, backgroundColor:"white", name:"signal[#{signal.length}]"
+				nonDot = new Layer height:exports.px(5.5), width:exports.px(5.5), superLayer:statusBarBG, borderRadius:exports.px(5.5)/2, backgroundColor:"transparent", name:"signal[#{signal.length}]"
 				nonDot.style.border = "#{exports.px(1)}px solid #{@color}"
 				nonDot.constraints =
 					leading:[signal[signal.length - 1], 1]
@@ -2119,7 +2124,7 @@ exports.Menu = (array) ->
 		top:0
 		bottom:0
 	exports.bgBlur(overlay)
-	menus = new Layer backgroundColor:"transparent"
+	menus = new Layer backgroundColor:"transparent", superLayer:all
 	menus.constraints = 
 		leading:0
 		trailing:0
@@ -2237,7 +2242,68 @@ exports.Menu = (array) ->
 
 exports.NavBar = (array) ->
 	setup = setupComponent("navBar", array)
-	print setup
+	bar = new Layer name:"navbar"
+	barArea = new Layer superLayer:bar, backgroundColor:"transparent"
+	divider = new Layer backgroundColor:"#B2B2B2", name:"nav divider", superLayer:barArea
+	if setup.superLayer 
+		setup.superLayer.addSubLayer(bar)
+	divider.constraints =
+		height:.5
+		bottom:0
+		leading:0
+		trailing:0
+	if setup.blur 
+		bar.backgroundColor = "rgba(255, 255, 255, .9)"
+	else
+		bar.backgroundColor = "rgba(255, 255, 255, 1)"
+		exports.bgBlur(bar)
+	bar.type = setup.type
+	barArea.constraints =
+		leading:0
+		trailing:0
+		height:44
+		bottom:0
+	bar.constraints = 
+		leading:0
+		trailing:0
+		top:0
+		height:64
+	for layer in Framer.CurrentContext.layers
+		if layer.type == "statusBar"
+			@statusBar = layer
+			bar.placeBehind(@statusBar)
+	title = new exports.Text style:"navBarTitle", fontWeight:"semibold", superLayer:barArea, text:setup.title
+	title.constraints = 
+		align:"horizontal"
+		bottom:12
+	if setup.rightAction == false || setup.rightAction == ""
+		# Don't create a right action
+	else
+		if typeof setup.rightAction == "string"
+			@fontWeight = "regular"
+			if setup.rightAction.search("-b") == 0
+				@fontWeight = "semibold"
+				setup.rightAction = setup.rightAction.replace("-b ", "")
+			@rightAction = new exports.Button  style:"rightAction", superLayer:barArea, text:setup.rightAction, fontWeight:@fontWeight, name:"right action"
+			@rightAction.constraints =
+				bottom:12
+				trailing:8
+	if setup.leftAction == false || setup.leftAction == ""
+		# Don't create a left action
+	else
+		if typeof setup.rightAction == "string"
+			@leftAction = new exports.Button style:"leftAction", superLayer:barArea, text:setup.leftAction, name:"left action"
+			@leftAction.constraints =
+				bottom:12
+				leading:8
+	exports.layout()
+	return {
+		all:bar
+		navBar:barArea
+		title:title
+		rightAction:@rightAction
+		leftAction:@leftAction
+	}
 
 exports.Tab = (array) ->
 	setup = setupComponent("tab", array)

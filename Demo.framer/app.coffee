@@ -1,7 +1,7 @@
 ## Import Module
 ios = require 'iOSKit'
 
-whiteBG = new BackgroundLayer
+whiteBG = new BackgroundLayer backgroundColor: "white"
 
 home = new ios.Tab label:"Home"
 discover = new ios.Tab label:"Discover"
@@ -11,8 +11,7 @@ tabBar = new ios.TabBar tabs:[home, discover, search], activeFillColor:"red", ac
 
 statusBar = new ios.StatusBar battery:80, carrier:"verizon", network:"3g", signal:3
 
-menu = new ios.Menu options:["Yo", "Don't", "-r Delete"], animated:true, description:"Hi, friends"
+nav = new ios.NavBar rightAction:"-b Edit", title:"Home", superLayer:home.view, leftAction:false
 
-
-
-ios.layout()
+nav.rightAction.on Events.TouchEnd, ->
+	menu = new ios.Menu animated:true, options:["Quickly", "With speed", "Slow"], description:"How quickly would you like to edit?"
