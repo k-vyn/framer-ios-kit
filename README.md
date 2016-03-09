@@ -11,29 +11,63 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 ## System Components
 
 ### .Alert 
-![Alert Default](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-04%2014.26.26.png)
+![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-04%2014.26.26.png)
 
 **Example**
 ```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
 
 #### Properties
-**Title** *String* –
-Text that appears at the top.
 
-**Message** *String* –
-Text that appears below Title.
-
-**Action** *String* –
-This is the primary action button. It’ll be centered in the alert if no secondary action is declared
-
-**Secondary Action** *String* –
-If declared, this will formatted on the left. 
  
 ### .Banner
 
-### .Label
+### .Button
 
 ### .Keyboard
+
+### .LockScreen
+
+### .Menu
+
+## .NavBar
+![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.39.48.png)
+
+#### Example
+
+```nav = new ios.NavBar title:”Home”, rightAction:”-b Edit”, blur:false```
+
+#### Properties
+
+**title** *String* 
+
+**leftAction** *String* or *Object* - This will set the action to the left. It can either be an image, layer, or string. 
+
+**rightAction** *String* or *Object* - This will set the action the right. It can either be an image, layer, or string. You can also use -b at the beginning of your string to make the text semibold. 
+
+**blur** *Bool* - By default or when set to true, the background will have a iOS background blur effect turned on. If you’d like to disable this, set blur to false.
+
+**superLayer** *Layer* – When needed the navbar can be a part of a view. If you’re using tabs, you can set this to be inside of a view by settings this to tabLayer.*view*.
+
+## .StatusBar
+![StatusBar](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.34.00.png)
+Status Bar will add a touch of realism to your prototype. It has  many customizable properties that’ll make it suit any situation. It also has a clock that shows the real time. 
+
+#### Example
+
+```status = new ios.StatusBar carrier:”Verizon”, network:”3g”, signal:3, battery:70```
+
+#### Properies
+**clock24** *Bool* - If set to true, this will modify the system clock to a 24–hour clock. 
+
+**carrier** *String* - If set, this will remove wifi and show network. 
+
+**network** *String* - Sets the network when carrier is modified. 
+
+**battery** *Int* - Changes the remaining battery percentage
+
+**signal**  *Int (0-5)* - This will change the number of bars shown  the signal. 0 being no network, and 5 being full reception.  
+  
+### .Text
 
 ## Autolayout 
 Autolayout is the backbone of iOS. It enables layouts to mold to devices. To allow this functionality, it replaces the pixel level syntax that the web is built on. Autolayout for FramerJS takes a shift in how we layout screens. We define constraints and setup relationships in points instead of relying on dependent positioning like x and y.
@@ -95,3 +129,10 @@ This will align the horizontal of the childLayer to the center of the parentLaye
 Align edges
 There will be times you’d prefer not to align 
 ```
+
+## Supporting Functions
+### getTime
+### timeDelegate
+### sameParent
+### addStyle
+### apply
