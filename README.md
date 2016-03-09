@@ -29,7 +29,6 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 ### .Menu
 
-<<<<<<< HEAD
 ## .NavBar
 ![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.39.48.png)
 
@@ -54,16 +53,6 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 Status Bar will add a touch of realism to your prototype. It has  many customizable properties that’ll make it suit any situation. It also has a clock that shows the real time. 
 
 #### Example
-
-=======
-### .NavBar
-
-## .StatusBar
-![Alert Default](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.34.00.png)
-Status Bar will add a touch of realism to your prototype. It has  many customizable properties that’ll make it suit any situation. It also has a clock that shows the real time. 
-
-#### Example
->>>>>>> origin/master
 ```status = new ios.StatusBar carrier:”Verizon”, network:”3g”, signal:3, battery:70```
 
 #### Properies
@@ -145,8 +134,4 @@ There will be times you’d prefer not to align
 ### timeDelegate
 ### sameParent
 ### addStyle
-<<<<<<< HEAD
 ### apply
-=======
-### apply
->>>>>>> origin/master
