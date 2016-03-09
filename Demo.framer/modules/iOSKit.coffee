@@ -144,6 +144,8 @@ defaults = {
 		fontSize:17
 		fontWeight:"regular"
 		name:"button"
+		blur:true
+		superLayer:undefined
 	}
 	framerProps :["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
 	cssProps : ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
@@ -186,6 +188,12 @@ defaults = {
 	keyboardProps: ["returnKey"]
 	keyboard: {
 		returnKey:"default"
+	}
+	menu: {
+		options:["Option", "Option", "Option"]
+		exit:"Cancel"
+		animated:false
+		description:undefined
 	}
 	navBar: {
 		title:"title"
@@ -271,6 +279,7 @@ setProps(defaults.tab, defaults.tab)
 setProps(defaults.tabBar, defaults.tabBar)
 setProps(defaults.navBar, defaults.navBar)
 setProps(defaults.button, defaults.button)
+setProps(defaults.menu, defaults.menu)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -632,6 +641,10 @@ exports.apply = (layer, style) ->
 				else
 					layer.style["line-height"] = exports.px(style[p]) + "px"
 
+exports.bgBlur = (layer) ->
+	layer.style["-webkit-backdrop-filter"] = "blur(#{exports.px(5)}px)"
+	return layer 
+
 exports.Custom = (style, array) ->
 	layer = new Layer 
 	isStyleValid = exports.styles[style]
@@ -927,33 +940,58 @@ exports.Banner = (array) ->
 exports.Button = (array) ->
 	setup = setupComponent("button", array)
 	button = new Layer name:setup.name
+	color = ""
+	if setup.superLayer 
+		setup.superLayer.addSubLayer(button)
 	switch setup.type
 		when "big"
 			@fontSize = 20
 			@top = 16
 			@fontWeight = "medium"
 			button.constraints =
-				leading:20
-				trailing:20
+				leading:10
+				trailing:10
 				height:57
 			button.borderRadius = exports.px(12.5)
 			backgroundColor = ""
 			switch setup.style
 				when "light"
-					@color = "#007AFF"
-					backgroundColor = "rgba(255, 255, 255, .8)"
-					button.style["-webkit-backdrop-filter"] = "blur(#{exports.px(5)}px)"
+					color = "#007AFF"
+					if setup.blur 
+						backgroundColor = "rgba(255, 255, 255, .9)"
+						exports.bgBlur(button)
+					else
+						backgroundColor = "white"
+
 				when "dark"
-					@color = "#FFF"
-					backgroundColor = "#2B2B2B"
+					color = "#FFF"
+					if setup.blur
+						backgroundColor = "rgba(43, 43, 43, .9)"
+						exports.bgBlur(button)
+					else
+						backgroundColor = "#282828"
 				else
-					@color = setup.color
-					backgroundColor = setup.backgroundColor
+					if setup.blur 
+						color = setup.color
+						backgroundColor = new Color(setup.backgroundColor)
+						rgbString = backgroundColor.toRgbString()
+						rgbaString = rgbString.replace(")", ", .9)")
+						rgbaString  = rgbaString.replace("rgb", "rgba")
+						backgroundColor = rgbaString
+						exports.bgBlur(button)
+					else
+						color = setup.color
+						backgroundColor = new Color(setup.backgroundColor)
+
 
 			button.backgroundColor = backgroundColor
 
 			button.on Events.TouchStart, ->
-				newColor = button.backgroundColor.darken(10)
+				newColor = ""
+				if setup.style == "dark"
+					newColor = button.backgroundColor.lighten(10)
+				else
+					newColor = button.backgroundColor.darken(10)
 				button.animate 
 					properties:(backgroundColor:newColor)
 					time:.5
@@ -968,19 +1006,18 @@ exports.Button = (array) ->
 			button.borderRadius = exports.px(2.5)
 			switch setup.style
 				when "light"
-					@color = "#007AFF"
+					color = "#007AFF"
 					button.borderColor = "#007AFF"
-				when "dark"
-					@color = "#FFF"
-					button.borderColor = "#FFF"
 				else
-					@color = setup.color
+					color = setup.color
 					button.borderColor = setup.color
 			button.backgroundColor = "transparent"
 			button.borderWidth = exports.px(1)
+
+
 		else
 			button.backgroundColor = "transparent"
-			@color = setup.color
+			color = setup.color
 			@fontSize = setup.fontSize
 			@fontWeight = setup.fontWeight
 
@@ -994,13 +1031,27 @@ exports.Button = (array) ->
 					properties:(color:setup.color)
 					time:.5
 
-	textLayer = new exports.Text style:"button#{setup.type}#{setup.style}", text:setup.text, color:@color, superLayer:button, fontSize:@fontSize, fontWeight:@fontWeight
+	textLayer = new exports.Text style:"button#{setup.type}#{setup.style}", text:setup.text, color:color, superLayer:button, fontSize:@fontSize, fontWeight:@fontWeight
 	textLayer.constraints =
 		align:"horizontal"
 		top:@top
 	switch setup.type 
 		when "small"
 			button.props = (width:textLayer.width + exports.px(60), height: textLayer.height + exports.px(10))
+			button.on Events.TouchStart, ->
+				button.animate
+					properties:(backgroundColor:color)
+					time:.5	
+				textLayer.animate
+					properties:(color:"#FFF")
+					time:.5
+			button.on Events.TouchEnd, ->
+				button.animate
+					properties:(backgroundColor:"transparent")
+					time:.5	
+				textLayer.animate
+					properties:(color:color)
+					time:.5
 		else 
 			button.props = (width:textLayer.width, height:textLayer.height)
 	exports.layout()
@@ -2050,6 +2101,137 @@ exports.Keyboard = (array) ->
 			"n" : keysArray[24]
 			"m" : keysArray[25]
 		}
+	}
+
+
+exports.Menu = (array) ->
+	setup = setupComponent("menu", array)
+	all = new Layer backgroundColor:"transparent"
+	all.constraints = 
+		leading:0
+		trailing:0
+		top:0
+		bottom:0
+	overlay = new Layer backgroundColor:"rgba(0, 0, 0, .4)", superLayer:all, name:"overlay"
+	overlay.constraints =
+		leading:0
+		trailing:0
+		top:0
+		bottom:0
+	exports.bgBlur(overlay)
+	menus = new Layer backgroundColor:"transparent"
+	menus.constraints = 
+		leading:0
+		trailing:0
+		top:0
+		bottom:0
+	exitButton = new exports.Button type:"big", text:setup.exit, blur:false, superLayer:menus
+	exitButton.constraints = 
+		bottom:10
+		align:"horizontal"
+
+	options = new Layer superLayer:menus, borderRadius:exports.px(12.5), backgroundColor:"rgba(255,255,255, .85)"
+
+	descriptionBuffer = 0
+	if setup.description
+		description = new exports.Text style:"menuDescription", text:setup.description, superLayer:options, fontSize:13, color:"#8F8E94", textAlign:"center"
+		description.constraints = 
+			top:21
+			align:"horizontal"
+			width:exports.pt(exports.width) - 100
+		exports.layout()
+		descriptionBuffer = exports.pt(description.height) + 42
+		divider = new Layer superLayer:options, backgroundColor:"#D6E3E7"
+		divider.constraints =
+			height:1
+			top:descriptionBuffer
+			leading:0
+			trailing:0
+	exports.bgBlur(options)
+	options.constraints = 
+		leading:10
+		trailing:10
+		bottom:[exitButton, 10]
+		height:58 * setup.options.length + descriptionBuffer
+	exports.layout()
+	opts = {}
+	for opt, index in setup.options
+		isRedPresent = opt.search("-r")
+		if isRedPresent == 0
+			@red = true
+			opt = opt.replace("-r", "")
+			opt = opt.slice(1)
+		o = new Layer superLayer:options, width:options.width, backgroundColor:"transparent", borderRadius:exports.px(12.5)
+		o.constraints = 
+			top:index * 58 + descriptionBuffer
+			height:58
+		button = new exports.Button text:opt, superLayer:o, fontSize:20
+		button.constraints =
+			align:"horizontal"
+			top:15
+		if @red
+			button.subLayers[0].color = "red"
+		button.color = "#FE3824"
+		if index != setup.options.length - 1
+			divider = new Layer superLayer:o, width:options.width, backgroundColor:"#D6E3E7"
+			divider.constraints =
+				height:1
+				bottom:0
+		exports.layout()
+		o.on Events.TouchStart, ->
+			backgroundColor = "rgba(215,215,215,.7)"
+			@.animate
+				properties: (backgroundColor: backgroundColor)
+				time:.5
+		o.on Events.TouchEnd, ->
+			@.animate
+				properties:(backgroundColor:"transparent")
+				time:.5
+			menus.animate 
+				properties: (maxY:exports.height+exports.px((setup.options.length + 3) * 58))
+				time:.3
+			overlay.animate
+				properties: (opacity:0)
+				time:.3
+			Utils.delay .3, ->
+				all.destroy()
+		opts[opt] = o
+
+	if setup.animated == true
+		overlay.opacity = 0 
+		menus.maxY = exports.height + exports.px((setup.options.length + 3) * 58)
+		overlay.animate
+			properties:(opacity:1)
+			time:.3
+		menus.animate
+			properties:(maxY:exports.height)
+			time:.3
+
+	overlay.on Events.TouchEnd, ->
+		menus.animate 
+			properties: (maxY:exports.height+exports.px((setup.options.length + 3) * 58))
+			time:.3
+		overlay.animate
+			properties: (opacity:0)
+			time:.3
+		Utils.delay .3, ->
+			all.destroy()		
+
+	exitButton.on Events.TouchEnd, ->
+		menus.animate 
+			properties: (maxY:exports.height+exports.px((setup.options.length + 3) * 58))
+			time:.3
+		overlay.animate
+			properties: (opacity:0)
+			time:.3
+		Utils.delay .3, ->
+			all.destroy()
+	return {
+		cancel:exitButton
+		options:opts
+		menu:menus
+		overlay:overlay
+		description:description
 	}
 
 
