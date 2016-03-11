@@ -243,6 +243,29 @@ defaults = {
 		tabBar: undefined
 		type:"tab"
 	}
+	table : {
+		constraints: undefined
+		type:"table"
+		content:[
+			{
+				"label": "Cats" 
+				"detail" : "Animal"
+			},
+			{
+				"label" : "Dogs"
+				"detail" : "Animal"
+
+				}
+			]
+		cell:"default"
+		superLayer:undefined
+	}
+	tableCell : {
+		type:"tableCell"
+		properties: "default"
+		height:50
+	}
+
 	text: {
 		defaults: {
 			text: "iOS Text Layer"
@@ -283,6 +306,8 @@ setProps(defaults.tabBar, defaults.tabBar)
 setProps(defaults.navBar, defaults.navBar)
 setProps(defaults.button, defaults.button)
 setProps(defaults.menu, defaults.menu)
+setProps(defaults.table, defaults.table)
+setProps(defaults.tableCell, defaults.tableCell)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -298,13 +323,12 @@ setupComponent = (component, array) ->
 
 ## Conversions
 
-#Pixels to Points
+#Functions
 exports.pt = (px) ->
 	pt = px/exports.scale
 	pt = Math.round(pt)
 	return pt
 
-#Points to Pixels
 exports.px = (pt) ->
 	px = pt * exports.scale
 	px = Math.round(px)
@@ -375,31 +399,6 @@ exports.changeFill = (layer, color) ->
 	newString = "fill=\"" + color
 	layer.html = layer.html.replace(string, newString)
 
-## Errors
-
-error = (context, code) ->
-	if code == 1 
-		print "Error Invalid Relationship – Layer id:#{context.id} has a relationship with another layer not in the same superLayer."
-	if code == 2
-		print "Error #{context} requires a layer"
-	if code == 3
-		print "Error #{context} cannot refer to itself"
-	if code == 4
-		print "Error #{context} is not a valid weight. Please use 100, 200, 300... or Thin, Light, Regular..."
-	if code == 5
-		print "Error Layer id:#{context} is not a valid Tab object. Please create a Tab using new module.Tab."
-
-## AutoLayout
-
-#checks if two layers have the same parent
-exports.sameParent = (layer1, layer2) ->
-	parentOne = layer1.superLayer
-	parentTwo = layer2.superLayer
-	if parentOne == parentTwo
-		return true
-	else 
-		return false
-
 exports.getTime = ->
 	daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
 	monthsOfTheYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
@@ -418,6 +417,29 @@ exports.getTime = ->
 		mins:mins
 		secs:secs
 	}
+
+## Errors
+error = (context, code) ->
+	if code == 1 
+		print "Error Invalid Relationship – Layer id:#{context.id} has a relationship with another layer not in the same superLayer."
+	if code == 2
+		print "Error #{context} requires a layer"
+	if code == 3
+		print "Error #{context} cannot refer to itself"
+	if code == 4
+		print "Error #{context} is not a valid weight. Please use 100, 200, 300... or Thin, Light, Regular..."
+	if code == 5
+		print "Error Layer id:#{context} is not a valid Tab object. Please create a Tab using new module.Tab."
+
+## AutoLayout
+
+exports.sameParent = (layer1, layer2) ->
+	parentOne = layer1.superLayer
+	parentTwo = layer2.superLayer
+	if parentOne == parentTwo
+		return true
+	else 
+		return false
 
 #Refreshes Layer or All Layers
 exports.layout = (layer) ->
@@ -502,7 +524,6 @@ layoutAlign = (layer, type) ->
 		if declaredConstraint == "vertical"
 			layer.centerY()
 
-
 #Size Constraints
 layoutSize = (layer, type) ->
 	if layer.constraints[type]
@@ -511,7 +532,6 @@ layoutSize = (layer, type) ->
 			textFrame = textAutoSize(layer)
 			layer.width = textFrame.width
 			layer.height = textFrame.height
-
 
 #Move & Resizes Layers
 layoutChange = (layer, type) ->
@@ -593,7 +613,6 @@ layoutChange = (layer, type) ->
 								@.objLayer = object
 							layer[prop] = @.objLayer[objProp2] - exports.scale * @.objInt
 
-
 #Text Layers
 exports.styles = {}
 
@@ -609,6 +628,12 @@ exports.apply = (layer, style) ->
 	framerProps = ["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
 	cssProps = ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight", "textTransform"]
 	for p in props
+		if defaults.constraintTypes.indexOf(p) != -1 
+			if layer.constraints 
+				layer.constraints[p] = style[p]
+			else
+				obj = {"#{p}" : style[p]}
+				layer.constraints = obj
 		if framerProps.indexOf(p) != -1 
 			if style[p] == parseInt(style[p], 10)
 				layer[p] = exports.px(style[p])
@@ -643,6 +668,11 @@ exports.apply = (layer, style) ->
 					layer.style["line-height"] = exports.px(style["fontSize"]) * 1.2 + "px"
 				else
 					layer.style["line-height"] = exports.px(style[p]) + "px"
+	if layer.type == "text"
+		frame = textAutoSize(layer)
+		layer.width = frame.width
+		layer.height = frame.height
+
 
 exports.bgBlur = (layer) ->
 	layer.style["-webkit-backdrop-filter"] = "blur(#{exports.px(5)}px)"
@@ -760,7 +790,7 @@ exports.timeFormatter = (timeObj, clockType) ->
 		timeObj.mins = "0" + timeObj.mins
 	return timeObj.hours + ":" + timeObj.mins
 
-##Alerts
+## Components 
 exports.Alert = (array) ->
 	if array == undefined
 		array = []
@@ -775,7 +805,8 @@ exports.Alert = (array) ->
 		trailing:0
 		top:0
 		bottom:0
-	overlay = new Layer backgroundColor:"black", opacity:.3, superLayer:all, name:"overlay"
+	overlay = new Layer backgroundColor:"rgba(0,0,0,.3)", superLayer:all, name:"overlay"
+	exports.bgBlur(overlay)
 	overlay.constraints =
 		leading:0
 		trailing:0
@@ -1131,7 +1162,6 @@ exports.LockScreen = (array) ->
 	exports.layout()
 	return BG
 
-
 exports.StatusBar = (array) ->
 	setup = setupComponent("statusBar", array)
 	statusBarBG = new Layer backgroundColor:"transparent", name:"statusBar.all"
@@ -1311,7 +1341,6 @@ exports.StatusBar = (array) ->
 		time:time
 		bluetooth:bluetooth
 	}
-
 
 exports.Keyboard = (array) ->
 	if array == undefined
@@ -2108,7 +2137,6 @@ exports.Keyboard = (array) ->
 		}
 	}
 
-
 exports.Menu = (array) ->
 	setup = setupComponent("menu", array)
 	all = new Layer backgroundColor:"transparent"
@@ -2238,7 +2266,6 @@ exports.Menu = (array) ->
 		overlay:overlay
 		description:description
 	}
-
 
 exports.NavBar = (array) ->
 	setup = setupComponent("navBar", array)
@@ -2418,8 +2445,77 @@ exports.TabBar = (array) ->
 	exports.layout()
 	return tabBar
 
+exports.Table = (array) ->
+	setup = setupComponent("table", array)
+	table = new ScrollComponent name:"table", backgroundColor:"white"
+	table.scrollHorizontal = false
+	if setup.constraints
+		table.constraints = setup.constraints
+		exports.layout()
+	if setup.superLayer 
+		setup.superLayer.addSubLayer(table)
+	if setup.cell == "default"
+		@types = {
+			"label" : {
+				"fontSize"
+				"color" : "#030303"
+				"leading" : 16
+				"top" : 14
+ 			}, "detail" : {
+				"color" : "#8F8E94"
+				"trailing" : 16
+				"top" : 14
+			}
+				}
+		@cellHeight = exports.px(50)
+	else
+		@types = setup.cell.frame
+		@cellHeight = exports.px(setup.cell.height)
+	for row, index in setup.content
+		cell = new Layer superLayer:table.content, y:(index * @cellHeight), height:@cellHeight, backgroundColor:"white"
+		cell.constraints =
+			leading:0
+			trailing:0
+		divider = new Layer backgroundColor:"#C8C7CC", superLayer:cell
+		divider.constraints = 
+			bottom:0
+			height:1
+			leading:16
+			trailing:0
+		keys = Object.keys(row)
+		for key, i in keys
+			textLayer = new exports.Text style:"#{key}#{Utils.randomNumber(0,1000)}", text:row[key], superLayer:cell, name:key + " " + row[key]
+			textStyle = 
+				"table#{key}" : 
+					@types[key]
+			if exports.styles["table#{key}"] == undefined
+				exports.addStyle textStyle
+				exports.apply(textLayer, "table#{key}")
+			else
+				exports.apply(textLayer, "table#{key}")
+
+	return table
 
 
 
-
-
+exports.TableCell = (array) ->
+	setup = setupComponent("tableCell", array)
+	if setup.properties == "default"
+		@cellStructure = {
+				"label" : {
+					"fontSize"
+					"color" : "#030303"
+					"leading" : 16
+					"top" : 14
+	 			}, "detail" : {
+					"color" : "#8F8E94"
+					"trailing" : 16
+					"top" : 14
+				}
+					}
+	else
+		@cellStructure = setup.properties
+	return {
+		frame: @cellStructure
+		height: setup.height
+	}
