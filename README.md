@@ -32,6 +32,12 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 ## .NavBar
 ![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.39.48.png)
 
+## StatusBar
+## Tab 
+## TabBar
+## Table
+## TableCell
+
 #### Example
 
 ```nav = new ios.NavBar title:”Home”, rightAction:”-b Edit”, blur:false```

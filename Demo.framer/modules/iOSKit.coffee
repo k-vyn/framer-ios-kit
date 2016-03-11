@@ -264,6 +264,10 @@ defaults = {
 		type:"tableCell"
 		properties: "default"
 		height:50
+		swipe:false
+		swipeAction:"Delete"
+		swipeColor:"#FE3824"
+		swipeTextColor:"#FFF"
 	}
 
 	text: {
@@ -2471,17 +2475,26 @@ exports.Table = (array) ->
 	else
 		@types = setup.cell.frame
 		@cellHeight = exports.px(setup.cell.height)
+	cellHeight = @cellHeight
+	cells = []
+	if setup.cell.isSwipe == true
+		buttonCreated = false
+		buttonLabel = new exports.Text style:"swipeTextLabel", text:setup.cell.swipe.label, color:setup.cell.swipe.textColor
+		button = new Layer maxX:table.content.width, height:cellHeight, superLayer:table.content, backgroundColor:setup.cell.swipe.color, name:"swipe button", width:buttonLabel.width + exports.px(20)
+		button.addSubLayer(buttonLabel)
+		buttonLabel.constraints = 
+			align:"center"
+		button.visible = false
+		buttonCell = 0
+		button.sendToBack()
 	for row, index in setup.content
-		cell = new Layer superLayer:table.content, y:(index * @cellHeight), height:@cellHeight, backgroundColor:"white"
+		cell = new Layer superLayer:table.content, y:(index * cellHeight), height:cellHeight, backgroundColor:"white", name:"cell " + index
 		cell.constraints =
 			leading:0
 			trailing:0
-		divider = new Layer backgroundColor:"#C8C7CC", superLayer:cell
-		divider.constraints = 
-			bottom:0
-			height:1
-			leading:16
-			trailing:0
+		cells.push cell
+		divider = new Layer backgroundColor:"#C8C7CC", superLayer:table.content, width:table.content.width, height:exports.px(1)
+		divider.maxY = cell.maxY
 		keys = Object.keys(row)
 		for key, i in keys
 			textLayer = new exports.Text style:"#{key}#{Utils.randomNumber(0,1000)}", text:row[key], superLayer:cell, name:key + " " + row[key]
@@ -2493,6 +2506,50 @@ exports.Table = (array) ->
 				exports.apply(textLayer, "table#{key}")
 			else
 				exports.apply(textLayer, "table#{key}")
+
+		if setup.cell.isSwipe
+			cell.draggable = true
+			cell.speedX = .5
+			cell.draggable.vertical = false
+			cell.draggable.overdrag = false
+			cell.on Events.TouchStart, ->
+				if buttonCreated == true
+					for row in cells
+						row.animate
+							properties:(maxX:table.content.width)
+							time:.3
+					Utils.delay .2, ->
+						button.visible = false
+						buttonCreated = false
+			cell.on Events.Swipe, ->
+				if buttonCreated == false
+					if @.x < exports.px(-41)
+						buttonCreated = true
+						button.visible = true
+						button.y = @.y
+						buttonCell = @.y/cellHeight
+			
+				else
+					for row in cells 
+						row.animate
+							properties:(maxX:table.content.width)
+							time:.2
+			cell.on Events.SwipeEnd, ->
+				row = @.y/cellHeight
+				if @.x < exports.px(-41) && buttonCreated == true
+					@.animate
+						properties:(maxX:button.x)
+						time:.1
+				if row != buttonCell && buttonCreated == true
+					@.animate
+						properties:(maxX:table.content.width)
+						time:.1
+					Utils.delay .1, ->
+						button.visible = false
+						buttonCreated = false
+
+			table.action = button
+
 
 	return table
 
@@ -2518,4 +2575,10 @@ exports.TableCell = (array) ->
 	return {
 		frame: @cellStructure
 		height: setup.height
+		isSwipe: setup.swipe
+		swipe:{
+			label:setup.swipeAction
+			color:setup.swipeColor
+			textColor:setup.swipeTextColor
+		}
 	}

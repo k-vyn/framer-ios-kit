@@ -19,6 +19,9 @@ homeNav.rightAction.on Events.TouchEnd, ->
 discoverNav = new ios.NavBar superLayer:discover.view, title:"Discover", leftAction:false
 
 customCell = new ios.TableCell 
+	swipe:true
+	slideAction:"Archive things for once"
+	slideColor:"Blue"
 	height:75
 	properties:{
 		"label" : {
@@ -50,5 +53,9 @@ table = new ios.Table
 		{label:"D", detail:"DE"}
 		{label:"Lodfjdsds", detail:"EF"}
 		]
+	cell:customCell
+
+table.action.on Events.Click, ->
+	alert = new ios.Alert
 
 ios.layout()
