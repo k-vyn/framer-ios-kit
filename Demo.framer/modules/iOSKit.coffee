@@ -293,6 +293,13 @@ defaults = {
 			textTransform:"none"
 			} 
 	}
+	toggle:{
+		color:"#4DD865"
+		constraints:undefined
+		superLayer:undefined
+		style:"light"
+		setAs:"off"
+	}
 }
 
 setProps = (object, dest) ->
@@ -312,6 +319,7 @@ setProps(defaults.button, defaults.button)
 setProps(defaults.menu, defaults.menu)
 setProps(defaults.table, defaults.table)
 setProps(defaults.tableCell, defaults.tableCell)
+setProps(defaults.toggle, defaults.toggle)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -2582,3 +2590,28 @@ exports.TableCell = (array) ->
 			textColor:setup.swipeTextColor
 		}
 	}
+
+exports.Toggle = (array) ->
+	setup = setupComponent("toggle", array)
+
+	toggle = new Layer width:exports.px(51), height:exports.px(32), borderRadius:exports.px(18), backgroundColor:"white", borderColor:"#E5E5E5", borderWidth:exports.px(1.5)
+	if setup.superLayer
+		setup.superLayer.addSubLayer(toggle)
+	nob = new Layer width:exports.px(28), height:exports.px(28), borderRadius:exports.px(14), superLayer:toggle, backgroundColor:"white", shadowColor:"rgba(0, 0, 0, .4)", shadowY:2, shadowBlur:20, x:exports.px(1)
+	toggle.constraints = setup.constraints	
+	exports.layout()
+	toggle.states.add
+		"on" :
+			backgroundColor:setup.color
+			borderWidth:0
+	nob.states.add
+		"on" :
+			x: toggle.width - nob.width - exports.px(2)
+			y:exports.px(2)
+
+
+
+	nob.on Events.TouchEnd, ->
+		toggle.states.next()
+		nob.states.next()
+	return toggle

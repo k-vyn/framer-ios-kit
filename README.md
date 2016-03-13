@@ -17,7 +17,6 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 ```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
 
 #### Properties
-
  
 ### .Banner
 
@@ -33,6 +32,25 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 ![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.39.48.png)
 
 ## StatusBar
+![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-12%2022.44.36.png)
+The status bar component is a dynamic component that’s fully customizable. It has a fully functioning clock that’ll update in real time! You can easily modify each part of the status bar to suit your needs. 
+
+#### Example
+``status = new ios.StatusBar carrier:"Verizon", signal:4, battery:70``
+
+#### Properties 
+**carrier** *String* - By default, the carrier is set to empty, and the network is wifi, but as soon as you set a carrier, the network will no longer be set to wifi.
+
+**network** *String* - By default, the carrier will be set to LTE, but you can replace it with other speeds like 3G.
+
+**signal** *Int (0-5)* - Signal is the strength of the network. By default, it’ll be set to 5 bars. If you set the signal to 0, you’ll see the signal, network, and carrier be replaced with "No network."
+
+**style** *Light* or *Dark* – This will toggle the status bar to be black or white. Light being white and dark being black. By default, it’ll be set to dark.
+
+**clock24** *Bool* - The clock is by default set to a 12 hour clock, but if you’d prefer a 24 hour clock, set clock24 to true. 
+
+**battery** *Int (0-100)* - You can modify what battery the device has. The battery icon will adjust to match what the percentage is. By default, it’s set to 100.
+
 ## Tab 
 ## TabBar
 ## Table

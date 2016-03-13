@@ -18,44 +18,6 @@ homeNav.rightAction.on Events.TouchEnd, ->
 
 discoverNav = new ios.NavBar superLayer:discover.view, title:"Discover", leftAction:false
 
-customCell = new ios.TableCell 
-	swipe:true
-	slideAction:"Archive things for once"
-	slideColor:"Blue"
-	height:75
-	properties:{
-		"label" : {
-			"fontSize":20
-			"leading":16
-			"top" : 16
-		}
-		"detail" : {
-			fontSize:20
-			top:15
-			trailing:16
-		}
-		"message" :{
-			fontSize:16
-			bottom:14
-			leading:16
-			color:"#828282"
-			width:200
-		}
-	}
-
-table = new ios.Table 
-	superLayer:home.view
-	constraints:{top:64, bottom:0, leading:0, trailing:0}
-	content:[
-		{label:"A", detail:"AB"},
-		{label:"B", detail:"BC"}
-		{label:"C", detail:"CD"},
-		{label:"D", detail:"DE"}
-		{label:"Lodfjdsds", detail:"EF"}
-		]
-	cell:customCell
-
-table.action.on Events.Click, ->
-	alert = new ios.Alert
+tog = new ios.Toggle constraints:{align:"center"}
 
 ios.layout()
