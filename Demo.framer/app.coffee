@@ -1,7 +1,7 @@
 ## Import Module
 ios = require 'iOSKit'
 
-whiteBG = new BackgroundLayer backgroundColor: "white"
+whiteBG = new BackgroundLayer backgroundColor: "#999"
 
 home = new ios.Tab label:"Home"
 discover = new ios.Tab label:"Discover"
@@ -18,6 +18,7 @@ homeNav.rightAction.on Events.TouchEnd, ->
 
 discoverNav = new ios.NavBar superLayer:discover.view, title:"Discover", leftAction:false
 
-tog = new ios.Toggle constraints:{align:"center"}
+field = new ios.Field constraints:{align:"center"}, placeholderText:"Enter a cat"
 
+	
 ios.layout()

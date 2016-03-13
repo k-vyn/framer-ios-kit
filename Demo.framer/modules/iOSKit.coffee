@@ -146,6 +146,7 @@ defaults = {
 		name:"button"
 		blur:true
 		superLayer:undefined
+		constraints:undefined
 	}
 	framerProps :["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
 	cssProps : ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
@@ -177,6 +178,32 @@ defaults = {
 			"objProp2" : "x"
 			"opp" : "leading"
 		}
+	}
+	cursor:{
+		color:"blue"
+		height:20
+		width:1
+	}
+	field: {
+		isEditing:false
+		cursor:{}
+		borderRadius:5
+		borderWidth:0
+		borderColor:"transparent"
+		color:"#090908"
+		backgroundColor:"#FFF"
+		style:"light"
+		type:"field"
+		constraints:undefined
+		width:258
+		height:30
+		fontSize:15
+		fontWeight:"regular"
+		placeholderText:"placeholderText"
+		placeholderColor:"#808080"
+		text:""
+		textConstraints:{align:"vertical", leading:8}
+
 	}
 	lockScreen: {
 		time:"default"
@@ -293,13 +320,6 @@ defaults = {
 			textTransform:"none"
 			} 
 	}
-	toggle:{
-		color:"#4DD865"
-		constraints:undefined
-		superLayer:undefined
-		style:"light"
-		setAs:"off"
-	}
 }
 
 setProps = (object, dest) ->
@@ -319,7 +339,8 @@ setProps(defaults.button, defaults.button)
 setProps(defaults.menu, defaults.menu)
 setProps(defaults.table, defaults.table)
 setProps(defaults.tableCell, defaults.tableCell)
-setProps(defaults.toggle, defaults.toggle)
+setProps(defaults.field, defaults.field)
+
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -628,6 +649,12 @@ layoutChange = (layer, type) ->
 #Text Layers
 exports.styles = {}
 
+exports.color = (string) ->
+	switch string
+		when "blue" then string = "#007AFF"
+
+	return string
+
 ## Custom Styles
 
 exports.addStyle = (array) ->
@@ -783,6 +810,8 @@ exports.update = (layer, array) ->
 				textFrame = textAutoSize(layer)
 				layer.width = textFrame.width
 				layer.height = textFrame.height
+	if layer.type == "field"
+		print "yo"
 	exports.layout()
 
 exports.timeDelegate = (layer, clockType) ->
@@ -801,6 +830,7 @@ exports.timeFormatter = (timeObj, clockType) ->
 	if timeObj.mins < 10
 		timeObj.mins = "0" + timeObj.mins
 	return timeObj.hours + ":" + timeObj.mins
+
 
 ## Components 
 exports.Alert = (array) ->
@@ -987,6 +1017,10 @@ exports.Button = (array) ->
 	setup = setupComponent("button", array)
 	button = new Layer name:setup.name
 	color = ""
+	if setup.constraints
+		button.constraints = 
+			setup.constraints
+		exports.layout()
 	if setup.superLayer 
 		setup.superLayer.addSubLayer(button)
 	switch setup.type
@@ -1102,6 +1136,217 @@ exports.Button = (array) ->
 			button.props = (width:textLayer.width, height:textLayer.height)
 	exports.layout()
 	return button
+
+
+
+listenToKeys = (layer) ->
+	isCommand = false
+	allSelected = false
+	document.addEventListener 'keydown', (e) ->
+		if e.keyCode == 91
+			isCommand = true
+		if e.keyCode == 13
+			e.preventDefault()
+		if e.keyCode == 8
+			e.preventDefault()
+			if allSelected == true
+				exports.update(layer, [text:""])
+				layer.backgroundColor ="transparent"
+				allSelected = false
+			initialLength = layer.html.length
+			newText = layer.html.slice(0, -1)
+			exports.update(layer, [text:newText])
+			endLength = layer.html.length
+			if initialLength == endLength
+				newText = layer.html.slice(0, -6)
+				exports.update(layer, [text:newText])
+	document.addEventListener 'keyup', (e) ->
+		if e.keyCode == 91
+			isCommand = false
+
+	document.addEventListener 'keypress', (e) ->
+	  	codes = {
+	  		13:"<br>"
+	  		32:"&nbsp;"
+	  		33:"!"
+	  		34:"\""
+	  		35:"#"
+	  		36:"$"
+	  		37:"%"
+	  		38:"&"
+	  		39:"\'"
+	  		40:"("
+	  		41:")"
+	  		42:"*"
+	  		43:"+"
+	  		44:","
+	  		45:"-"
+	  		47:"/"
+	  		46:"."
+	  		48:"0"
+	  		49:"1"
+	  		50:"2"
+	  		51:"3"
+	  		52:"4"
+	  		53:"5"
+	  		54:"6"
+	  		55:"7"
+	  		56:"8"
+	  		57:"9"
+	  		58:":"
+	  		59:";"
+	  		60:"<"
+	  		61:"="
+	  		62:">"
+	  		63:"?"
+	  		64:"@"
+	  		65:"A"
+	  		66:"B"
+	  		67:"C"
+	  		68:"D"
+	  		69:"E"
+	  		70:"F"
+	  		71:"G"
+	  		72:"H"
+	  		73:"I"
+	  		74:"J"
+	  		75:"K"
+	  		76:"L"
+	  		77:"M"
+	  		78:"N"
+	  		79:"O"
+	  		80:"P"
+	  		81:"Q"
+	  		82:"R"
+	  		83:"S"
+	  		84:"T"
+	  		85:"U"
+	  		86:"V"
+	  		87:"W"
+	  		88:"X"
+	  		89:"Y"
+	  		90:"Z"
+	  		91:"["
+	  		92:"\\"
+	  		93:"]"
+	  		94:"^"
+	  		95:"_"
+	  		96:"`"
+	  		97:"a"
+	  		98:"b"
+	  		99:"c"
+	  		100:"d"
+	  		101:"e"
+	  		102:"f"
+	  		103:"g"
+	  		104:"h"
+	  		105:"i"
+	  		106:"j"
+	  		107:"k"
+	  		108:"l"
+	  		109:"m"
+	  		110:"n"
+	  		111:"o"
+	  		112:"p"
+	  		113:"q"
+	  		114:"r"
+	  		115:"s"
+	  		116:"t"
+	  		117:"u"
+	  		118:"v"
+	  		119:"w"
+	  		120:"x"
+	  		121:"y"
+	  		122:"z"
+	  		123:"{"
+	  		124:"|"
+	  		125:"}"
+	  		126:"~"
+	  	}
+
+	  	if isCommand == true
+	  		if e.keyCode == 97
+	  			layer.backgroundColor = "rgba(0, 118, 255, .2)"
+	  			allSelected = true
+	  	if e.keyCode > 31 && isCommand == false
+		  	e.preventDefault()
+		  	newText = layer.html + codes[e.keyCode]
+		  	exports.update(layer, [text:newText])
+
+	  	return 
+
+
+exports.Field = (array) ->
+	setup = setupComponent("field", array)
+	field = new Layer borderRadius:exports.px(setup.borderRadius), backgroundColor:setup.backgroundColor, width:exports.px(setup.width), height:exports.px(setup.height)
+	if setup.constraints
+		field.constraints = 
+			setup.constraints
+
+	text = new exports.Text style:"fieldText", superLayer:field, text:setup.text, fontSize:setup.fontSize, fontWeight:setup.fontWeight, color:setup.color
+	if setup.textConstraints
+		text.constraints =
+			setup.textConstraints
+	field.text = text
+
+	##Handle keypress
+	text.on "change:html", ->
+		if text.html == ""
+			field.cursor.constraints = {align:"vertical", leading:8}
+		else
+			field.cursor.constraints = {align:"vertical", trailingEdges:text}
+		exports.layout()
+		if field.placeholder
+			field.placeholder.visible = false
+
+
+	if setup.text == "" || setup.text == undefined
+		placeholder = new exports.Text style:"fieldPlaceholder", superLayer:field, text:setup.placeholderText, fontSize:setup.fontSize, fontWeight:setup.fontWeight, color:setup.placeholderColor
+		if setup.textConstraints 
+			placeholder.constraints =
+				setup.textConstraints
+		field.placeholder = placeholder
+
+	field.on Events.TouchEnd, ->
+		listenToKeys(text)
+		text.visible = true
+
+		## Default Cursor
+		keys = Object.keys(setup.cursor)
+		if keys.length < 1
+			setup.cursor.constraints = {align:"vertical", leading:8}
+			setup.cursor.width = 2
+			setup.cursor.height = 20
+
+
+		cursor = new Layer width:exports.px(setup.cursor.width), height:exports.px(setup.cursor.height), superLayer:field, name:"cursor", backgroundColor:exports.color("blue"), borderRadius:exports.px(1)
+		field.cursor = cursor
+		cursor.constraints = 
+			setup.cursor.constraints
+
+		exports.layout()
+
+
+
+
+
+		Utils.interval .5, ->
+			if cursor.opacity == 0
+				cursor.animate
+					properties:(opacity:1)
+					time:.3
+			else
+				cursor.animate
+					properties:(opacity:0)
+					time:.3
+
+
+
+	
+	exports.layout()
+	return field
+
+
 
 exports.LockScreen = (array) ->
 	switch exports.device
@@ -2591,27 +2836,27 @@ exports.TableCell = (array) ->
 		}
 	}
 
-exports.Toggle = (array) ->
-	setup = setupComponent("toggle", array)
+# exports.Toggle = (array) ->
+# 	setup = setupComponent("toggle", array)
 
-	toggle = new Layer width:exports.px(51), height:exports.px(32), borderRadius:exports.px(18), backgroundColor:"white", borderColor:"#E5E5E5", borderWidth:exports.px(1.5)
-	if setup.superLayer
-		setup.superLayer.addSubLayer(toggle)
-	nob = new Layer width:exports.px(28), height:exports.px(28), borderRadius:exports.px(14), superLayer:toggle, backgroundColor:"white", shadowColor:"rgba(0, 0, 0, .4)", shadowY:2, shadowBlur:20, x:exports.px(1)
-	toggle.constraints = setup.constraints	
-	exports.layout()
-	toggle.states.add
-		"on" :
-			backgroundColor:setup.color
-			borderWidth:0
-	nob.states.add
-		"on" :
-			x: toggle.width - nob.width - exports.px(2)
-			y:exports.px(2)
+# 	toggle = new Layer width:exports.px(51), height:exports.px(32), borderRadius:exports.px(18), backgroundColor:"white", borderColor:"#E5E5E5", borderWidth:exports.px(1.5)
+# 	if setup.superLayer
+# 		setup.superLayer.addSubLayer(toggle)
+# 	nob = new Layer width:exports.px(28), height:exports.px(28), borderRadius:exports.px(14), superLayer:toggle, backgroundColor:"white", shadowColor:"rgba(0, 0, 0, .4)", shadowY:2, shadowBlur:20, x:exports.px(1)
+# 	toggle.constraints = setup.constraints	
+# 	exports.layout()
+# 	toggle.states.add
+# 		"on" :
+# 			backgroundColor:setup.color
+# 			borderWidth:0
+# 	nob.states.add
+# 		"on" :
+# 			x: toggle.width - nob.width - exports.px(2)
+# 			y:exports.px(2)
 
 
 
-	nob.on Events.TouchEnd, ->
-		toggle.states.next()
-		nob.states.next()
-	return toggle
+# 	nob.on Events.TouchEnd, ->
+# 		toggle.states.next()
+# 		nob.states.next()
+# 	return toggle
