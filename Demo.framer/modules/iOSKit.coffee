@@ -369,6 +369,10 @@ exports.px = (pt) ->
 	px = Math.round(px)
 	return px
 
+exports.clean = (string) ->
+	## remove white space
+	string = string.replace(/[&]nbsp[;]/gi, " ").replace(/[<]br[>]/gi, "")
+	return string
 exports.svg = (svg) ->
 	# Find String
 	startIndex = svg.search("<svg width=") 
@@ -1309,6 +1313,10 @@ listenToKeys = (field, keyboard) ->
 				if field.text.html == ""
 					field.placeholder.visible = true
 
+				# Get rid of & nbsp;
+
+				field.value = exports.clean(newText)
+
 	document.addEventListener 'keyup', (e) ->
 		if field.active
 			if e.keyCode == 13
@@ -1354,6 +1362,7 @@ listenToKeys = (field, keyboard) ->
 			  	if e.keyCode > 31
 				  	newText = field.text.html + char
 				  	exports.update(field.text, [text:newText])
+				  	field.value = exports.clean(newText)
 
 
 exports.Field = (array) ->
@@ -1700,18 +1709,42 @@ exports.StatusBar = (array) ->
 
 exports.Keyboard = (array) ->
 	setup = setupComponent("keyboard", array)
+
+	#This will hold all of the specs for each device's device
+	boardSpecs = {}
+
+	#This will set the specs
+	switch exports.device
+		when "iphone-5"
+			boardSpecs.height = 216
+			boardSpecs.spacer = exports.px(6)
+		when "iphone-6s"
+			boardSpecs.spacer = exports.px(5)
+			boardSpecs.height = 216
+		when "iphone-6s-plus"
+			boardSpecs.spacer = exports.px(6)
+			boardSpecs.height = 225
+
 	board = new Layer backgroundColor:"#D1D5DA", name:"keyboard"
-	board.constraints = (height:216, trailing:0, leading:0)
-	exports.layout()
+
+	#This will generate a object with 216 height and it'll stretch end to end. 
+	board.constraints = (height:boardSpecs.height, trailing:0, leading:0)
+
+	#This will deterine if it starts on the bottom or pops up from the bottom 
 	if setup.hidden
 		board.y = exports.height
 	else
 		board.maxY = exports.height
+
+	#Letters to be made
 	lettersArray = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v",  "b", "n", "m"]
+	
+	#Numbers to be made (depending on device)
+	numsArray = [0..9]
+
+	#Holds the keys that we make. This will allows us to quickly iterate through them. 
 	keysArray = []
-	spacer = exports.px(5)
-	if exports.scale == 3 || exports.width == 640
-		spacer = exports.px(6)
+
 	rowsMap = [
 		{ 
 			"padding" : exports.px(4)
@@ -1902,15 +1935,15 @@ exports.Keyboard = (array) ->
 		key.html = letter
 		if index <= rowsMap[0].endIndex
 			rowIndex = index - rowsMap[0].startIndex
-			key.x = rowsMap[0].padding + (rowIndex*spacer) + (rowIndex*key.width)
+			key.x = rowsMap[0].padding + (rowIndex*boardSpecs.spacer) + (rowIndex*key.width)
 			key.y = rowsMap[0].marginTop
 		if index > rowsMap[0].endIndex && index <= rowsMap[1].endIndex
 			rowIndex = index - rowsMap[1].startIndex
-			key.x = rowsMap[1].padding + (rowIndex*spacer) + (rowIndex*key.width)
+			key.x = rowsMap[1].padding + (rowIndex*boardSpecs.spacer) + (rowIndex*key.width)
 			key.y = rowsMap[1].marginTop + key.height
 		if index > rowsMap[1].endIndex
 			rowIndex = index - rowsMap[2].startIndex
-			key.x = rowsMap[2].padding + (rowIndex*spacer) + (rowIndex*key.width)
+			key.x = rowsMap[2].padding + (rowIndex*boardSpecs.spacer) + (rowIndex*key.width)
 			key.y = rowsMap[2].marginTop + key.height * 2
 		path.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 

@@ -22,5 +22,11 @@ field = new ios.Field constraints:{align:"center"}, placeholderText:"Make shit u
 
 homeNav.rightAction.on Events.TouchEnd, ->
 	field.active = false
+	print field.value
 	
 ios.layout()
+
+
+string = "how&nbsp;do&nbsp;you&nbsp;know?<br>"
+string = ios.clean(string)
+print string
