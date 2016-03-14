@@ -18,7 +18,9 @@ homeNav.rightAction.on Events.TouchEnd, ->
 
 discoverNav = new ios.NavBar superLayer:discover.view, title:"Discover", leftAction:false
 
-field = new ios.Field constraints:{align:"center"}, placeholderText:"Enter a cat"
+field = new ios.Field constraints:{align:"center"}, placeholderText:"Make shit up", width:340, height:30
 
+homeNav.rightAction.on Events.TouchEnd, ->
+	field.active = false
 	
 ios.layout()

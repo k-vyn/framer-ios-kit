@@ -203,6 +203,7 @@ defaults = {
 		placeholderColor:"#808080"
 		text:""
 		textConstraints:{align:"vertical", leading:8}
+		keyboard:true
 
 	}
 	lockScreen: {
@@ -1139,141 +1140,212 @@ exports.Button = (array) ->
 
 
 
-listenToKeys = (layer) ->
+listenToKeys = (field, keyboard) ->
+	keypress = (key) ->
+		originalColor = key.backgroundColor
+
+
+		switch key.name
+			when "shift"
+				key.icon.states.switchInstant("on")
+				key.backgroundColor = "white"
+			when "delete"
+				key.icon.states.switchInstant("on")
+				key.backgroundColor = "white"
+				key.icon.states.switchInstant("on")
+			when "space"
+				key.backgroundColor = "#AAB3BC"
+			else
+				keyboard.keyPopUp.visible = true	
+				boxKey = key.name
+				if isShift
+					boxKey = boxKey.toUpperCase()
+				keyboard.keyPopUp.box.html = boxKey
+				keyboard.keyPopUp.maxY = key.maxY
+				keyboard.keyPopUp.midX = key.midX
+
 	isCommand = false
 	allSelected = false
+	isShift = false
+	codes = {
+  		13:"<br>"
+  		32:"&nbsp;"
+  		33:"!"
+  		34:"\""
+  		35:"#"
+  		36:"$"
+  		37:"%"
+  		38:"&"
+  		39:"\'"
+  		40:"("
+  		41:")"
+  		42:"*"
+  		43:"+"
+  		44:","
+  		45:"-"
+  		47:"/"
+  		46:"."
+  		48:"0"
+  		49:"1"
+  		50:"2"
+  		51:"3"
+  		52:"4"
+  		53:"5"
+  		54:"6"
+  		55:"7"
+  		56:"8"
+  		57:"9"
+  		58:":"
+  		59:";"
+  		60:"<"
+  		61:"="
+  		62:">"
+  		63:"?"
+  		64:"@"
+  		65:"A"
+  		66:"B"
+  		67:"C"
+  		68:"D"
+  		69:"E"
+  		70:"F"
+  		71:"G"
+  		72:"H"
+  		73:"I"
+  		74:"J"
+  		75:"K"
+  		76:"L"
+  		77:"M"
+  		78:"N"
+  		79:"O"
+  		80:"P"
+  		81:"Q"
+  		82:"R"
+  		83:"S"
+  		84:"T"
+  		85:"U"
+  		86:"V"
+  		87:"W"
+  		88:"X"
+  		89:"Y"
+  		90:"Z"
+  		91:"["
+  		92:"\\"
+  		93:"]"
+  		94:"^"
+  		95:"_"
+  		96:"`"
+  		97:"a"
+  		98:"b"
+  		99:"c"
+  		100:"d"
+  		101:"e"
+  		102:"f"
+  		103:"g"
+  		104:"h"
+  		105:"i"
+  		106:"j"
+  		107:"k"
+  		108:"l"
+  		109:"m"
+  		110:"n"
+  		111:"o"
+  		112:"p"
+  		113:"q"
+  		114:"r"
+  		115:"s"
+  		116:"t"
+  		117:"u"
+  		118:"v"
+  		119:"w"
+  		120:"x"
+  		121:"y"
+  		122:"z"
+  		123:"{"
+  		124:"|"
+  		125:"}"
+  		126:"~"
+  	}
+
 	document.addEventListener 'keydown', (e) ->
-		if e.keyCode == 91
-			isCommand = true
-		if e.keyCode == 13
-			e.preventDefault()
-		if e.keyCode == 8
-			e.preventDefault()
+		if field.active
+			if e.keyCode == 16
+				isShift = true
+				keypress(keyboard.keys.shift)
+				for k in keyboard.keysArray
+					k.style["text-transform"] = "uppercase"
 			if allSelected == true
-				exports.update(layer, [text:""])
-				layer.backgroundColor ="transparent"
-				allSelected = false
-			initialLength = layer.html.length
-			newText = layer.html.slice(0, -1)
-			exports.update(layer, [text:newText])
-			endLength = layer.html.length
-			if initialLength == endLength
-				newText = layer.html.slice(0, -6)
-				exports.update(layer, [text:newText])
+				if e.keyCode == 37 || e.keyCode == 39
+					allSelected = false
+					field.text.backgroundColor = "transparent"
+			if e.keyCode == 91
+				isCommand = true
+			if e.keyCode == 13
+				e.preventDefault()
+				keyboard.keys.return.backgroundColor = "white"
+
+			if e.keyCode == 8
+				e.preventDefault()
+				keypress(keyboard.keys.delete)
+				if allSelected == true
+					exports.update(field.text, [text:""])
+					field.text.backgroundColor ="transparent"
+					allSelected = false
+				initialLength = field.text.html.length
+				newText = field.text.html.slice(0, -1)
+				exports.update(field.text, [text:newText])
+				endLength = field.text.html.length
+				if initialLength == endLength
+					newText = field.text.html.slice(0, -6)
+					exports.update(field.text, [text:newText])
+				if field.text.html == ""
+					field.placeholder.visible = true
+
 	document.addEventListener 'keyup', (e) ->
-		if e.keyCode == 91
-			isCommand = false
+		if field.active
+			if e.keyCode == 13
+				keyboard.keys.return.backgroundColor = "#AAB3BC"
+			if e.keyCode == 32
+				keyboard.keys.space.backgroundColor = "White"
+			if e.keyCode == 8
+				keyboard.keys.delete.animate
+					properties:(backgroundColor:"#AAB3BC")
+					time:.1
+				keyboard.keys.delete.icon.states.switch("off")
+			if e.keyCode == 91
+				isCommand = false
+			if e.keyCode == 16
+				isShift = false
+				for k in keyboard.keysArray
+					k.style["text-transform"] = "lowercase"
+				keyboard.keys.shift.animate
+					properties:(backgroundColor:"#AAB3BC")
+					time:.2
+				keyboard.keys.shift.icon.states.next()
+			if e.keyCode >= 65 && e.keyCode <= 90
+				keyboard.keyPopUp.visible = false
 
 	document.addEventListener 'keypress', (e) ->
-	  	codes = {
-	  		13:"<br>"
-	  		32:"&nbsp;"
-	  		33:"!"
-	  		34:"\""
-	  		35:"#"
-	  		36:"$"
-	  		37:"%"
-	  		38:"&"
-	  		39:"\'"
-	  		40:"("
-	  		41:")"
-	  		42:"*"
-	  		43:"+"
-	  		44:","
-	  		45:"-"
-	  		47:"/"
-	  		46:"."
-	  		48:"0"
-	  		49:"1"
-	  		50:"2"
-	  		51:"3"
-	  		52:"4"
-	  		53:"5"
-	  		54:"6"
-	  		55:"7"
-	  		56:"8"
-	  		57:"9"
-	  		58:":"
-	  		59:";"
-	  		60:"<"
-	  		61:"="
-	  		62:">"
-	  		63:"?"
-	  		64:"@"
-	  		65:"A"
-	  		66:"B"
-	  		67:"C"
-	  		68:"D"
-	  		69:"E"
-	  		70:"F"
-	  		71:"G"
-	  		72:"H"
-	  		73:"I"
-	  		74:"J"
-	  		75:"K"
-	  		76:"L"
-	  		77:"M"
-	  		78:"N"
-	  		79:"O"
-	  		80:"P"
-	  		81:"Q"
-	  		82:"R"
-	  		83:"S"
-	  		84:"T"
-	  		85:"U"
-	  		86:"V"
-	  		87:"W"
-	  		88:"X"
-	  		89:"Y"
-	  		90:"Z"
-	  		91:"["
-	  		92:"\\"
-	  		93:"]"
-	  		94:"^"
-	  		95:"_"
-	  		96:"`"
-	  		97:"a"
-	  		98:"b"
-	  		99:"c"
-	  		100:"d"
-	  		101:"e"
-	  		102:"f"
-	  		103:"g"
-	  		104:"h"
-	  		105:"i"
-	  		106:"j"
-	  		107:"k"
-	  		108:"l"
-	  		109:"m"
-	  		110:"n"
-	  		111:"o"
-	  		112:"p"
-	  		113:"q"
-	  		114:"r"
-	  		115:"s"
-	  		116:"t"
-	  		117:"u"
-	  		118:"v"
-	  		119:"w"
-	  		120:"x"
-	  		121:"y"
-	  		122:"z"
-	  		123:"{"
-	  		124:"|"
-	  		125:"}"
-	  		126:"~"
-	  	}
+	  	if field.active 
+	  		char = codes[e.keyCode]
+	  		key = keyboard.keys[char]
+		  	if isCommand == true
+		  		if e.keyCode == 97
+		  			field.text.backgroundColor = "rgba(0, 118, 255, .2)"
+		  			allSelected = true
+		  	if isCommand == false
+		  		e.preventDefault()
 
-	  	if isCommand == true
-	  		if e.keyCode == 97
-	  			layer.backgroundColor = "rgba(0, 118, 255, .2)"
-	  			allSelected = true
-	  	if e.keyCode > 31 && isCommand == false
-		  	e.preventDefault()
-		  	newText = layer.html + codes[e.keyCode]
-		  	exports.update(layer, [text:newText])
+		  		if e.keyCode >= 65 && e.keyCode <= 90
+		  			char2 = char.toLowerCase()
+		  			key = keyboard.keys[char2]
+		  			keypress(key)
 
-	  	return 
+			  	if e.keyCode >= 97 && e.keyCode <= 122 || e.keyCode == 32		
+			  		keypress(key)
+
+			  	if e.keyCode > 31
+				  	newText = field.text.html + char
+				  	exports.update(field.text, [text:newText])
 
 
 exports.Field = (array) ->
@@ -1282,7 +1354,7 @@ exports.Field = (array) ->
 	if setup.constraints
 		field.constraints = 
 			setup.constraints
-
+	field.active = false
 	text = new exports.Text style:"fieldText", superLayer:field, text:setup.text, fontSize:setup.fontSize, fontWeight:setup.fontWeight, color:setup.color
 	if setup.textConstraints
 		text.constraints =
@@ -1299,6 +1371,8 @@ exports.Field = (array) ->
 		if field.placeholder
 			field.placeholder.visible = false
 
+	if setup.keyboard 
+		keyboard = new exports.Keyboard
 
 	if setup.text == "" || setup.text == undefined
 		placeholder = new exports.Text style:"fieldPlaceholder", superLayer:field, text:setup.placeholderText, fontSize:setup.fontSize, fontWeight:setup.fontWeight, color:setup.placeholderColor
@@ -1308,8 +1382,21 @@ exports.Field = (array) ->
 		field.placeholder = placeholder
 
 	field.on Events.TouchEnd, ->
-		listenToKeys(text)
+		field.active = true
 		text.visible = true
+
+		clickZone = new Layer name:"fieldActive", backgroundColor:"transparent"
+		clickZone.constraints = 
+			top:0
+			bottom:keyboard
+			leading:0
+			trailing:0
+		clickZone.on Events.TouchEnd, (handler) ->
+			## listen for something else
+			if handler.offsetX < field.x || handler.offsetX > field.maxX || handler.offsetY < field.y || handler.offsetY > field.maxY
+				field.active = false
+				clickZone.destroy()
+				document.removeEventListener('keypress')
 
 		## Default Cursor
 		keys = Object.keys(setup.cursor)
@@ -1318,31 +1405,30 @@ exports.Field = (array) ->
 			setup.cursor.width = 2
 			setup.cursor.height = 20
 
+		if field.cursor == undefined
+			listenToKeys(field, keyboard)
+			cursor = new Layer width:exports.px(setup.cursor.width), height:exports.px(setup.cursor.height), superLayer:field, name:"cursor", backgroundColor:exports.color("blue"), borderRadius:exports.px(1)
+			field.cursor = cursor
+			cursor.constraints = 
+				setup.cursor.constraints
 
-		cursor = new Layer width:exports.px(setup.cursor.width), height:exports.px(setup.cursor.height), superLayer:field, name:"cursor", backgroundColor:exports.color("blue"), borderRadius:exports.px(1)
-		field.cursor = cursor
-		cursor.constraints = 
-			setup.cursor.constraints
-
+			Utils.interval .5, ->
+				if field.active == true
+					if field.cursor.opacity == 0
+						field.cursor.animate
+							properties:(opacity:1)
+							time:.3
+					else
+						field.cursor.animate
+							properties:(opacity:0)
+							time:.3
+				else
+					field.cursor.opacity = 0
 		exports.layout()
 
 
 
 
-
-		Utils.interval .5, ->
-			if cursor.opacity == 0
-				cursor.animate
-					properties:(opacity:1)
-					time:.3
-			else
-				cursor.animate
-					properties:(opacity:0)
-					time:.3
-
-
-
-	
 	exports.layout()
 	return field
 
@@ -1646,8 +1732,8 @@ exports.Keyboard = (array) ->
 	}
 	@.color = "white"
 	path = new Layer superLayer:keyPopUp, backgroundColor:"transparent", name:"shape path"
-
-
+	board.keyPopUp = keyPopUp
+	board.keyPopUp.box = box
 	shiftKey = new Layer superLayer:board, name:"shift", borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498"
 	shiftKey.constraints = (bottom:56, leading:3, width:42, height:42)
 	shiftIcon = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey, backgroundColor:"transparent", x:exports.px(11), y:exports.px(11)
@@ -1667,7 +1753,7 @@ exports.Keyboard = (array) ->
 		</svg>"
 
 	shiftIcon.states.add
-		on:
+		"on":
 			html: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 			<svg width='#{exports.px(20)}px' height='#{exports.px(18)}px' viewBox='0 0 20 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
@@ -1684,14 +1770,13 @@ exports.Keyboard = (array) ->
 			</svg>"
 	shiftIcon.states.animationOptions =
   	  time: .01
-
-  	deleteKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498"
+  	deleteKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", name:"delete"
   	deleteKey.constraints = (bottom:56, trailing:3, width:42, height:42)
   	deleteIcon = new Layer superLayer:deleteKey, width:exports.px(24), height:exports.px(18), backgroundColor:"transparent"
   	deleteIcon.constraints = (top:13, leading:10)
 
   	deleteIcon.states.add 
-  		on: 
+  		"on": 
   			html: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 				<svg width='#{exports.px(24)}px' height='#{exports.px(18)}px' viewBox='0 0 24 18' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
@@ -1735,6 +1820,8 @@ exports.Keyboard = (array) ->
 
   	deleteIcon.states.switchInstant("off")
 
+
+
 	shiftIcon.on Events.Click, ->
 		shiftIcon.states.next()
 		if shiftIcon.states.state == "on"
@@ -1748,9 +1835,15 @@ exports.Keyboard = (array) ->
 				key.style["text-transform"] = 'lowercase'
 			box.style["text-transform"] = 'lowercase'
 
+	board.keys = {}
+	board.keys.delete = deleteKey
+	board.keys.delete.icon = deleteIcon
+	board.keys.shift = shiftKey
+	board.keys.shift.icon = shiftIcon
 	for letter in lettersArray
 		index = lettersArray.indexOf(letter) 
 		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.scale, backgroundColor:"white", color:"black", shadowY:exports.px(1), shadowColor:"#929498"
+		board.keys[letter] = key
 		keyPopUp.bringToFront()
 		box.bringToFront()
 		if exports.scale == 2
@@ -1859,7 +1952,7 @@ exports.Keyboard = (array) ->
 
 
 
-
+	board.keysArray = keysArray
 	numKey = new Layer superLayer:board, name:"num", borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black"
 	numKey.constraints = (width:40.5, height:42, bottom:4, leading:3)
 	numKey.html = "123"
@@ -1927,7 +2020,7 @@ exports.Keyboard = (array) ->
 		emojiBG.constraints = (trailing:1, leading:1, bottom:1, height:258)
 		exports.layout()
 		emojiGalley = new ScrollComponent superLayer:emojiBG, width:emojiBG.width, height:emojiBG.height - exports.px(40)
-		emojiGalley.speedY = 0
+		emojiGalley.speedY = 0 
 		emojiSpacer = exports.px(6)
 		emojiPicker = new Layer backgroundColor:"transparent", name:"emoji picker", superLayer:emojiBG
 		emojiPicker.constraints = 
@@ -2322,7 +2415,7 @@ exports.Keyboard = (array) ->
 		emojiKey.backgroundColor = "#AAB3BC"
 
 
-	returnKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black"
+	returnKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"return"
 	returnKey.constraints = (width:87.5, height:42, trailing:3, bottom:4)
 	returnKey.html = "return"
 	returnKey.style = {
@@ -2334,8 +2427,8 @@ exports.Keyboard = (array) ->
 
 	}
 	exports.layout()
-
-	spaceKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"white", shadowY:exports.px(1), shadowColor:"#929498", color:"black"
+	board.keys.return = returnKey
+	spaceKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"white", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"space"
 	spaceKey.constraints = (width:180, height:42, leading:[emojiKey, 6], bottom:4)
 	spaceKey.html = "space"
 	spaceKey.style = {
@@ -2346,6 +2439,8 @@ exports.Keyboard = (array) ->
 		'line-height' : exports.px(42) + "px"
 
 	}
+	board.keys["&nbsp;"] = spaceKey
+	board.keys.space = spaceKey
 	exports.layout()
 
 
@@ -2361,38 +2456,7 @@ exports.Keyboard = (array) ->
 		returnKey.backgroundColor = "#AAB3BC"
 
 
-	return {
-		"board" : board
-		"keys" : keysArray
-		"key" : {
-			"q" : keysArray[0]
-			"w" : keysArray[1]
-			"e" : keysArray[2]
-			"r" : keysArray[3]
-			"t" : keysArray[4]
-			"y" : keysArray[5]
-			"u" : keysArray[6]
-			"i" : keysArray[7]
-			"o" : keysArray[8]
-			"p" : keysArray[9]
-			"a" : keysArray[10]
-			"s" : keysArray[11]
-			"d" : keysArray[12]
-			"f" : keysArray[13]
-			"g" : keysArray[14]
-			"h" : keysArray[15]
-			"j" : keysArray[16]
-			"k" : keysArray[17]
-			"l" : keysArray[18]
-			"z" : keysArray[19]
-			"x" : keysArray[20]
-			"c" : keysArray[21]
-			"v" : keysArray[22]
-			"b" : keysArray[23]
-			"n" : keysArray[24]
-			"m" : keysArray[25]
-		}
-	}
+	return board
 
 exports.Menu = (array) ->
 	setup = setupComponent("menu", array)
@@ -2805,8 +2869,6 @@ exports.Table = (array) ->
 
 
 	return table
-
-
 
 exports.TableCell = (array) ->
 	setup = setupComponent("tableCell", array)
