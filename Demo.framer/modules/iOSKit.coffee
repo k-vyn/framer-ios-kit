@@ -213,9 +213,9 @@ defaults = {
 		clock24:false
 		type:"lockScreen"
 	}
-	keyboardProps: ["returnKey"]
 	keyboard: {
-		returnKey:"default"
+		returnKey:"return"
+		hidden:false
 	}
 	menu: {
 		options:["Option", "Option", "Option"]
@@ -341,6 +341,7 @@ setProps(defaults.menu, defaults.menu)
 setProps(defaults.table, defaults.table)
 setProps(defaults.tableCell, defaults.tableCell)
 setProps(defaults.field, defaults.field)
+setProps(defaults.keyboard, defaults.keyboard)
 
 
 setupComponent = (component, array) ->
@@ -1268,6 +1269,14 @@ listenToKeys = (field, keyboard) ->
 
 	document.addEventListener 'keydown', (e) ->
 		if field.active
+			if e.keyCode == 27
+				e.preventDefault()
+				keyboard.animate
+					properties:(y:exports.height)
+					time:.25
+					curve:"ease-in-out"
+				field.active = false
+				field.clickZone.destroy()
 			if e.keyCode == 16
 				isShift = true
 				keypress(keyboard.keys.shift)
@@ -1334,7 +1343,6 @@ listenToKeys = (field, keyboard) ->
 		  			allSelected = true
 		  	if isCommand == false
 		  		e.preventDefault()
-
 		  		if e.keyCode >= 65 && e.keyCode <= 90
 		  			char2 = char.toLowerCase()
 		  			key = keyboard.keys[char2]
@@ -1372,7 +1380,7 @@ exports.Field = (array) ->
 			field.placeholder.visible = false
 
 	if setup.keyboard 
-		keyboard = new exports.Keyboard
+		keyboard = new exports.Keyboard hidden:true
 
 	if setup.text == "" || setup.text == undefined
 		placeholder = new exports.Text style:"fieldPlaceholder", superLayer:field, text:setup.placeholderText, fontSize:setup.fontSize, fontWeight:setup.fontWeight, color:setup.placeholderColor
@@ -1382,6 +1390,10 @@ exports.Field = (array) ->
 		field.placeholder = placeholder
 
 	field.on Events.TouchEnd, ->
+		keyboard.animate
+			properties:(maxY:exports.height)
+			curve:"ease-in-out"
+			time:.25
 		field.active = true
 		text.visible = true
 
@@ -1395,8 +1407,12 @@ exports.Field = (array) ->
 			## listen for something else
 			if handler.offsetX < field.x || handler.offsetX > field.maxX || handler.offsetY < field.y || handler.offsetY > field.maxY
 				field.active = false
+				keyboard.animate
+					properties:(y:exports.height)
+					time:.25
+					curve:"ease-in-out"
 				clickZone.destroy()
-				document.removeEventListener('keypress')
+		field.clickZone = clickZone
 
 		## Default Cursor
 		keys = Object.keys(setup.cursor)
@@ -1425,9 +1441,6 @@ exports.Field = (array) ->
 				else
 					field.cursor.opacity = 0
 		exports.layout()
-
-
-
 
 	exports.layout()
 	return field
@@ -1686,16 +1699,14 @@ exports.StatusBar = (array) ->
 	}
 
 exports.Keyboard = (array) ->
-	if array == undefined
-		array = []
-	for prop in defaults.keyboardProps
-		if array[prop]			
-			@[prop] = array[prop]
-		else 
-			@[prop] = defaults.keyboardProps[prop]
+	setup = setupComponent("keyboard", array)
 	board = new Layer backgroundColor:"#D1D5DA", name:"keyboard"
-	board.constraints = (bottom:0, height:216, trailing:0, leading:0)
+	board.constraints = (height:216, trailing:0, leading:0)
 	exports.layout()
+	if setup.hidden
+		board.y = exports.height
+	else
+		board.maxY = exports.height
 	lettersArray = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v",  "b", "n", "m"]
 	keysArray = []
 	spacer = exports.px(5)
@@ -2417,7 +2428,7 @@ exports.Keyboard = (array) ->
 
 	returnKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"return"
 	returnKey.constraints = (width:87.5, height:42, trailing:3, bottom:4)
-	returnKey.html = "return"
+	returnKey.html = setup.returnKey
 	returnKey.style = {
 		"font-size" : exports.px(16) + "px"
 		"font-weight" : 400
