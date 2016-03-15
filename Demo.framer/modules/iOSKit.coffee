@@ -87,6 +87,10 @@ exports.getDevice = ->
 	device = device.replace("-rose", "")
 	device = device.replace("5s", "5")
 	device = device.replace("5c", "5")
+	device = device.replace("-mini", "")
+	device = device.replace("-air", "")
+	device = device.replace("-2", "")
+	device = device.replace("-4", "")
 	exports.device = device.replace("-silver", "")
 	screen = {
 		width:exports.width
@@ -203,7 +207,7 @@ defaults = {
 		placeholderColor:"#808080"
 		text:""
 		textConstraints:{align:"vertical", leading:8}
-		keyboard:true
+		input:true
 
 	}
 	lockScreen: {
@@ -215,7 +219,8 @@ defaults = {
 	}
 	keyboard: {
 		returnKey:"return"
-		hidden:false
+		animated:false
+		output:undefined
 	}
 	menu: {
 		options:["Option", "Option", "Option"]
@@ -617,6 +622,18 @@ layoutChange = (layer, type) ->
 						layer[trait] = layer[prop] - layer.constraints[opp][prop]
 						if layer[trait] < 0
 							layer[trait] = layer[trait] * -1
+					else
+						startX = layer.x
+						endX = 0
+						for object in layer.constraints[opp]
+							# If it's a number
+							if object == parseInt(object, 10)
+								endX = endX - object
+							else
+								endTrait = defaults.constraints[opp].objProp2
+								endX = endX + object[endTrait]
+						layer.width = endX - startX
+						
 		else
 			## Handle Bottom & Trailing
 			objProp2 = defaults.constraints[type].objProp2
@@ -1143,13 +1160,10 @@ exports.Button = (array) ->
 	exports.layout()
 	return button
 
-
-
 listenToKeys = (field, keyboard) ->
+
 	keypress = (key) ->
 		originalColor = key.backgroundColor
-
-
 		switch key.name
 			when "shift"
 				key.icon.states.switchInstant("on")
@@ -1161,13 +1175,18 @@ listenToKeys = (field, keyboard) ->
 			when "space"
 				key.backgroundColor = "#AAB3BC"
 			else
-				keyboard.keyPopUp.visible = true	
-				boxKey = key.name
-				if isShift
-					boxKey = boxKey.toUpperCase()
-				keyboard.keyPopUp.box.html = boxKey
-				keyboard.keyPopUp.maxY = key.maxY
-				keyboard.keyPopUp.midX = key.midX
+				if exports.device != "ipad"
+					keyboard.keyPopUp.visible = true	
+					boxKey = key.name
+					if isShift
+						boxKey = boxKey.toUpperCase()
+					keyboard.keyPopUp.box.html = boxKey
+					keyboard.keyPopUp.maxY = key.maxY
+					keyboard.keyPopUp.midX = key.midX
+				else
+					key.animate
+						properties:(backgroundColor:"#AAB3BC")
+						time:.2
 
 	isCommand = false
 	allSelected = false
@@ -1283,9 +1302,10 @@ listenToKeys = (field, keyboard) ->
 				field.clickZone.destroy()
 			if e.keyCode == 16
 				isShift = true
-				keypress(keyboard.keys.shift)
-				for k in keyboard.keysArray
-					k.style["text-transform"] = "uppercase"
+				if keyboard
+					keypress(keyboard.keys.shift)
+					for k in keyboard.keysArray
+						k.style["text-transform"] = "uppercase"
 			if allSelected == true
 				if e.keyCode == 37 || e.keyCode == 39
 					allSelected = false
@@ -1298,7 +1318,8 @@ listenToKeys = (field, keyboard) ->
 
 			if e.keyCode == 8
 				e.preventDefault()
-				keypress(keyboard.keys.delete)
+				if keyboard
+					keypress(keyboard.keys.delete)
 				if allSelected == true
 					exports.update(field.text, [text:""])
 					field.text.backgroundColor ="transparent"
@@ -1319,11 +1340,11 @@ listenToKeys = (field, keyboard) ->
 
 	document.addEventListener 'keyup', (e) ->
 		if field.active
-			if e.keyCode == 13
+			if e.keyCode == 13 && keyboard
 				keyboard.keys.return.backgroundColor = "#AAB3BC"
-			if e.keyCode == 32
+			if e.keyCode == 32 && keyboard
 				keyboard.keys.space.backgroundColor = "White"
-			if e.keyCode == 8
+			if e.keyCode == 8 && keyboard
 				keyboard.keys.delete.animate
 					properties:(backgroundColor:"#AAB3BC")
 					time:.1
@@ -1332,19 +1353,28 @@ listenToKeys = (field, keyboard) ->
 				isCommand = false
 			if e.keyCode == 16
 				isShift = false
-				for k in keyboard.keysArray
-					k.style["text-transform"] = "lowercase"
-				keyboard.keys.shift.animate
-					properties:(backgroundColor:"#AAB3BC")
-					time:.2
-				keyboard.keys.shift.icon.states.next()
+				if keyboard
+					for k in keyboard.keysArray
+						k.style["text-transform"] = "lowercase"
+					keyboard.keys.shift.animate
+						properties:(backgroundColor:"#AAB3BC")
+						time:.2
+					keyboard.keys.shift.icon.states.next()
 			if e.keyCode >= 65 && e.keyCode <= 90
-				keyboard.keyPopUp.visible = false
+				if keyboard && exports.device != "ipad"
+					keyboard.keyPopUp.visible = false
+				else
+					k = keyboard.keys[codes[e.keyCode].toLowerCase()]
+					k.animate
+						properties:(backgroundColor:"white")
+						time:.2
+
 
 	document.addEventListener 'keypress', (e) ->
 	  	if field.active 
 	  		char = codes[e.keyCode]
-	  		key = keyboard.keys[char]
+	  		if keyboard
+	  			key = keyboard.keys[char]
 		  	if isCommand == true
 		  		if e.keyCode == 97
 		  			field.text.backgroundColor = "rgba(0, 118, 255, .2)"
@@ -1353,17 +1383,18 @@ listenToKeys = (field, keyboard) ->
 		  		e.preventDefault()
 		  		if e.keyCode >= 65 && e.keyCode <= 90
 		  			char2 = char.toLowerCase()
-		  			key = keyboard.keys[char2]
-		  			keypress(key)
+		  			if keyboard
+			  			key = keyboard.keys[char2]
+			  			keypress(key)
 
 			  	if e.keyCode >= 97 && e.keyCode <= 122 || e.keyCode == 32		
-			  		keypress(key)
+			  		if keyboard
+			  			keypress(key)
 
 			  	if e.keyCode > 31
 				  	newText = field.text.html + char
 				  	exports.update(field.text, [text:newText])
 				  	field.value = exports.clean(newText)
-
 
 exports.Field = (array) ->
 	setup = setupComponent("field", array)
@@ -1388,9 +1419,6 @@ exports.Field = (array) ->
 		if field.placeholder
 			field.placeholder.visible = false
 
-	if setup.keyboard 
-		keyboard = new exports.Keyboard hidden:true
-
 	if setup.text == "" || setup.text == undefined
 		placeholder = new exports.Text style:"fieldPlaceholder", superLayer:field, text:setup.placeholderText, fontSize:setup.fontSize, fontWeight:setup.fontWeight, color:setup.placeholderColor
 		if setup.textConstraints 
@@ -1399,27 +1427,29 @@ exports.Field = (array) ->
 		field.placeholder = placeholder
 
 	field.on Events.TouchEnd, ->
-		keyboard.animate
-			properties:(maxY:exports.height)
-			curve:"ease-in-out"
-			time:.25
+		
 		field.active = true
 		text.visible = true
-
 		clickZone = new Layer name:"fieldActive", backgroundColor:"transparent"
-		clickZone.constraints = 
-			top:0
-			bottom:keyboard
-			leading:0
-			trailing:0
+		if setup.input
+			keyboard = new exports.Keyboard animated:true, output:field	
+			clickZone.constraints = 
+				top:0
+				bottom:keyboard.specs.height
+				leading:0
+				trailing:0
+		else
+			clickZone.constraints =
+				top:0
+				bottom:0
+				leading:0
+				trailing:0
+
 		clickZone.on Events.TouchEnd, (handler) ->
 			## listen for something else
 			if handler.offsetX < field.x || handler.offsetX > field.maxX || handler.offsetY < field.y || handler.offsetY > field.maxY
 				field.active = false
-				keyboard.animate
-					properties:(y:exports.height)
-					time:.25
-					curve:"ease-in-out"
+				keyboard.destroy()
 				clickZone.destroy()
 		field.clickZone = clickZone
 
@@ -1453,8 +1483,6 @@ exports.Field = (array) ->
 
 	exports.layout()
 	return field
-
-
 
 exports.LockScreen = (array) ->
 	switch exports.device
@@ -1716,23 +1744,143 @@ exports.Keyboard = (array) ->
 	#This will set the specs
 	switch exports.device
 		when "iphone-5"
-			boardSpecs.height = 216
+			boardSpecs.height = 215
+			boardSpecs.key = {
+				width:exports.px(26)
+				height:exports.px(39)
+			}
+			boardSpecs.padding = {}
+			boardSpecs.padding.row1 = exports.px(3)
+			boardSpecs.padding.row2 = exports.px(19)
+			boardSpecs.padding.row3 = exports.px(54)
+
+
+			boardSpecs.marginTop = {}
+			boardSpecs.marginTop.row1 = exports.px(11)
+			boardSpecs.marginTop.row2 = exports.px(26)
+			boardSpecs.marginTop.row3 = exports.px(41)
+			boardSpecs.marginTop.row4 = exports.px(55)
+
+			boardSpecs.shiftIcon = {x:exports.px(9), y:exports.px(10)}
+			boardSpecs.deleteIcon = {x:exports.px(7), y:exports.px(10)}
+			boardSpecs.emojiIcon = {x:exports.px(8), y:exports.px(9)}
+
+			boardSpecs.sideKey = exports.px(36.5)
+			boardSpecs.sideKeyRadius = exports.px(4)
+			boardSpecs.sideKeyBottom = exports.px(58)
+
+			boardSpecs.returnKey = exports.px(74)
+
 			boardSpecs.spacer = exports.px(6)
+
 		when "iphone-6s"
-			boardSpecs.spacer = exports.px(5)
 			boardSpecs.height = 216
-		when "iphone-6s-plus"
+			boardSpecs.key = {
+				width:exports.px(31.5)
+				height:exports.px(42)
+			}
+			boardSpecs.padding = {}
+			boardSpecs.padding.row1 = exports.px(3)
+			boardSpecs.padding.row2 = exports.px(22)
+			boardSpecs.padding.row3 = exports.px(59)
+
+
+			boardSpecs.marginTop = {}
+			boardSpecs.marginTop.row1 = exports.px(10)
+			boardSpecs.marginTop.row2 = exports.px(22)
+			boardSpecs.marginTop.row3 = exports.px(34)
+			boardSpecs.marginTop.row4 = exports.px(44)
+
+			boardSpecs.shiftIcon = {x:exports.px(11), y:exports.px(11)}
+			boardSpecs.deleteIcon = {x:exports.px(10), y:exports.px(13)}
+			boardSpecs.emojiIcon = {x:exports.px(11), y:exports.px(11)}
+
+			boardSpecs.returnKey = exports.px(87.5)
+
+			boardSpecs.sideKey = exports.px(42)
+			boardSpecs.sideKeyRadius = exports.px(5)
+			boardSpecs.sideKeyBottom = exports.px(56)
+
 			boardSpecs.spacer = exports.px(6)
-			boardSpecs.height = 225
+
+		when "iphone-6s-plus"
+			boardSpecs.height = 226
+			boardSpecs.key = {
+				width:exports.px(35)
+				height:exports.px(45)
+			}
+			boardSpecs.padding = {}
+			boardSpecs.padding.row1 = exports.px(4)
+			boardSpecs.padding.row2 = exports.px(25)
+			boardSpecs.padding.row3 = exports.px(67)
+
+
+			boardSpecs.marginTop = {}
+			boardSpecs.marginTop.row1 = exports.px(8)
+			boardSpecs.marginTop.row2 = exports.px(19)
+			boardSpecs.marginTop.row3 = exports.px(30)
+			boardSpecs.marginTop.row4 = exports.px(41)
+
+			boardSpecs.shiftIcon = {x:exports.px(13), y:exports.px(14)}
+			boardSpecs.deleteIcon = {x:exports.px(11), y:exports.px(14)}
+			boardSpecs.emojiIcon = {x:exports.px(11), y:exports.px(11)}
+
+			boardSpecs.bottomRow = 6
+
+			boardSpecs.returnKey = exports.px(97)
+
+			boardSpecs.sideKey = exports.px(45)
+			boardSpecs.sideKeyRadius = exports.px(5)
+
+			boardSpecs.spacer = exports.px(6)
+		when "ipad"
+			boardSpecs.height = 268
+			boardSpecs.key = {
+				width:exports.px(58)
+				height:exports.px(56)
+			}
+			boardSpecs.padding = {}
+			boardSpecs.padding.row1 = exports.px(6)
+			boardSpecs.padding.row2 = exports.px(35)
+			boardSpecs.padding.row3 = exports.px(74)
+
+
+			boardSpecs.marginTop = {}
+			boardSpecs.marginTop.row1 = exports.px(8)
+			boardSpecs.marginTop.row2 = exports.px(19)
+			boardSpecs.marginTop.row3 = exports.px(30)
+			boardSpecs.marginTop.row4 = exports.px(41)
+
+			boardSpecs.shiftIcon = {x:exports.px(13), y:exports.px(14)}
+			boardSpecs.deleteIcon = {x:exports.px(11), y:exports.px(14)}
+			boardSpecs.emojiIcon = {x:exports.px(11), y:exports.px(11)}
+
+			boardSpecs.bottomRow = 6
+
+			boardSpecs.returnKey = exports.px(97)
+
+			boardSpecs.sideKey = exports.px(56)
+			boardSpecs.sideKey2 = exports.px(76)
+			boardSpecs.sideKeyRadius = exports.px(5)
+
+			boardSpecs.spacer = exports.px(12)
 
 	board = new Layer backgroundColor:"#D1D5DA", name:"keyboard"
+
+	board.specs = boardSpecs
 
 	#This will generate a object with 216 height and it'll stretch end to end. 
 	board.constraints = (height:boardSpecs.height, trailing:0, leading:0)
 
+	exports.layout()
+
 	#This will deterine if it starts on the bottom or pops up from the bottom 
-	if setup.hidden
+	if setup.animated
 		board.y = exports.height
+		board.animate 
+			properties:(maxY: exports.height)
+			time:.25
+			curve:"ease-in-out"
 	else
 		board.maxY = exports.height
 
@@ -1745,26 +1893,6 @@ exports.Keyboard = (array) ->
 	#Holds the keys that we make. This will allows us to quickly iterate through them. 
 	keysArray = []
 
-	rowsMap = [
-		{ 
-			"padding" : exports.px(4)
-			"startIndex" : 0
-			"endIndex" : 9
-			"marginTop" : exports.px(10)
-		},
-		{ 
-			"padding" : 22 * exports.scale
-			"startIndex" : 10
-			"endIndex" : 18
-			"marginTop" : 22 * exports.scale
-		},
-		{ 
-			"padding" : 59 * exports.scale
-			"startIndex" : 19
-			"endIndex" : 25
-			"marginTop" : 34 * exports.scale
-		}
-	]
 	keyPopUp = new Layer width:@keyWidth, height:@keyHeight, x:@.x-16*exports.scale, backgroundColor:"transparent", superLayer:board, name:"key pop up"
 	box = new Layer borderRadius:exports.px(10), superLayer:keyPopUp, backgroundColor:"transparent", color:"black", name:"letter"
 	box.style = {
@@ -1778,9 +1906,10 @@ exports.Keyboard = (array) ->
 	path = new Layer superLayer:keyPopUp, backgroundColor:"transparent", name:"shape path"
 	board.keyPopUp = keyPopUp
 	board.keyPopUp.box = box
-	shiftKey = new Layer superLayer:board, name:"shift", borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498"
-	shiftKey.constraints = (bottom:56, leading:3, width:42, height:42)
-	shiftIcon = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey, backgroundColor:"transparent", x:exports.px(11), y:exports.px(11)
+
+	shiftKey = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius, backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2)
+	shiftKey.constraints = (leading:3)
+	shiftIcon = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x, y:boardSpecs.shiftIcon.y
 	shiftIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 		<svg width='#{exports.px(20)}px' height='#{exports.px(18)}px' viewBox='0 0 20 19' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 		    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
@@ -1814,10 +1943,9 @@ exports.Keyboard = (array) ->
 			</svg>"
 	shiftIcon.states.animationOptions =
   	  time: .01
-  	deleteKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", name:"delete"
-  	deleteKey.constraints = (bottom:56, trailing:3, width:42, height:42)
-  	deleteIcon = new Layer superLayer:deleteKey, width:exports.px(24), height:exports.px(18), backgroundColor:"transparent"
-  	deleteIcon.constraints = (top:13, leading:10)
+  	deleteKey = new Layer superLayer:board, borderRadius:boardSpecs.sideKeyRadius, backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", name:"delete", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2)
+  	deleteKey.constraints = (trailing:3)
+  	deleteIcon = new Layer superLayer:deleteKey, width:exports.px(24), height:exports.px(18), backgroundColor:"transparent", x:boardSpecs.deleteIcon.x, y:boardSpecs.deleteIcon.y
 
   	deleteIcon.states.add 
   		"on": 
@@ -1862,6 +1990,19 @@ exports.Keyboard = (array) ->
   		deleteKey.backgroundColor = "#AAB3BC"
   		deleteIcon.states.switchInstant("off")
 
+  		if setup.output
+	  		initialLength = setup.output.text.html.length
+	  		newText = setup.output.text.html.slice(0, -1)
+	  		exports.update(setup.output.text, [text:newText])
+	  		endLength = setup.output.text.html.length
+	  		if initialLength == endLength 
+	  			newText = setup.output.text.html.slice(0, -6)
+	  			exports.update(setup.output.text, [text:newText])
+	  		if setup.output.text.html == ""
+	  			setup.output.placeholder.visible = true
+
+
+
   	deleteIcon.states.switchInstant("off")
 
 
@@ -1884,14 +2025,35 @@ exports.Keyboard = (array) ->
 	board.keys.delete.icon = deleteIcon
 	board.keys.shift = shiftKey
 	board.keys.shift.icon = shiftIcon
+
+	rowsMap = [
+		{ 
+			"padding" : boardSpecs.padding.row1
+			"startIndex" : 0
+			"endIndex" : 9
+			"marginTop" : boardSpecs.marginTop.row1
+		},
+		{ 
+			"padding" : boardSpecs.padding.row2
+			"startIndex" : 10
+			"endIndex" : 18
+			"marginTop" : boardSpecs.marginTop.row2
+		},
+		{ 
+			"padding" : boardSpecs.padding.row3
+			"startIndex" : 19
+			"endIndex" : 25
+			"marginTop" : boardSpecs.marginTop.row3
+		}
+	]
+
 	for letter in lettersArray
 		index = lettersArray.indexOf(letter) 
-		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.scale, backgroundColor:"white", color:"black", shadowY:exports.px(1), shadowColor:"#929498"
+		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.scale, backgroundColor:"white", color:"black", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.key.width, height:boardSpecs.key.height
 		board.keys[letter] = key
 		keyPopUp.bringToFront()
 		box.bringToFront()
 		if exports.scale == 2
-			key.constraints = (width:32, height:42)
 			keyPopUp.constraints = (width:65, height:122)
 			path.constraints = (width:65, height: 122)
 			path.y = 10
@@ -1905,7 +2067,6 @@ exports.Keyboard = (array) ->
 			box.y = exports.px(28)
 
 		if exports.scale == 3
-			key.constraints = (width:35, height:46)
 			keyPopUp.constraints = (width:68, height:122)
 			@keyHeight = exports.px(122)
 			@keyWidth = exports.px(65)
@@ -1945,33 +2106,34 @@ exports.Keyboard = (array) ->
 			rowIndex = index - rowsMap[2].startIndex
 			key.x = rowsMap[2].padding + (rowIndex*boardSpecs.spacer) + (rowIndex*key.width)
 			key.y = rowsMap[2].marginTop + key.height * 2
-		path.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 
-		<svg width='#{@pathWidth}px' height='#{@pathHeight}' viewBox='0 0 63 114' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
-		    <title>Rectangle 44 Copy</title>
-		    <desc>Created with Sketch.</desc>
-		    <defs>
-		        <filter x='-50%' y='-50%' width='200%' height='200%' filterUnits='objectBoundingBox' id='filter-1'>
-		            <feOffset dx='0' dy='0' in='SourceAlpha' result='shadowOffsetOuter1'></feOffset>
-		            <feGaussianBlur stdDeviation='1.5' in='shadowOffsetOuter1' result='shadowBlurOuter1'></feGaussianBlur>
-		            <feColorMatrix values='0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.21 0' in='shadowBlurOuter1' type='matrix' result='shadowMatrixOuter1'></feColorMatrix>
-		            <feMerge>
-		                <feMergeNode in='shadowMatrixOuter1'></feMergeNode>
-		                <feMergeNode in='SourceGraphic'></feMergeNode>
-		            </feMerge>
-		        </filter>
-		    </defs>
-		    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
-		        <g id='iPhone-6' sketch:type='MSArtboardGroup' transform='translate(-118.000000, -240.000000)' stroke='#C7C7C7' filter='url(#filter-1)' stroke-width='0.5' 
-		        fill='#FFFFFF' opacity='0.998367537'>
-		         <path d='M134,306 C134,306 121,295 121,290 C121,279.616788 121,253.001456 121,253.001456 C121,247.477804 125.485832,243 131.002774,243 L167.862127,243 C173.386507,243 177.880862,247.469905 
-		         177.900044,252.997271 C177.900044,252.997271 178,280 177.999999,290 C177.999999,295.006553 165,306 165,306 L165,346.049594 
-		         C165,348.806807 162.770556,351.041969 160.002098,351.041969 L138.997902,351.041969 
-		          C136.237637,351.041969 134,348.808331 134,346.049594 L134,306 Z' id='Rectangle-44-Copy' sketch:type='MSShapeGroup' transform='translate(149.500000, 297.020985) scale(-1, 1) translate(-149.500000, -297.020985) '>
-		          </path>
-		        </g>
-		    </g>
-		</svg>"
+
+		path.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{@pathWidth}px' height='#{@pathHeight}' viewBox='0 0 63 114' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <title>Rectangle 44 Copy</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs>
+			        <filter x='-50%' y='-50%' width='200%' height='200%' filterUnits='objectBoundingBox' id='filter-1'>
+			            <feOffset dx='0' dy='0' in='SourceAlpha' result='shadowOffsetOuter1'></feOffset>
+			            <feGaussianBlur stdDeviation='1.5' in='shadowOffsetOuter1' result='shadowBlurOuter1'></feGaussianBlur>
+			            <feColorMatrix values='0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.21 0' in='shadowBlurOuter1' type='matrix' result='shadowMatrixOuter1'></feColorMatrix>
+			            <feMerge>
+			                <feMergeNode in='shadowMatrixOuter1'></feMergeNode>
+			                <feMergeNode in='SourceGraphic'></feMergeNode>
+			            </feMerge>
+			        </filter>
+			    </defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='iPhone-6' sketch:type='MSArtboardGroup' transform='translate(-118.000000, -240.000000)' stroke='#C7C7C7' filter='url(#filter-1)' stroke-width='0.5' 
+			        fill='#FFFFFF' opacity='0.998367537'>
+			         <path d='M134,306 C134,306 121,295 121,290 C121,279.616788 121,253.001456 121,253.001456 C121,247.477804 125.485832,243 131.002774,243 L167.862127,243 C173.386507,243 177.880862,247.469905 
+			         177.900044,252.997271 C177.900044,252.997271 178,280 177.999999,290 C177.999999,295.006553 165,306 165,306 L165,346.049594 
+			         C165,348.806807 162.770556,351.041969 160.002098,351.041969 L138.997902,351.041969 
+			          C136.237637,351.041969 134,348.808331 134,346.049594 L134,306 Z' id='Rectangle-44-Copy' sketch:type='MSShapeGroup' transform='translate(149.500000, 297.020985) scale(-1, 1) translate(-149.500000, -297.020985) '>
+			          </path>
+			        </g>
+			    </g>
+			</svg>"
 		keysArray.push key
 
 
@@ -1993,26 +2155,34 @@ exports.Keyboard = (array) ->
 				for key in keysArray
 					key.style['text-transform'] = 'lowercase'
 				box.style['text-transform'] = 'lowercase'
+				if setup.output
+					@newText = setup.output.text.html + @.name.toUpperCase()
+			else
+				if setup.output
+					@newText = setup.output.text.html + @.name
+				if setup.output
+					exports.update(setup.output.text, [text:@newText])
 
 
 
 	board.keysArray = keysArray
-	numKey = new Layer superLayer:board, name:"num", borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black"
-	numKey.constraints = (width:40.5, height:42, bottom:4, leading:3)
+	numKey = new Layer superLayer:board, name:"num", borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black", width:boardSpecs.sideKey, height:boardSpecs.key.height
+	numKey.constraints = (top:exports.pt(boardSpecs.marginTop.row4 + boardSpecs.key.height*3), leading:3)
 	numKey.html = "123"
 	numKey.style = {
 		"font-size" : exports.px(16) + "px"
 		"font-weight" : 400
 		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 		'text-align' : 'center'
-		'line-height' : exports.px(42) + "px"
+		'line-height' : boardSpecs.key.height + "px"
 
 	}
 
 	exports.layout()
-	emojiKey = new Layer superLayer:board, name:"emoji", borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498"
-	emojiKey.constraints = (width:41, height:42, bottom:4, leading:[numKey, 6])
-	emojiKey.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+	emojiKey = new Layer superLayer:board, name:"emoji", borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.key.height
+	emojiKey.constraints = (bottomEdges:numKey, leading:[numKey, 6])
+	emojiIcon = new Layer width:exports.px(20), height:exports.px(19), superLayer:emojiKey, backgroundColor:"transparent", x:boardSpecs.emojiIcon.x, y:boardSpecs.emojiIcon.y
+	emojiIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 		<svg width='#{exports.px(20)}px' height='#{exports.px(20)}px' viewBox='0 0 20 20' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 		    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 		    <title>Emoji</title>
@@ -2026,10 +2196,7 @@ exports.Keyboard = (array) ->
 		        </g>
 		    </g>
 		</svg>"
-	emojiKey.style = {
-		"padding-top": exports.px(11) + "px"
-		"padding-left": exports.px(11) + "px"
-	}
+
 
 	emojiFormatter = (string) ->
 		unicodeFormat = ""
@@ -2459,30 +2626,32 @@ exports.Keyboard = (array) ->
 		emojiKey.backgroundColor = "#AAB3BC"
 
 
-	returnKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"return"
-	returnKey.constraints = (width:87.5, height:42, trailing:3, bottom:4)
+	returnKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"return", width:boardSpecs.returnKey, height:boardSpecs.key.height
+	returnKey.constraints = (trailing:3, bottomEdges:numKey)
 	returnKey.html = setup.returnKey
 	returnKey.style = {
 		"font-size" : exports.px(16) + "px"
 		"font-weight" : 400
 		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 		'text-align' : 'center'
-		'line-height' : exports.px(42) + "px"
+		'line-height' : boardSpecs.key.height + "px"
 
 	}
 	exports.layout()
 	board.keys.return = returnKey
-	spaceKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"white", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"space"
-	spaceKey.constraints = (width:180, height:42, leading:[emojiKey, 6], bottom:4)
+
+	spaceKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"white", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"space", height:boardSpecs.key.height
+	spaceKey.constraints = (bottomEdges:numKey, leading:[emojiKey, exports.pt(boardSpecs.spacer)], trailing:[returnKey, boardSpecs.spacer])
 	spaceKey.html = "space"
 	spaceKey.style = {
 		"font-size" : exports.px(16) + "px"
 		"font-weight" : 400
 		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 		'text-align' : 'center'
-		'line-height' : exports.px(42) + "px"
+		'line-height' : boardSpecs.key.height + "px"
 
 	}
+
 	board.keys["&nbsp;"] = spaceKey
 	board.keys.space = spaceKey
 	exports.layout()
@@ -2490,8 +2659,12 @@ exports.Keyboard = (array) ->
 
 	spaceKey.on Events.TouchStart, ->
 		spaceKey.backgroundColor = "#AAB3BC"
+
 	spaceKey.on Events.TouchEnd, ->
 		spaceKey.backgroundColor = "white"
+		if setup.output
+			@newText = setup.output.text.html + "&nbsp;"
+			exports.update(setup.output.text, [text:@newText])
 
 
 	returnKey.on Events.TouchStart, ->
