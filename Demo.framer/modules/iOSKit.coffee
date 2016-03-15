@@ -1769,6 +1769,8 @@ exports.Keyboard = (array) ->
 			boardSpecs.sideKeyRadius = exports.px(4)
 			boardSpecs.sideKeyBottom = exports.px(58)
 
+			boardSpecs.iPadDeleteOffset = 0
+
 			boardSpecs.returnKey = exports.px(74)
 
 			boardSpecs.spacer = exports.px(6)
@@ -1796,6 +1798,8 @@ exports.Keyboard = (array) ->
 			boardSpecs.emojiIcon = {x:exports.px(11), y:exports.px(11)}
 
 			boardSpecs.returnKey = exports.px(87.5)
+
+			boardSpecs.iPadDeleteOffset = 0
 
 			boardSpecs.sideKey = exports.px(42)
 			boardSpecs.sideKeyRadius = exports.px(5)
@@ -1827,6 +1831,8 @@ exports.Keyboard = (array) ->
 
 			boardSpecs.bottomRow = 6
 
+			boardSpecs.iPadDeleteOffset = 0
+
 			boardSpecs.returnKey = exports.px(97)
 
 			boardSpecs.sideKey = exports.px(45)
@@ -1836,7 +1842,7 @@ exports.Keyboard = (array) ->
 		when "ipad"
 			boardSpecs.height = 268
 			boardSpecs.key = {
-				width:exports.px(58)
+				width:exports.px(56)
 				height:exports.px(56)
 			}
 			boardSpecs.padding = {}
@@ -1847,15 +1853,17 @@ exports.Keyboard = (array) ->
 
 			boardSpecs.marginTop = {}
 			boardSpecs.marginTop.row1 = exports.px(8)
-			boardSpecs.marginTop.row2 = exports.px(19)
-			boardSpecs.marginTop.row3 = exports.px(30)
-			boardSpecs.marginTop.row4 = exports.px(41)
+			boardSpecs.marginTop.row2 = exports.px(16)
+			boardSpecs.marginTop.row3 = exports.px(24)
+			boardSpecs.marginTop.row4 = exports.px(32)
 
 			boardSpecs.shiftIcon = {x:exports.px(13), y:exports.px(14)}
 			boardSpecs.deleteIcon = {x:exports.px(11), y:exports.px(14)}
 			boardSpecs.emojiIcon = {x:exports.px(11), y:exports.px(11)}
 
 			boardSpecs.bottomRow = 6
+
+			boardSpecs.iPadDeleteOffset = boardSpecs.marginTop.row3 + boardSpecs.key.height * 2 - boardSpecs.marginTop.row1
 
 			boardSpecs.returnKey = exports.px(97)
 
@@ -1887,6 +1895,11 @@ exports.Keyboard = (array) ->
 	#Letters to be made
 	lettersArray = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v",  "b", "n", "m"]
 	
+
+	if exports.device == "ipad"
+		lettersArray.push ","
+		lettersArray.push "."
+
 	#Numbers to be made (depending on device)
 	numsArray = [0..9]
 
@@ -1908,7 +1921,7 @@ exports.Keyboard = (array) ->
 	board.keyPopUp.box = box
 
 	shiftKey = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius, backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2)
-	shiftKey.constraints = (leading:3)
+	shiftKey.constraints = (leading:exports.pt(boardSpecs.padding.row1))
 	shiftIcon = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x, y:boardSpecs.shiftIcon.y
 	shiftIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 		<svg width='#{exports.px(20)}px' height='#{exports.px(18)}px' viewBox='0 0 20 19' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
@@ -1943,7 +1956,10 @@ exports.Keyboard = (array) ->
 			</svg>"
 	shiftIcon.states.animationOptions =
   	  time: .01
-  	deleteKey = new Layer superLayer:board, borderRadius:boardSpecs.sideKeyRadius, backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", name:"delete", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2)
+
+
+
+  	deleteKey = new Layer superLayer:board, borderRadius:boardSpecs.sideKeyRadius, backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", name:"delete", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2 - boardSpecs.iPadDeleteOffset)
   	deleteKey.constraints = (trailing:3)
   	deleteIcon = new Layer superLayer:deleteKey, width:exports.px(24), height:exports.px(18), backgroundColor:"transparent", x:boardSpecs.deleteIcon.x, y:boardSpecs.deleteIcon.y
 
@@ -2006,6 +2022,47 @@ exports.Keyboard = (array) ->
   	deleteIcon.states.switchInstant("off")
 
 
+  	if exports.device == "ipad"
+        keyboardKey = new Layer superLayer:board, name:"dismiss", borderRadius:boardSpecs.sideKeyRadius, backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.sideKey
+        
+        keyboardKey.constraints = {trailingEdges:deleteKey, top:exports.pt(boardSpecs.marginTop.row4 + boardSpecs.key.height*3)}
+
+  		shiftKey2 = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius, backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.sideKey
+		shiftKey2.constraints = (trailingEdges:deleteKey, bottomEdges:shiftKey)
+		shiftIcon2 = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey2, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x, y:boardSpecs.shiftIcon.y
+		shiftIcon2.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='#{exports.px(20)}px' height='#{exports.px(18)}px' viewBox='0 0 20 19' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+			    <title>Shift</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+			        <g id='Keyboard/Light/Lower' sketch:type='MSLayerGroup' transform='translate(-14.000000, -129.000000)' fill='#030303'>
+			            <g id='Third-Row' transform='translate(3.000000, 118.000000)' sketch:type='MSShapeGroup'>
+			                <path d='M21.6719008,12.2325898 C21.301032,11.8279916 20.6946892,11.8334731 20.3288195,12.2325898 L11.6947023,21.6512983 C10.7587441,22.672308 11.1285541,23.5 12.5097751,23.5 L15.9999999,23.5000002 L15.9999999,28.0014241 C15.9999999,28.8290648 16.6716559,29.5000001 17.497101,29.5000001 L24.5028992,29.5000001 C25.3297253,29.5000001 26.0000003,28.8349703 26.0000003,28.0014241 L26.0000003,23.5000001 L29.4902251,23.5000002 C30.8763357,23.5000002 31.2439521,22.6751916 30.3054161,21.6512985 L21.6719008,12.2325898 Z M21.341748,14.3645316 C21.1530056,14.1632064 20.8433515,14.1670914 20.6582514,14.3645316 L13.5,21.9999998 L17.5000001,21.9999999 L17.5000002,27.5089956 C17.5000002,27.7801703 17.7329027,28.0000008 18.0034229,28.0000008 L23.996577,28.0000008 C24.2746097,28.0000008 24.4999997,27.7721203 24.4999997,27.5089956 L24.4999997,21.9999999 L28.5,21.9999999 L21.341748,14.3645316 Z' id='Shift'></path>
+			            </g>
+			        </g>
+			    </g>
+			</svg>"
+
+		shiftIcon2.states.add
+			"on":
+				html: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+				<svg width='#{exports.px(20)}px' height='#{exports.px(18)}px' viewBox='0 0 20 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+				    <!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
+				    <title>Shift</title>
+				    <desc>Created with Sketch.</desc>
+				    <defs></defs>
+				    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' sketch:type='MSPage'>
+				        <g id='Keyboard/Light/Upper' sketch:type='MSLayerGroup' transform='translate(-14.000000, -130.000000)' fill='#030303'>
+				            <g id='Third-Row' transform='translate(3.000000, 118.000000)' sketch:type='MSShapeGroup'>
+				                <path d='M21.7052388,13.2052388 C21.3157462,12.8157462 20.6857559,12.8142441 20.2947612,13.2052388 L11.9160767,21.5839233 C11.1339991,22.3660009 11.3982606,23 12.4979131,23 L16.5,23 L16.5,28.009222 C16.5,28.5564136 16.9463114,29 17.4975446,29 L24.5024554,29 C25.053384,29 25.5,28.5490248 25.5,28.009222 L25.5,23 L29.5020869,23 C30.6055038,23 30.866824,22.366824 30.0839233,21.5839233 L21.7052388,13.2052388 Z' id='Shift'></path>
+				            </g>
+				        </g>
+				    </g>
+				</svg>"
+		shiftIcon2.states.animationOptions =
+	  	  time: .01
 
 	shiftIcon.on Events.Click, ->
 		shiftIcon.states.next()
@@ -2167,7 +2224,7 @@ exports.Keyboard = (array) ->
 
 	board.keysArray = keysArray
 	numKey = new Layer superLayer:board, name:"num", borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black", width:boardSpecs.sideKey, height:boardSpecs.key.height
-	numKey.constraints = (top:exports.pt(boardSpecs.marginTop.row4 + boardSpecs.key.height*3), leading:3)
+	numKey.constraints = (top:exports.pt(boardSpecs.marginTop.row4 + boardSpecs.key.height*3), leadingEdges:shiftKey)
 	numKey.html = "123"
 	numKey.style = {
 		"font-size" : exports.px(16) + "px"
@@ -2627,7 +2684,10 @@ exports.Keyboard = (array) ->
 
 
 	returnKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"#AAB3BC", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"return", width:boardSpecs.returnKey, height:boardSpecs.key.height
-	returnKey.constraints = (trailing:3, bottomEdges:numKey)
+	if exports.device == "ipad"
+		returnKey.constraints = (trailingEdges:deleteKey, top:exports.pt(boardSpecs.marginTop.row2 + boardSpecs.key.height) )
+	else
+		returnKey.constraints = (trailing:boardSpecs.spacer, bottomEdges:numKey)
 	returnKey.html = setup.returnKey
 	returnKey.style = {
 		"font-size" : exports.px(16) + "px"
