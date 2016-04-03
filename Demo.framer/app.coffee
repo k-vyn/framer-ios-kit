@@ -5,4 +5,7 @@ whiteBG = new BackgroundLayer backgroundColor: "white"
 status = new ios.StatusBar carrier:"T-Mobile"
 
 
-banner = new ios.Banner animated:true, title:"Do it now", message:"PLEAAAAASE", duration:false
+alert = new ios.Menu actions:["OK", "Do something", "Don't do anything"]
+
+alert.actions[0].on Events.TouchEnd, ->
+	print "OK"

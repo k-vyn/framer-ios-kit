@@ -15,11 +15,11 @@ framerDevices = {
 "apple-iphone-5s-gold": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 
 ## 5c
-"apple-iphone-5c-green": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5c-green": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5c-blue": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5c-red": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5c-white": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5c-yellow": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5c-white": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
+"apple-iphone-5c-yellow": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5c-pink": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 
 ## 6s
@@ -238,6 +238,9 @@ exports.changeFill = (layer, color) ->
 	newString = "fill=\"" + exports.color(color).toHexString()
 	layer.html = layer.html.replace(string, newString)
 
+exports.capitalize = (string) ->
+	return string.charAt(0).toUpperCase() + string.slice(1)
+
 # Returns the current time
 exports.getTime = ->
 	daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
@@ -301,12 +304,11 @@ exports.color = (colorString) ->
 ## Defaults for everything
 defaults = {
 	alert: {
-		text:{
-			title: "Title"
-			message:"Message"
-			action:"Action"
-			secondaryAction: "secondaryAction"
-		}
+		title: "Title"
+		message:"Message"
+		actions:["OK"]
+		action:"Action"
+		secondaryAction: "secondaryAction"
 	}
 	banner: {
 		title: "Title"
@@ -402,7 +404,7 @@ defaults = {
 		output:undefined
 	}
 	menu: {
-		options:["Option", "Option", "Option"]
+		actions:["OK"]
 		exit:"Cancel"
 		animated:false
 		description:undefined
@@ -516,12 +518,11 @@ setPropsRedo = (object) ->
 	keys = Object.keys(object)
 	object["props"] = keys
 
-components = [defaults.banner, defaults.menu, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
+components = [defaults.alert, defaults.banner, defaults.menu, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
 for comp in components
 	setPropsRedo(comp)
 
 setProps(defaults.text.defaults, defaults.text)
-setProps(defaults.alert.text, defaults.alert)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -878,408 +879,6 @@ textAutoSize = (textLayer) ->
 		width : textWidth.width
 		height: textWidth.height
 	}
-
-exports.Text = (array) ->
-	if array == undefined
-		array = []
-	exceptions = Object.keys(array)
-	styleArray = {}
-	for i in defaults.text.props
-		if array[i] != undefined
-			@[i] = array[i]
-		else
-			@[i] = defaults.text.defaults[i]
-		if i != "style"
-			styleArray[i] = @[i]
-	textLayer = new Layer
-	textLayer.type = "text"
-	textLayer.html = @text
-	textStyle = 
-		"#{@.style}" : 
-			styleArray
-	if exports.styles[@.style] == undefined
-		exports.addStyle textStyle
-		exports.apply(textLayer, @style)
-	else
-		exports.apply(textLayer, @style)
-		for change in exceptions
-			if change != "style"
-				makeStyleChange(textLayer, change, array[change])		
-	textFrame = textAutoSize(textLayer)
-	textLayer.props = (height:textFrame.height, width:textFrame.width)
-	return textLayer
-
-exports.update = (layer, array) ->
-	if array == undefined
-		array = []
-	if layer.type == "text"
-		for change in array
-			key = Object.keys(change)[0]
-			value = change[key]
-			if key == "text"
-				layer.html = value
-				textFrame = textAutoSize(layer)
-				layer.width = textFrame.width
-				layer.height = textFrame.height
-	if layer.type == "field"
-		print "yo"
-	exports.layout()
-
-exports.timeDelegate = (layer, clockType) ->
-	@time = exports.getTime()
-	Utils.delay 60 - @time.secs, ->
-		@time = exports.getTime()
-		exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
-		Utils.interval 60, ->
-			@time = exports.getTime()
-			exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
- 
-exports.timeFormatter = (timeObj, clockType) ->
-	if clockType == false 
-		if timeObj.hours > 12
-			timeObj.hours = timeObj.hours - 12
-	if timeObj.mins < 10
-		timeObj.mins = "0" + timeObj.mins
-	return timeObj.hours + ":" + timeObj.mins
-
-
-## Components 
-exports.Alert = (array) ->
-	if array == undefined
-		array = []
-	for i in defaults.alert.props
-		if array[i] != undefined
-			@[i] = array[i]
-		else
-			@[i] = defaults.alert.text[i]
-	all = new Layer backgroundColor:"transparent", name:"alert all"
-	all.constraints = 
-		leading:0
-		trailing:0
-		top:0
-		bottom:0
-	overlay = new Layer backgroundColor:"rgba(0,0,0,.3)", superLayer:all, name:"overlay"
-	exports.bgBlur(overlay)
-	overlay.constraints =
-		leading:0
-		trailing:0
-		top:0
-		bottom:0
-	alertBG = new Layer backgroundColor:"white", superLayer:all, borderRadius:exports.px(10), name:"alert bg", x:92, y:537
-	alertBG.constraints =
-		align:"center"
-		width:280
-		height:400
-	title = new exports.Text style:"alertTitle", superLayer:alertBG, text:@title, fontWeight:"medium",  name:"title"
-	title.constraints = 
-		align:"horizontal"
-		top:20
-	message = new exports.Text style:"alertMessage", text:@message, fontSize:13, superLayer:alertBG, textAlign:"center", lineHeight:16, width:240, name:"message"
-	message.constraints =
-		top: [title, 10]
-		align:"horizontal"
-		width: 220
-	divider = new Layer superLayer:alertBG, backgroundColor:"#E2E8EB", name:"horizontal divider"
-	divider.constraints = 
-		leading:0
-		trailing:0
-		height:1
-		bottom:44
-	exports.layout()
-	actionButton = new exports.Text style:"alertAction", color:"#0076FF", superLayer:alertBG, text:@action, name:"action"
-	secondaryActionButton = new exports.Text style:"alertAction", text:@secondaryAction, name:"secondaryAction"
-	alertBG.constraints["height"] = 20 + exports.pt(title.height) + 10 + exports.pt(message.height) + 64 
-	exports.layout()
-	if @action != "Action" && @secondaryAction == "secondaryAction"
-		actionButton.constraints = 
-			align:"horizontal"
-			bottom:16
-		box = new Layer superLayer:alertBG, backgroundColor:"transparent"
-		box.constraints = 
-			leading:0
-			trailing:0
-			bottom:0
-			height:44
-		secondaryActionButton.visible = false
-		exports.layout()
-		return {
-			all : all
-			overlay : overlay
-			action: box
-			title: title
-			message: message
-		}
-	else
-		leftBox = new Layer width:alertBG.width/2, superLayer:alertBG, name:@secondaryAction + " box", backgroundColor:"transparent"
-		rightBox = new Layer width:alertBG.width/2, superLayer:alertBG, name:@action + " box", backgroundColor:"transparent"
-		dividerVertical = new Layer superLayer:alertBG, backgroundColor:"#E2E8EB"
-		dividerVertical.constraints = 
-			width:1
-			height:44
-			bottom:0
-			align:"horizontal"
-		leftBox.constraints =
-			height:44
-			bottom:0
-			leading:0
-		rightBox.constraints =
-			height:44
-			bottom:0
-			trailing:0
-		leftBox.addSubLayer(secondaryActionButton)
-		rightBox.addSubLayer(actionButton)
-		exports.layout()
-		actionButton.constraints = 
-			align:"horizontal"
-			bottom:14
-		secondaryActionButton.constraints =
-			align:"horizontal"
-			bottom:14
-		exports.layout()
-		return {
-			all : all
-			overlay : overlay
-			action: rightBox
-			secondaryAction : leftBox
-			title: title
-			message: message
-		}
-
-exports.Banner = (array) ->
-	setup = setupComponent("banner", array)
-	banner = new Layer backgroundColor:"transparent", name:"banner"
-	banner.html = exports.svg(bannerBG[exports.device]).svg
-	banner.constraints =
-		leading:0
-		trailing:0
-		top:0
-		height:68
-
-	# Different positionings for each device
-	switch exports.device 
-		when "ipad" 
-			@leadingIcon = 200
-			@topIcon = 15
-			@topTitle = 11
-		when "ipad-pro"
-			@leadingIcon = 192
-			@topIcon = 12
-			@topTitle = 9
-		else
-			@leadingIcon = 15
-			@topIcon = 8
-			@topTitle = 5
-
-	if setup.icon == undefined
-		setup.icon = new Layer superLayer:banner
-		setup.icon.style["background"] = "linear-gradient(-180deg, #67FF81 0%, #01B41F 100%)"
-	else
-		banner.addSubLayer(setup.icon)
-
-	setup.icon.borderRadius = exports.px(4.5)
-	setup.icon.name = "icon"
-	setup.icon.constraints =
-		height:20
-		width:20
-		leading:@leadingIcon
-		top:@topIcon 
-
-	title = new exports.Text style:"bannerTitle", text:setup.title, color:"white", fontWeight:"medium", fontSize:13, superLayer:banner, name:"title"
-	title.constraints = 
-		top:@topTitle
-
-		leading:[setup.icon, 11]
-	message = new exports.Text style:"bannerMessage", text:setup.message, color:"white", fontSize:13, superLayer:banner, name:"message"
-	message.constraints =
-		leadingEdges:title
-		top:[title, 2]
-
-	time = new exports.Text style:"bannerTime", text:setup.time, color:"white", fontSize:11, superLayer:banner, name:"time"
-	time.constraints =
-		leading:[title, 5]
-		bottomEdges: title
-
-	if exports.device == "ipad" || exports.device == "ipad-pro"
-		time.constraints =
-			bottomEdges: title
-			trailing: @leadingIcon
-
-	exports.layout()
-	exports.bgBlur(banner)
-
-	## Banner Drag settings
-	banner.draggable = true
-	banner.draggable.horizontal = false
-	banner.draggable.constraints =
-		y:0
-
-	banner.draggable.bounceOptions =
-	    friction: 25
-	    tension: 250
-
-	banner.on Events.DragEnd, ->
-		if banner.maxY < exports.px(68)
-			banner.animate
-				properties:(maxY:0)
-				time:.15
-				curve:"ease-in-out"
-			Utils.delay .25, ->
-				banner.destroy()
-
-
-	# Buffer that sits above the banner
-	bannerBuffer = new Layer y:200, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.width, maxY:banner.y, height:exports.height
-	exports.bgBlur(bannerBuffer)
-
-	# Animate-in
-	if setup.animated == true
-		banner.y = 0 - banner.height
-		banner.animate
-			properties:(y:0)
-			time:.25
-			curve:"ease-in-out"
-
-	# Animate-out
-	if setup.duration
-		Utils.delay setup.duration, ->
-			banner.animate
-				properties:(maxY:0)
-				time:.25
-				curve:"ease-in-out"
-		Utils.delay setup.duration + .25, ->
-			banner.destroy()
-		
-	# Export Banner
-	banner.icon = setup.icon
-	banner.title = title
-	banner.message = message
-	return banner
-
-
-exports.Button = (array) ->
-	setup = setupComponent("button", array)
-	button = new Layer name:setup.name
-	color = ""
-	if setup.constraints
-		button.constraints = 
-			setup.constraints
-		exports.layout()
-	if setup.superLayer 
-		setup.superLayer.addSubLayer(button)
-	switch setup.type
-		when "big"
-			@fontSize = 20
-			@top = 16
-			@fontWeight = "medium"
-			button.constraints =
-				leading:10
-				trailing:10
-				height:57
-			button.borderRadius = exports.px(12.5)
-			backgroundColor = ""
-			switch setup.style
-				when "light"
-					color = "#007AFF"
-					if setup.blur 
-						backgroundColor = "rgba(255, 255, 255, .9)"
-						exports.bgBlur(button)
-					else
-						backgroundColor = "white"
-
-				when "dark"
-					color = "#FFF"
-					if setup.blur
-						backgroundColor = "rgba(43, 43, 43, .9)"
-						exports.bgBlur(button)
-					else
-						backgroundColor = "#282828"
-				else
-					if setup.blur 
-						color = setup.color
-						backgroundColor = new Color(setup.backgroundColor)
-						rgbString = backgroundColor.toRgbString()
-						rgbaString = rgbString.replace(")", ", .9)")
-						rgbaString  = rgbaString.replace("rgb", "rgba")
-						backgroundColor = rgbaString
-						exports.bgBlur(button)
-					else
-						color = setup.color
-						backgroundColor = new Color(setup.backgroundColor)
-
-
-			button.backgroundColor = backgroundColor
-
-			button.on Events.TouchStart, ->
-				newColor = ""
-				if setup.style == "dark"
-					newColor = button.backgroundColor.lighten(10)
-				else
-					newColor = button.backgroundColor.darken(10)
-				button.animate 
-					properties:(backgroundColor:newColor)
-					time:.5
-			button.on Events.TouchEnd, ->
-				button.animate
-					properties:(backgroundColor:backgroundColor)
-					time:.5
-
-		when "small"
-			@fontSize = 16
-			@top = 4
-			button.borderRadius = exports.px(2.5)
-			switch setup.style
-				when "light"
-					color = "#007AFF"
-					button.borderColor = "#007AFF"
-				else
-					color = setup.color
-					button.borderColor = setup.color
-			button.backgroundColor = "transparent"
-			button.borderWidth = exports.px(1)
-
-
-		else
-			button.backgroundColor = "transparent"
-			color = setup.color
-			@fontSize = setup.fontSize
-			@fontWeight = setup.fontWeight
-
-			button.on Events.TouchStart, ->
-				newColor = button.subLayers[0].color.lighten(30)
-				button.subLayers[0].animate 
-					properties:(color:newColor)
-					time:.5
-			button.on Events.TouchEnd, ->
-				button.subLayers[0].animate
-					properties:(color:setup.color)
-					time:.5
-
-	textLayer = new exports.Text style:"button#{setup.type}#{setup.style}", text:setup.text, color:color, superLayer:button, fontSize:@fontSize, fontWeight:@fontWeight
-	textLayer.constraints =
-		align:"horizontal"
-		top:@top
-	switch setup.type 
-		when "small"
-			button.props = (width:textLayer.width + exports.px(60), height: textLayer.height + exports.px(10))
-			button.on Events.TouchStart, ->
-				button.animate
-					properties:(backgroundColor:color)
-					time:.5	
-				textLayer.animate
-					properties:(color:"#FFF")
-					time:.5
-			button.on Events.TouchEnd, ->
-				button.animate
-					properties:(backgroundColor:"transparent")
-					time:.5	
-				textLayer.animate
-					properties:(color:color)
-					time:.5
-		else 
-			button.props = (width:textLayer.width, height:textLayer.height)
-	exports.layout()
-	return button
-
 listenToKeys = (field, keyboard) ->
 
 	keypress = (key) ->
@@ -1515,6 +1114,420 @@ listenToKeys = (field, keyboard) ->
 					newText = field.text.html + char
 					exports.update(field.text, [text:newText])
 					field.value = exports.clean(newText)
+
+exports.update = (layer, array) ->
+	if array == undefined
+		array = []
+	if layer.type == "text"
+		for change in array
+			key = Object.keys(change)[0]
+			value = change[key]
+			if key == "text"
+				layer.html = value
+				textFrame = textAutoSize(layer)
+				layer.width = textFrame.width
+				layer.height = textFrame.height
+	if layer.type == "field"
+		print "yo"
+	exports.layout()
+
+exports.timeDelegate = (layer, clockType) ->
+	@time = exports.getTime()
+	Utils.delay 60 - @time.secs, ->
+		@time = exports.getTime()
+		exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
+		Utils.interval 60, ->
+			@time = exports.getTime()
+			exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
+ 
+exports.timeFormatter = (timeObj, clockType) ->
+	if clockType == false 
+		if timeObj.hours > 12
+			timeObj.hours = timeObj.hours - 12
+	if timeObj.mins < 10
+		timeObj.mins = "0" + timeObj.mins
+	return timeObj.hours + ":" + timeObj.mins
+
+## Components 
+exports.Alert = (array) ->
+	setup = setupComponent("alert", array)
+	alert = new Layer backgroundColor:"transparent", name:"alert"
+	alert.constraints = 
+		leading:0
+		trailing:0
+		top:0
+		bottom:0
+	overlay = new Layer backgroundColor:"rgba(0,0,0,.3)", superLayer:alert, name:"overlay"
+	exports.bgBlur(overlay)
+	overlay.constraints =
+		leading:0
+		trailing:0
+		top:0
+		bottom:0
+	modal = new Layer backgroundColor:"white", superLayer:alert, borderRadius:exports.px(10), name:"modal", x:92, y:537
+	modal.constraints =
+		align:"center"
+		width:280
+		height:400
+	title = new exports.Text style:"alertTitle", superLayer:modal, text:setup.title, fontWeight:"medium",  name:"title", textAlign:"center"
+	title.constraints = 
+		align:"horizontal"
+		width:220
+		top:20
+	message = new exports.Text style:"alertMessage", text:setup.message, fontSize:13, superLayer:modal, textAlign:"center", lineHeight:16, width:240, name:"message"
+	message.constraints =
+		top: [title, 10]
+		align:"horizontal"
+		width: 220
+	divider = new Layer superLayer:modal, backgroundColor:"#E2E8EB", name:"horizontal divider"
+	divider.constraints = 
+		leading:0
+		trailing:0
+		height:1
+		bottom:44
+	exports.layout()
+	
+	#Title + Message + 1 set of actions
+	modal.constraints["height"] = 20 + exports.pt(title.height) + 10 + exports.pt(message.height) + 24 + 44
+
+
+	actions = []
+	switch setup.actions.length
+		when 1
+			actLabel = exports.capitalize(setup.actions[0])
+			action = new Layer superLayer:modal, backgroundColor:"transparent", name:setup.actions[0], borderRadius:exports.px(10)
+			action.constraints = 
+				leading:0
+				trailing:0
+				bottom:0
+				height:44
+			action.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action, text:actLabel, name:"label"
+			action.label.constraints = 
+				align:"horizontal"
+				bottom:14
+			actions.push action
+		when 2
+			actLabel = exports.capitalize(setup.actions[0])
+			action = new Layer superLayer:modal, name:setup.actions[0], borderRadius:exports.px(10), backgroundColor:"white"
+			action.constraints = 
+				leading:0
+				trailing:exports.pt(modal.width/2)
+				bottom:0
+				height:44
+			action.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action, text:actLabel, name:"label"
+			action.label.constraints = 
+				align:"horizontal"
+				bottom:16
+			actions.push action		
+
+			vertDivider = new Layer superLayer:modal, backgroundColor:"#E2E8EB", name:"vertical divider"
+			vertDivider.constraints = 
+				width:1
+				bottom:0
+				height:44
+				align:"horizontal"
+
+			actLabel2 = exports.capitalize(setup.actions[1])
+			action2 = new Layer superLayer:modal, name:setup.actions[1], borderRadius:exports.px(10), backgroundColor:"white"
+			action2.constraints = 
+				leading:exports.pt(modal.width/2)
+				trailing:0
+				bottom:0
+				height:44
+			action2.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action2, text:actLabel2, name:"label"
+			action2.label.constraints = 
+				align:"horizontal"
+				bottom:14
+			actions.push action2
+		else
+			for act, index in setup.actions
+				actLabel = exports.capitalize(act)
+				action = new Layer superLayer:modal, name:act, borderRadius:exports.px(10), backgroundColor:"white"
+				action.constraints = 
+					leading:0
+					trailing:0
+					bottom:0 + ((setup.actions.length - index - 1) * 44)
+					height:44
+				actionDivider = new Layer superLayer:modal, backgroundColor:"#E2E8EB", name:"horizontal divider"
+				actionDivider.constraints = 
+					leading:0
+					trailing:0
+					height:1
+					bottom:0 + ((setup.actions.length - index) * 44)
+				action.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action, text:actLabel, name:"label"
+				action.label.constraints = 
+					align:"horizontal"
+					bottom:14
+				actions.push action		
+				modal.constraints["height"] = modal.constraints["height"] + 42
+
+	alert.actions = {}	
+	for act in actions
+		#Add Touch Events
+		act.on Events.TouchStart, ->
+			@.backgroundColor = "white"
+			@.animate
+				properties:(backgroundColor:act.backgroundColor.darken(5))
+				time:.25
+			@.label.animate
+				properties:(color:act.label.color.lighten(10))
+				time:.25
+
+		act.on Events.TouchEnd, ->
+			@.animate
+				properties:(backgroundColor:"white")
+				time:.25
+			@.label.animate
+				properties:(color:exports.color("blue"))
+				time:.25
+
+		# Export actions
+		alert.actions[act.name] = act
+
+
+	exports.layout()
+
+	# Export alert
+	alert.overlay = overlay
+	alert.modal = modal
+	alert.title = title
+	alert.message = message
+
+	return alert
+
+exports.Banner = (array) ->
+	setup = setupComponent("banner", array)
+	banner = new Layer backgroundColor:"transparent", name:"banner"
+	banner.html = exports.svg(bannerBG[exports.device]).svg
+	banner.constraints =
+		leading:0
+		trailing:0
+		top:0
+		height:68
+
+	# Different positionings for each device
+	switch exports.device 
+		when "ipad" 
+			@leadingIcon = 200
+			@topIcon = 15
+			@topTitle = 11
+		when "ipad-pro"
+			@leadingIcon = 192
+			@topIcon = 12
+			@topTitle = 9
+		else
+			@leadingIcon = 15
+			@topIcon = 8
+			@topTitle = 5
+
+	if setup.icon == undefined
+		setup.icon = new Layer superLayer:banner
+		setup.icon.style["background"] = "linear-gradient(-180deg, #67FF81 0%, #01B41F 100%)"
+	else
+		banner.addSubLayer(setup.icon)
+
+	setup.icon.borderRadius = exports.px(4.5)
+	setup.icon.name = "icon"
+	setup.icon.constraints =
+		height:20
+		width:20
+		leading:@leadingIcon
+		top:@topIcon 
+
+	title = new exports.Text style:"bannerTitle", text:setup.title, color:"white", fontWeight:"medium", fontSize:13, superLayer:banner, name:"title"
+	title.constraints = 
+		top:@topTitle
+
+		leading:[setup.icon, 11]
+	message = new exports.Text style:"bannerMessage", text:setup.message, color:"white", fontSize:13, superLayer:banner, name:"message"
+	message.constraints =
+		leadingEdges:title
+		top:[title, 2]
+
+	time = new exports.Text style:"bannerTime", text:setup.time, color:"white", fontSize:11, superLayer:banner, name:"time"
+	time.constraints =
+		leading:[title, 5]
+		bottomEdges: title
+
+	if exports.device == "ipad" || exports.device == "ipad-pro"
+		time.constraints =
+			bottomEdges: title
+			trailing: @leadingIcon
+
+	exports.layout()
+	exports.bgBlur(banner)
+
+	## Banner Drag settings
+	banner.draggable = true
+	banner.draggable.horizontal = false
+	banner.draggable.constraints =
+		y:0
+
+	banner.draggable.bounceOptions =
+	    friction: 25
+	    tension: 250
+
+	banner.on Events.DragEnd, ->
+		if banner.maxY < exports.px(68)
+			banner.animate
+				properties:(maxY:0)
+				time:.15
+				curve:"ease-in-out"
+			Utils.delay .25, ->
+				banner.destroy()
+
+
+	# Buffer that sits above the banner
+	bannerBuffer = new Layer y:200, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.width, maxY:banner.y, height:exports.height
+	exports.bgBlur(bannerBuffer)
+
+	# Animate-in
+	if setup.animated == true
+		banner.y = 0 - banner.height
+		banner.animate
+			properties:(y:0)
+			time:.25
+			curve:"ease-in-out"
+
+	# Animate-out
+	if setup.duration
+		Utils.delay setup.duration, ->
+			banner.animate
+				properties:(maxY:0)
+				time:.25
+				curve:"ease-in-out"
+		Utils.delay setup.duration + .25, ->
+			banner.destroy()
+		
+	# Export Banner
+	banner.icon = setup.icon
+	banner.title = title
+	banner.message = message
+	return banner
+
+exports.Button = (array) ->
+	setup = setupComponent("button", array)
+	button = new Layer name:setup.name
+	color = ""
+	if setup.constraints
+		button.constraints = 
+			setup.constraints
+		exports.layout()
+	if setup.superLayer 
+		setup.superLayer.addSubLayer(button)
+	switch setup.type
+		when "big"
+			@fontSize = 20
+			@top = 16
+			@fontWeight = "medium"
+			button.constraints =
+				leading:10
+				trailing:10
+				height:57
+			button.borderRadius = exports.px(12.5)
+			backgroundColor = ""
+			switch setup.style
+				when "light"
+					color = "#007AFF"
+					if setup.blur 
+						backgroundColor = "rgba(255, 255, 255, .9)"
+						exports.bgBlur(button)
+					else
+						backgroundColor = "white"
+
+				when "dark"
+					color = "#FFF"
+					if setup.blur
+						backgroundColor = "rgba(43, 43, 43, .9)"
+						exports.bgBlur(button)
+					else
+						backgroundColor = "#282828"
+				else
+					if setup.blur 
+						color = setup.color
+						backgroundColor = new Color(setup.backgroundColor)
+						rgbString = backgroundColor.toRgbString()
+						rgbaString = rgbString.replace(")", ", .9)")
+						rgbaString  = rgbaString.replace("rgb", "rgba")
+						backgroundColor = rgbaString
+						exports.bgBlur(button)
+					else
+						color = setup.color
+						backgroundColor = new Color(setup.backgroundColor)
+
+
+			button.backgroundColor = backgroundColor
+
+			button.on Events.TouchStart, ->
+				newColor = ""
+				if setup.style == "dark"
+					newColor = button.backgroundColor.lighten(10)
+				else
+					newColor = button.backgroundColor.darken(10)
+				button.animate 
+					properties:(backgroundColor:newColor)
+					time:.5
+			button.on Events.TouchEnd, ->
+				button.animate
+					properties:(backgroundColor:backgroundColor)
+					time:.5
+
+		when "small"
+			@fontSize = 16
+			@top = 4
+			button.borderRadius = exports.px(2.5)
+			switch setup.style
+				when "light"
+					color = "#007AFF"
+					button.borderColor = "#007AFF"
+				else
+					color = setup.color
+					button.borderColor = setup.color
+			button.backgroundColor = "transparent"
+			button.borderWidth = exports.px(1)
+
+
+		else
+			button.backgroundColor = "transparent"
+			color = setup.color
+			@fontSize = setup.fontSize
+			@fontWeight = setup.fontWeight
+
+			button.on Events.TouchStart, ->
+				newColor = button.subLayers[0].color.lighten(30)
+				button.subLayers[0].animate 
+					properties:(color:newColor)
+					time:.5
+			button.on Events.TouchEnd, ->
+				button.subLayers[0].animate
+					properties:(color:setup.color)
+					time:.5
+
+	textLayer = new exports.Text style:"button#{setup.type}#{setup.style}", text:setup.text, color:color, superLayer:button, fontSize:@fontSize, fontWeight:@fontWeight
+	textLayer.constraints =
+		align:"horizontal"
+		top:@top
+	switch setup.type 
+		when "small"
+			button.props = (width:textLayer.width + exports.px(60), height: textLayer.height + exports.px(10))
+			button.on Events.TouchStart, ->
+				button.animate
+					properties:(backgroundColor:color)
+					time:.5	
+				textLayer.animate
+					properties:(color:"#FFF")
+					time:.5
+			button.on Events.TouchEnd, ->
+				button.animate
+					properties:(backgroundColor:"transparent")
+					time:.5	
+				textLayer.animate
+					properties:(color:color)
+					time:.5
+		else 
+			button.props = (width:textLayer.width, height:textLayer.height)
+	exports.layout()
+	return button
 
 exports.Field = (array) ->
 	setup = setupComponent("field", array)
@@ -2926,20 +2939,20 @@ exports.Keyboard = (array) ->
 
 exports.Menu = (array) ->
 	setup = setupComponent("menu", array)
-	all = new Layer backgroundColor:"transparent"
-	all.constraints = 
+	menu = new Layer backgroundColor:"transparent"
+	menu.constraints = 
 		leading:0
 		trailing:0
 		top:0
 		bottom:0
-	overlay = new Layer backgroundColor:"rgba(0, 0, 0, .4)", superLayer:all, name:"overlay"
+	overlay = new Layer backgroundColor:"rgba(0, 0, 0, .4)", superLayer:menu, name:"overlay"
 	overlay.constraints =
 		leading:0
 		trailing:0
 		top:0
 		bottom:0
 	exports.bgBlur(overlay)
-	menus = new Layer backgroundColor:"transparent", superLayer:all
+	menus = new Layer backgroundColor:"transparent", superLayer:menu
 	menus.constraints = 
 		leading:0
 		trailing:0
@@ -2950,50 +2963,50 @@ exports.Menu = (array) ->
 		bottom:10
 		align:"horizontal"
 
-	options = new Layer superLayer:menus, borderRadius:exports.px(12.5), backgroundColor:"rgba(255,255,255, .85)"
+	actions = new Layer superLayer:menus, borderRadius:exports.px(12.5), backgroundColor:"rgba(255,255,255, .85)"
 
 	descriptionBuffer = 0
 	if setup.description
-		description = new exports.Text style:"menuDescription", text:setup.description, superLayer:options, fontSize:13, color:"#8F8E94", textAlign:"center"
+		description = new exports.Text style:"menuDescription", text:setup.description, superLayer:actions, fontSize:13, color:"#8F8E94", textAlign:"center"
 		description.constraints = 
 			top:21
 			align:"horizontal"
 			width:exports.pt(exports.width) - 100
 		exports.layout()
 		descriptionBuffer = exports.pt(description.height) + 42
-		divider = new Layer superLayer:options, backgroundColor:"#D6E3E7"
+		divider = new Layer superLayer:actions, backgroundColor:"#D6E3E7"
 		divider.constraints =
 			height:1
 			top:descriptionBuffer
 			leading:0
 			trailing:0
-	exports.bgBlur(options)
-	options.constraints = 
+	exports.bgBlur(actions)
+	actions.constraints = 
 		leading:10
 		trailing:10
 		bottom:[exitButton, 10]
-		height:58 * setup.options.length + descriptionBuffer
+		height:58 * setup.actions.length + descriptionBuffer
 	exports.layout()
-	opts = {}
-	for opt, index in setup.options
-		isRedPresent = opt.search("-r")
+	acts = {}
+	for act, index in setup.actions
+		isRedPresent = act.search("-r")
 		if isRedPresent == 0
 			@red = true
-			opt = opt.replace("-r", "")
-			opt = opt.slice(1)
-		o = new Layer superLayer:options, width:options.width, backgroundColor:"transparent", borderRadius:exports.px(12.5)
+			act = act.replace("-r", "")
+			act = act.slice(1)
+		o = new Layer superLayer:actions, width:actions.width, backgroundColor:"transparent", borderRadius:exports.px(12.5)
 		o.constraints = 
 			top:index * 58 + descriptionBuffer
 			height:58
-		button = new exports.Button text:opt, superLayer:o, fontSize:20
+		button = new exports.Button text:act, superLayer:o, fontSize:20
 		button.constraints =
 			align:"horizontal"
 			top:15
 		if @red
 			button.subLayers[0].color = "red"
 		button.color = "#FE3824"
-		if index != setup.options.length - 1
-			divider = new Layer superLayer:o, width:options.width, backgroundColor:"#D6E3E7"
+		if index != setup.actions.length - 1
+			divider = new Layer superLayer:o, width:actions.width, backgroundColor:"#D6E3E7"
 			divider.constraints =
 				height:1
 				bottom:0
@@ -3008,18 +3021,18 @@ exports.Menu = (array) ->
 				properties:(backgroundColor:"transparent")
 				time:.5
 			menus.animate 
-				properties: (maxY:exports.height+exports.px((setup.options.length + 3) * 58))
+				properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
 				time:.3
 			overlay.animate
 				properties: (opacity:0)
 				time:.3
 			Utils.delay .3, ->
-				all.destroy()
-		opts[opt] = o
+				menu.destroy()
+		acts[act] = o
 
 	if setup.animated == true
 		overlay.opacity = 0 
-		menus.maxY = exports.height + exports.px((setup.options.length + 3) * 58)
+		menus.maxY = exports.height + exports.px((setup.actions.length + 3) * 58)
 		overlay.animate
 			properties:(opacity:1)
 			time:.3
@@ -3029,30 +3042,29 @@ exports.Menu = (array) ->
 
 	overlay.on Events.TouchEnd, ->
 		menus.animate 
-			properties: (maxY:exports.height+exports.px((setup.options.length + 3) * 58))
+			properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
 			time:.3
 		overlay.animate
 			properties: (opacity:0)
 			time:.3
 		Utils.delay .3, ->
-			all.destroy()		
+			menu.destroy()		
 
 	exitButton.on Events.TouchEnd, ->
 		menus.animate 
-			properties: (maxY:exports.height+exports.px((setup.options.length + 3) * 58))
+			properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
 			time:.3
 		overlay.animate
 			properties: (opacity:0)
 			time:.3
 		Utils.delay .3, ->
-			all.destroy()
-	return {
-		cancel:exitButton
-		options:opts
-		menu:menus
-		overlay:overlay
-		description:description
-	}
+			menu.destroy()
+
+	menu.cancel = exitButton
+	menu.description = description
+	menu.overlay = overlay
+	menu.actions = acts
+	return menu
 
 exports.NavBar = (array) ->
 	setup = setupComponent("navBar", array)
@@ -3364,6 +3376,37 @@ exports.TableCell = (array) ->
 		}
 	}
 
+exports.Text = (array) ->
+	if array == undefined
+		array = []
+	exceptions = Object.keys(array)
+	styleArray = {}
+	for i in defaults.text.props
+		if array[i] != undefined
+			@[i] = array[i]
+		else
+			@[i] = defaults.text.defaults[i]
+		if i != "style"
+			styleArray[i] = @[i]
+	textLayer = new Layer
+	textLayer.type = "text"
+	textLayer.html = @text
+	textStyle = 
+		"#{@.style}" : 
+			styleArray
+	if exports.styles[@.style] == undefined
+		exports.addStyle textStyle
+		exports.apply(textLayer, @style)
+	else
+		exports.apply(textLayer, @style)
+		for change in exceptions
+			if change != "style"
+				makeStyleChange(textLayer, change, array[change])		
+	textFrame = textAutoSize(textLayer)
+	textLayer.props = (height:textFrame.height, width:textFrame.width)
+	return textLayer
+
+
 iconLibrary = {
 	activity: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 			<svg width='#{exports.px(16)}px' height='#{exports.px(16)}px' viewBox='0 0 16 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
@@ -3657,8 +3700,7 @@ iconLibrary = {
 						</g>
 					</g>
 				</g>
-			</svg>"
-}
+			</svg>"}
 
 bannerBG = {
 	"iphone-5": "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
