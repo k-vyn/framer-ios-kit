@@ -2,18 +2,7 @@
 ios = require 'iOSKit'
 
 whiteBG = new BackgroundLayer backgroundColor: "white"
-statusBar = new ios.StatusBar carrier:"T-MOBILE", battery:100
+status = new ios.StatusBar carrier:"T-Mobile"
 
 
-text = new ios.Text style:"h1", fontSize:40, fontWeight:100, text:"hello " + ios.device
-
-text.constraints = 
-	align:"center"
-	
-
-button = new ios.Button constraints:{align:"horizontal", top:[text, 10]}, text:"Yoooo"
-
-
-key = new ios.Field
-
-ios.layout()
+banner = new ios.Banner animated:true, title:"Do it now", message:"PLEAAAAASE", duration:false

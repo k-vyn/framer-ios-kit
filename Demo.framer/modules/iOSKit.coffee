@@ -1,51 +1,58 @@
 #iOSKit Module
-#By Kevyn Arnott @kvyn_
+#By Kevyn Arnott 
+
+
 framerDevices = {
-#Fullscreen
+
+# Fullscreen
 "fullscreen" : { height: window.innerHeight, width: window.innerWidth,	scale:1, mobile:false, platform:"web"}
 
-#iPhones
-##5S
+# iPhones
+
+## 5S
 "apple-iphone-5s-space-gray": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5s-silver": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5s-gold": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 
-##5c
+## 5c
 "apple-iphone-5c-green": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5c-blue": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5c-red": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5c-white": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5c-yellow": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-5c-pink": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-##6s
+
+## 6s
 "apple-iphone-6s-space-gray" : { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-6s-silver": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-6s-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
 "apple-iphone-6s-rose-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-#6s plus
-"apple-iphone-6s-plus-gold": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
+
+## 6s plus
+"apple-iphone-6s-plus-gold": { height: 2208, width: 1242, scale: 3, mobile:true, platform:"iOS"}
 "apple-iphone-6s-plus-silver": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
 "apple-iphone-6s-plus-space-gray": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
 "apple-iphone-6s-plus-rose-gold": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
 
-#iPads
+# iPads
 
-#Air
-
+## Air 
 "apple-ipad-air-2-gold": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
 "apple-ipad-air-2-silver": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
 "apple-ipad-air-2-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
 
-#mini
+## Mini
 "apple-ipad-mini-4-gold": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
 "apple-ipad-mini-4-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
 "apple-ipad-mini-4-silver":{ height: 2048, width: 1536, scale: 2, mobile:true, platform:"iOS"}
 
-#Pro
+## Pro
 "apple-ipad-pro-gold": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
 "apple-ipad-pro-silver": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
 "apple-ipad-pro-space-gray" : { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
 }
+
+## These variables will be populated with details from the device upon running. 
 exports.device = 0
 exports.name = 0
 exports.scale = 0
@@ -54,10 +61,204 @@ exports.width = 0
 exports.mobile = 0
 exports.platform = 0
 exports.orientation = 0
+
 screen = {}
 
+# getDevice will populate device variables, and it'll override the frame if the device is different. 
+exports.getDevice = ->
 
-## iOS Color
+	# Loads the initial frame
+	device = Framer.Device.deviceType
+
+	### This switch looks at the innerWidth to determine if the prototype is being opened on a device. 
+	If so, it'll override the device, and it'll adjust the view to fullscreen.###
+
+	switch innerWidth
+		# iPhone 5c/5s/SE
+		when 640
+			device = "apple-iphone-5s-silver"
+			Framer.Device.deviceType = "fullscreen"
+
+		# iPhone 6s
+		when 750
+			device = "apple-ipad-6s-silver"
+			Framer.Device.deviceType = "fullscreen"
+
+		# iPhone 6s+
+		when 1242 
+			if innerHeight == 2208
+				device = "apple-iphone-6s-plus-silver"
+				Framer.Device.deviceType = "fullscreen"
+
+		# iPad in portrait
+		when 1536 
+			if innerHeight == 2048
+				device = "apple-ipad-air-2-silver"
+				Framer.Device.deviceType = "fullscreen"
+
+		# iPad
+		when 2048
+
+			# iPad Pro in portrait
+			if innerHeight == 2732
+				device = "apple-ipad-pro-silver"
+
+			# iPad in landsccape
+			if innerHeight == 1536
+				device = "apple-ipad-air-2-silver"
+			Framer.Device.deviceType = "fullscreen"
+
+		# iPad Pro
+		when 2732
+			if innerHeight == 2048
+				device = "apple-ipad-pro-silver"
+				Framer.Device.deviceType = "fullscreen"
+
+	exports.scale = framerDevices[device].scale
+
+	if device == "fullscreen"
+		exports.width = window.innerWidth
+		exports.height = window.innerHeight
+	else
+		exports.width = framerDevices[device].width
+		exports.height = framerDevices[device].height
+		if window.innerWidth == 1242 || window.innerWidth == 2208
+			exports.width = window.innerWidth
+			exports.height = window.innerHeight
+			exports.scale = 3
+	exports.mobile = framerDevices[device].mobile
+	exports.platform = framerDevices[device].platform
+	exports.orientation =  Framer.Device.orientation
+
+	# Device String Scrubber
+	device = device.replace("apple-", "")
+	device = device.replace("-gold", "")
+	device = device.replace("-green", "")
+	device = device.replace("-blue", "")
+	device = device.replace("-red", "")
+	device = device.replace("-white", "")
+	device = device.replace("-yellow", "")
+	device = device.replace("-pink", "")
+	device = device.replace("-space-grey", "")
+	device = device.replace("-rose", "")
+	device = device.replace("5s", "5")
+	device = device.replace("5c", "5")
+	device = device.replace("-mini", "")
+	device = device.replace("-air", "")
+	device = device.replace("-2", "")
+	device = device.replace("-4", "")
+	exports.device = device.replace("-silver", "")
+	
+	# exports.device becomes either ipad, ipad-pro, iphone-5, iphone-6s, iphone-6s-plus
+
+	screen = {
+		width:exports.width
+		height:exports.height
+	}
+
+
+exports.orient = () ->
+	if exports.orientation == -90
+		tempHeight = exports.height
+		tempWidth = exports.width
+		exports.height = tempWidth
+		exports.width = tempHeight
+
+exports.getDevice()
+exports.orient()
+
+window.addEventListener("resize", onResize)
+window.addEventListener("orientationchange" , onResize)
+
+# Listen to window reize
+
+onResize = () ->
+	exports.getDevice()
+	exports.layout()
+
+# Supporting Functions
+
+## Converts px to pt
+exports.pt = (px) ->
+	pt = px/exports.scale
+	pt = Math.round(pt)
+	return pt
+
+## Converts pt to px
+exports.px = (pt) ->
+	px = pt * exports.scale
+	px = Math.round(px)
+	return px
+
+# Cleans a string of <br> and &nbsp;
+exports.clean = (string) ->
+	## remove white space
+	string = string.replace(/[&]nbsp[;]/gi, " ").replace(/[<]br[>]/gi, "")
+	return string
+
+# Converts px's of an SVG to scalable variables
+exports.svg = (svg) ->
+	# Find String
+	startIndex = svg.search("<svg width=") 
+	endIndex = svg.search(" viewBox")
+	string = svg.slice(startIndex, endIndex)
+
+	#Find width
+	wStartIndex = string.search("=") + 2
+	wEndIndex =  string.search("px")
+	width = string.slice(wStartIndex, wEndIndex)
+	newWidth = exports.px(width)
+
+	# Find Height
+	heightString = string.slice(wEndIndex + 4, string.length)
+	hStartIndex = heightString.search("=")+ 2
+	hEndIndex = heightString.search("px") 
+	height = heightString.slice(hStartIndex, hEndIndex)
+	newHeight = exports.px(height)
+
+	#Create new string
+	newString = string.replace(width, newWidth)
+	newString = newString.replace(height, newHeight)
+
+	#Replace strings
+	svg = svg.replace(string, newString)
+
+	return {
+		svg:svg
+		width:newWidth
+		height:newHeight
+	}
+
+# Changes the fill of an SVG
+exports.changeFill = (layer, color) ->
+	startIndex = layer.html.search("fill=\"#")
+	fillString = layer.html.slice(startIndex, layer.html.length)
+	endIndex = fillString.search("\">")
+	string = fillString.slice(0, endIndex)
+	newString = "fill=\"" + exports.color(color).toHexString()
+	layer.html = layer.html.replace(string, newString)
+
+# Returns the current time
+exports.getTime = ->
+	daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+	monthsOfTheYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
+	dateObj = new Date()
+	month = monthsOfTheYear[dateObj.getMonth()]
+	date = dateObj.getDate()
+	day = daysOfTheWeek[dateObj.getDay()]
+	hours = dateObj.getHours()
+	mins = dateObj.getMinutes()
+	secs = dateObj.getSeconds()
+	return {
+		month:month
+		date:date
+		day:day
+		hours:hours
+		mins:mins
+		secs:secs
+	}
+
+## iOS Color – This will store all of the default iOS colors intead of the default CSS colors. *This is only up here because I refer to it in the defaults.*
 exports.color = (colorString) ->
 	color = ""
 	colorString = colorString.toLowerCase()
@@ -97,95 +298,7 @@ exports.color = (colorString) ->
 				color = new Color("#929292")
 	return color
 
-
-exports.getDevice = ->
-	device = Framer.Device.deviceType
-	switch innerWidth
-		when 640
-			device = "apple-iphone-5s-silver"
-			Framer.Device.deviceType = "fullscreen"
-		when 750
-			device = "apple-ipad-6s-silver"
-			Framer.Device.deviceType = "fullscreen"
-		when 1536 
-			if innerHeight == 2048
-				device = "apple-ipad-air-2-silver"
-				Framer.Device.deviceType = "fullscreen"
-		when 2048
-			if innerHeight == 2732
-				device = "apple-ipad-pro-silver"
-			if innerHeight == 1536
-				device = "apple-ipad-air-2-silver"
-			Framer.Device.deviceType = "fullscreen"
-		when 1242 
-			if innerHeight == 2208
-				device = "apple-iphone-6s-plus-silver"
-				Framer.Device.deviceType = "fullscreen"
-		when 2732
-			if innerHeight == 2048
-				device = "apple-ipad-pro-silver"
-				Framer.Device.deviceType = "fullscreen"
-
-	exports.scale = framerDevices[device].scale
-	if device == "fullscreen"
-		exports.width = window.innerWidth
-		exports.height = window.innerHeight
-	else
-		exports.width = framerDevices[device].width
-		exports.height = framerDevices[device].height
-		if window.innerWidth == 1242 || window.innerWidth == 2208
-			exports.width = window.innerWidth
-			exports.height = window.innerHeight
-			exports.scale = 3
-	exports.mobile = framerDevices[device].mobile
-	exports.platform = framerDevices[device].platform
-	exports.orientation =  Framer.Device.orientation
-	device = device.replace("apple-", "")
-	device = device.replace("-gold", "")
-	device = device.replace("-green", "")
-	device = device.replace("-blue", "")
-	device = device.replace("-red", "")
-	device = device.replace("-white", "")
-	device = device.replace("-yellow", "")
-	device = device.replace("-pink", "")
-	device = device.replace("-space-grey", "")
-	device = device.replace("-rose", "")
-	device = device.replace("5s", "5")
-	device = device.replace("5c", "5")
-	device = device.replace("-mini", "")
-	device = device.replace("-air", "")
-	device = device.replace("-2", "")
-	device = device.replace("-4", "")
-	exports.device = device.replace("-silver", "")
-	screen = {
-		width:exports.width
-		height:exports.height
-	}
-
-
-exports.orient = () ->
-	if exports.orientation == -90
-		tempHeight = exports.height
-		tempWidth = exports.width
-		exports.height = tempWidth
-		exports.width = tempHeight
-
-exports.getDevice()
-exports.orient()
-
-
-#Listen to window reize
-onResize = () ->
-	exports.getDevice()
-	exports.layout()
-
-
-
-window.addEventListener("resize", onResize)
-window.addEventListener("orientationchange" , onResize)
-
-
-
+## Defaults for everything
 defaults = {
 	alert: {
 		text:{
@@ -196,13 +309,13 @@ defaults = {
 		}
 	}
 	banner: {
-		text:{
-			title: "Title"
-			message:"Message"
-			action:"Action"
-			time:"now"
-			icon:undefined
-		}
+		title: "Title"
+		message:"Message"
+		action:"Action"
+		time:"now"
+		icon:undefined
+		duration:7
+		animated:false
 	}
 	button:{
 		text:"text"
@@ -399,21 +512,16 @@ setProps = (object, dest) ->
 	dest["props"] = keys
 
 
+setPropsRedo = (object) ->
+	keys = Object.keys(object)
+	object["props"] = keys
+
+components = [defaults.banner, defaults.menu, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
+for comp in components
+	setPropsRedo(comp)
+
 setProps(defaults.text.defaults, defaults.text)
 setProps(defaults.alert.text, defaults.alert)
-setProps(defaults.banner.text, defaults.banner)
-setProps(defaults.lockScreen, defaults.lockScreen)
-setProps(defaults.statusBar, defaults.statusBar)
-setProps(defaults.tab, defaults.tab)
-setProps(defaults.tabBar, defaults.tabBar)
-setProps(defaults.navBar, defaults.navBar)
-setProps(defaults.button, defaults.button)
-setProps(defaults.menu, defaults.menu)
-setProps(defaults.table, defaults.table)
-setProps(defaults.tableCell, defaults.tableCell)
-setProps(defaults.field, defaults.field)
-setProps(defaults.keyboard, defaults.keyboard)
-
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -426,124 +534,27 @@ setupComponent = (component, array) ->
 			obj[i] = defaults[component][i]
 	return obj
 
-
-## Conversions
-
-#Functions
-exports.pt = (px) ->
-	pt = px/exports.scale
-	pt = Math.round(pt)
-	return pt
-
-exports.px = (pt) ->
-	px = pt * exports.scale
-	px = Math.round(px)
-	return px
-
-exports.clean = (string) ->
-	## remove white space
-	string = string.replace(/[&]nbsp[;]/gi, " ").replace(/[<]br[>]/gi, "")
-	return string
-
-exports.svg = (svg) ->
-	# Find String
-	startIndex = svg.search("<svg width=") 
-	endIndex = svg.search(" viewBox")
-	string = svg.slice(startIndex, endIndex)
-
-	#Find width
-	wStartIndex = string.search("=") + 2
-	wEndIndex =  string.search("px")
-	width = string.slice(wStartIndex, wEndIndex)
-	newWidth = exports.px(width)
-
-	# Find Height
-	heightString = string.slice(wEndIndex + 4, string.length)
-	hStartIndex = heightString.search("=")+ 2
-	hEndIndex = heightString.search("px") 
-	height = heightString.slice(hStartIndex, hEndIndex)
-	newHeight = exports.px(height)
-
-	#Create new string
-	newString = string.replace(width, newWidth)
-	newString = newString.replace(height, newHeight)
-
-	#Replace strings
-	svg = svg.replace(string, newString)
-
-	return {
-		svg:svg
-		width:newWidth
-		height:newHeight
-	}
-
-exports.changeFill = (layer, color) ->
-	switch color
-		when "red"
-			color = "#FE3824"
-		when "blue"
-			color = "#0076FF"
-		when "pink"
-			color = "#FE2851"
-		when "grey"
-			color = "#929292"
-		when "gray"
-			color = "#929292"
-		when "black"
-			color = "#030303"
-		when "white"
-			color = "#EFEFF4"
-		when "orange"
-			color = "#FF9600"
-		when "green"
-			color = "#44DB5E"
-		when "light-blue"
-			color = "#54C7FC"
-		when "yellow"
-			color = "#FFCD00"
-
-
-	startIndex = layer.html.search("fill=\"#")
-	fillString = layer.html.slice(startIndex, layer.html.length)
-	endIndex = fillString.search("\">")
-	string = fillString.slice(0, endIndex)
-	newString = "fill=\"" + color
-	layer.html = layer.html.replace(string, newString)
-
-exports.getTime = ->
-	daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-	monthsOfTheYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-	dateObj = new Date()
-	month = monthsOfTheYear[dateObj.getMonth()]
-	date = dateObj.getDate()
-	day = daysOfTheWeek[dateObj.getDay()]
-	hours = dateObj.getHours()
-	mins = dateObj.getMinutes()
-	secs = dateObj.getSeconds()
-	return {
-		month:month
-		day:day
-		date:date
-		hours:hours
-		mins:mins
-		secs:secs
-	}
-
-## Errors
+# Errors
 error = (context, code) ->
-	if code == 1 
+	## Error code from sameParent
+	if code == 10
 		print "Error Invalid Relationship – Layer id:#{context.id} has a relationship with another layer not in the same superLayer."
-	if code == 2
-		print "Error #{context} requires a layer"
-	if code == 3
-		print "Error #{context} cannot refer to itself"
-	if code == 4
-		print "Error #{context} is not a valid weight. Please use 100, 200, 300... or Thin, Light, Regular..."
-	if code == 5
-		print "Error Layer id:#{context} is not a valid Tab object. Please create a Tab using new module.Tab."
-	if code == 6
-		print "Error '#{context}' is a invalid color"
 
+	## Error codes from layoutAlign 
+	if code == 20
+		print "Error #{context} requires a layer"
+	if code == 21
+		print "Error #{context} cannot refer to itself"
+
+	## Error codes for apply
+	if code == 40
+		print "Error #{context} is not a valid weight. Please use 100, 200, 300... or Thin, Light, Regular..."
+
+	## Error codes for not a valid tab
+	if code == 50
+		print "Error Layer id:#{context} is not a valid Tab object. Please create a Tab using new module.Tab."
+
+# Decides if it should be white/black text
 exports.setTextColor = (colorObject) ->
 	rgb = colorObject.toRgbString()
 	rgb = rgb.substring(4, rgb.length-1)
@@ -561,7 +572,6 @@ exports.setTextColor = (colorObject) ->
 	return color
 
 
-## AutoLayout
 exports.sameParent = (layer1, layer2) ->
 	parentOne = layer1.superLayer
 	parentTwo = layer2.superLayer
@@ -596,9 +606,9 @@ layoutAlign = (layer, type) ->
 	else
 		@superLayer = screen
 	if declaredConstraint == parseInt(declaredConstraint, 10)
-		error(type, 2)
+		error(type, 20)
 	if declaredConstraint == layer
-		error(type, 3)
+		error(type, 21)
 	if typeof declaredConstraint == "object"
 		for i in declaredConstraint
 			if typeof i == "string"
@@ -733,7 +743,7 @@ layoutChange = (layer, type) ->
 						if exports.sameParent(layer, layer.constraints[type])
 							layer[prop] = layer.constraints[type][objProp2]
 						else
-							error(layer, 1)
+							error(layer, 10)
 					if layer.constraints[type].length == 1
 						#Array of One
 						if layer.constraints[type][0] == parseInt(layer.constraints[type][0], 10)
@@ -744,7 +754,7 @@ layoutChange = (layer, type) ->
 							if exports.sameParent(layer, layer.constraints[type][0])
 								layer[prop] = layer.constraints[type][0][objProp2]
 							else
-								error(layer, 1)
+								error(layer, 10)
 					if layer.constraints[type].length > 1	
 						#Relationship Array
 						for object in layer.constraints[type]
@@ -803,7 +813,7 @@ exports.apply = (layer, style) ->
 						when "bold" then layer.style["font-weight"] = 700
 						when "black" then layer.style["font-weight"] = 800
 						else
-							error(p, 4)
+							error(p, 40)
 			if p == "lineHeight"
 				if style[p] == "auto"
 					layer.style["line-height"] = exports.px(style["fontSize"]) * 1.2 + "px"
@@ -813,7 +823,6 @@ exports.apply = (layer, style) ->
 		frame = textAutoSize(layer)
 		layer.width = frame.width
 		layer.height = frame.height
-
 
 exports.bgBlur = (layer) ->
 	layer.style["-webkit-backdrop-filter"] = "blur(#{exports.px(5)}px)"
@@ -1037,83 +1046,115 @@ exports.Alert = (array) ->
 		}
 
 exports.Banner = (array) ->
-	if array == undefined
-		array = []
-	for i in defaults.banner.props
-		if array[i] != undefined
-			@[i] = array[i]
-		else
-			@[i] = defaults.banner.text[i]
-	bannerBG = new Layer backgroundColor:"transparent", name:"banner all"
-	if exports.device == "iphone-6s"
-		bannerBG.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.width}px' height='#{exports.px(68)}px' viewBox='0 0 375 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
-				<!-- Generator: Sketch 3.6 (26304) - http://www.bohemiancoding.com/sketch -->
-				<title>Notification background</title>
-				<desc>Created with Sketch.</desc>
-				<defs></defs>
-				<g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.95'>
-					<g id='iOS8-Push-Notification' transform='translate(-58.000000, -23.000000)' fill='#1A1A1C'>
-						<g transform='translate(58.000000, 7.000000)' id='Notification-container'>
-							<g>
-								<path d='M0,16 L375,16 L375,84 L0,84 L0,16 Z M169,77.0048815 C169,75.897616 169.896279,75 171.0024,75 L203.9976,75 C205.103495,75 206,75.8938998 206,77.0048815 L206,77.9951185 C206,79.102384 205.103721,80 203.9976,80 L171.0024,80 C169.896505,80 169,79.1061002 169,77.9951185 L169,77.0048815 Z' id='Notification-background'></path>
-							</g>
-						</g>
-					</g>
-				</g>
-			</svg>"
-	if exports.device == "iphone-6s-plus"
-		bannerBG.html = "
-		<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.width}px' height='#{exports.px(68)}px' viewBox='0 0 414 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
-			<!-- Generator: Sketch 3.6 (26304) - http://www.bohemiancoding.com/sketch -->
-			<title>Notification background Copy</title>
-			<desc>Created with Sketch.</desc>
-			<defs></defs>
-			<g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.95'>
-				<g id='iOS8-Push-Notification' transform='translate(-43.000000, -74.000000)' fill='#1A1A1C'>
-					<g transform='translate(43.000000, 74.000000)' id='Notification-container'>
-						<g>
-							<path d='M0,0 L414,0 L414,68 L0,68 L0,0 Z M189,61.0048815 C189,59.897616 189.896279,59 191.0024,59 L223.9976,59 C225.103495,59 226,59.8938998 226,61.0048815 L226,61.9951185 C226,63.102384 225.103721,64 223.9976,64 L191.0024,64 C189.896505,64 189,63.1061002 189,61.9951185 L189,61.0048815 Z' id='Notification-background-Copy'></path>
-						</g>
-					</g>
-				</g>
-			</g>
-		</svg>
-		"
-	bannerBG.constraints =
+	setup = setupComponent("banner", array)
+	banner = new Layer backgroundColor:"transparent", name:"banner"
+	banner.html = exports.svg(bannerBG[exports.device]).svg
+	banner.constraints =
 		leading:0
 		trailing:0
 		top:0
 		height:68
-	icon = new Layer superLayer:bannerBG, name:"icon", borderRadius:exports.px(4.5)
-	if @icon == undefined
-		icon.style["background"] = "linear-gradient(-180deg, #67FF81 0%, #01B41F 100%)"
-	icon.constraints =
+
+	# Different positionings for each device
+	switch exports.device 
+		when "ipad" 
+			@leadingIcon = 200
+			@topIcon = 15
+			@topTitle = 11
+		when "ipad-pro"
+			@leadingIcon = 192
+			@topIcon = 12
+			@topTitle = 9
+		else
+			@leadingIcon = 15
+			@topIcon = 8
+			@topTitle = 5
+
+	if setup.icon == undefined
+		setup.icon = new Layer superLayer:banner
+		setup.icon.style["background"] = "linear-gradient(-180deg, #67FF81 0%, #01B41F 100%)"
+	else
+		banner.addSubLayer(setup.icon)
+
+	setup.icon.borderRadius = exports.px(4.5)
+	setup.icon.name = "icon"
+	setup.icon.constraints =
 		height:20
 		width:20
-		leading:15
-		top:8
-	title = new exports.Text style:"bannerTitle", text:@title, color:"white", fontWeight:"medium", fontSize:13, superLayer:bannerBG, name:"title"
+		leading:@leadingIcon
+		top:@topIcon 
+
+	title = new exports.Text style:"bannerTitle", text:setup.title, color:"white", fontWeight:"medium", fontSize:13, superLayer:banner, name:"title"
 	title.constraints = 
-		top:5
-		leading:[icon, 11]
-	message = new exports.Text style:"bannerMessage", text:@message, color:"white", fontSize:13, superLayer:bannerBG, name:"message"
+		top:@topTitle
+
+		leading:[setup.icon, 11]
+	message = new exports.Text style:"bannerMessage", text:setup.message, color:"white", fontSize:13, superLayer:banner, name:"message"
 	message.constraints =
 		leadingEdges:title
 		top:[title, 2]
-	time = new exports.Text style:"bannerTime", text:@time, color:"white", fontSize:11, superLayer:bannerBG, name:"time"
+
+	time = new exports.Text style:"bannerTime", text:setup.time, color:"white", fontSize:11, superLayer:banner, name:"time"
 	time.constraints =
 		leading:[title, 5]
 		bottomEdges: title
 
+	if exports.device == "ipad" || exports.device == "ipad-pro"
+		time.constraints =
+			bottomEdges: title
+			trailing: @leadingIcon
+
 	exports.layout()
-	return {
-		all : bannerBG
-		icon:icon
-		title:title
-		message:message
-	}
+	exports.bgBlur(banner)
+
+	## Banner Drag settings
+	banner.draggable = true
+	banner.draggable.horizontal = false
+	banner.draggable.constraints =
+		y:0
+
+	banner.draggable.bounceOptions =
+	    friction: 25
+	    tension: 250
+
+	banner.on Events.DragEnd, ->
+		if banner.maxY < exports.px(68)
+			banner.animate
+				properties:(maxY:0)
+				time:.15
+				curve:"ease-in-out"
+			Utils.delay .25, ->
+				banner.destroy()
+
+
+	# Buffer that sits above the banner
+	bannerBuffer = new Layer y:200, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.width, maxY:banner.y, height:exports.height
+	exports.bgBlur(bannerBuffer)
+
+	# Animate-in
+	if setup.animated == true
+		banner.y = 0 - banner.height
+		banner.animate
+			properties:(y:0)
+			time:.25
+			curve:"ease-in-out"
+
+	# Animate-out
+	if setup.duration
+		Utils.delay setup.duration, ->
+			banner.animate
+				properties:(maxY:0)
+				time:.25
+				curve:"ease-in-out"
+		Utils.delay setup.duration + .25, ->
+			banner.destroy()
+		
+	# Export Banner
+	banner.icon = setup.icon
+	banner.title = title
+	banner.message = message
+	return banner
+
 
 exports.Button = (array) ->
 	setup = setupComponent("button", array)
@@ -1636,9 +1677,9 @@ exports.LockScreen = (array) ->
 
 exports.StatusBar = (array) ->
 	setup = setupComponent("statusBar", array)
-	statusBarBG = new Layer backgroundColor:"transparent", name:"statusBar.all"
-	statusBarBG.type = setup.type
-	statusBarBG.constraints = 
+	statusBar = new Layer backgroundColor:"transparent", name:"statusBar.all"
+	statusBar.type = setup.type
+	statusBar.constraints = 
 		leading:0
 		trailing:0
 		height:20
@@ -1655,7 +1696,7 @@ exports.StatusBar = (array) ->
 		if layer.type == "lockScreen"
 			@isLockScreenPresent = true
 	if @isLockScreenPresent
-		gripper = new Layer superLayer:statusBarBG, width:exports.px(37), height:exports.px(5), name:"gripper", backgroundColor:"transparent", opacity:.5, name:"gripper"
+		gripper = new Layer superLayer:statusBar, width:exports.px(37), height:exports.px(5), name:"gripper", backgroundColor:"transparent", opacity:.5, name:"gripper"
 		gripper.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 			<svg width='#{exports.px(37)}px' height='#{exports.px(5)}px' viewBox='0 0 37 5' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 				<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
@@ -1680,18 +1721,18 @@ exports.StatusBar = (array) ->
 				@time.stamp = "AM"
 		else
 			@time.stamp = ""
-		time = new exports.Text style:"statusBarTime", text:exports.timeFormatter(@time, setup.clock24) + " " + @time.stamp, fontSize:12, fontWeight:"semibold", superLayer:statusBarBG, color:@color, name:"time"
+		time = new exports.Text style:"statusBarTime", text:exports.timeFormatter(@time, setup.clock24) + " " + @time.stamp, fontSize:12, fontWeight:"semibold", superLayer:statusBar, color:@color, name:"time"
 		time.constraints =
 			align:"center"
 	signal = []
 	if setup.signal < 1
-		noNetwork = new exports.Text superLayer:statusBarBG, fontSize:12, text:"No Network"
+		noNetwork = new exports.Text superLayer:statusBar, fontSize:12, text:"No Network"
 		noNetwork.constraints =
 			leading:7
 			top:3
 	else
 		for i in [0...setup.signal]
-			dot = new Layer height:exports.px(5.5), width:exports.px(5.5), backgroundColor:"black", superLayer:statusBarBG, borderRadius:exports.px(5.5)/2, backgroundColor:@color, name:"signal[#{i}]"
+			dot = new Layer height:exports.px(5.5), width:exports.px(5.5), backgroundColor:"black", superLayer:statusBar, borderRadius:exports.px(5.5)/2, backgroundColor:@color, name:"signal[#{i}]"
 			if i == 0
 				dot.constraints =
 					leading:7
@@ -1705,25 +1746,25 @@ exports.StatusBar = (array) ->
 		if setup.signal < 5
 			nonDots = 5 - setup.signal
 			for i in [0...nonDots]
-				nonDot = new Layer height:exports.px(5.5), width:exports.px(5.5), superLayer:statusBarBG, borderRadius:exports.px(5.5)/2, backgroundColor:"transparent", name:"signal[#{signal.length}]"
+				nonDot = new Layer height:exports.px(5.5), width:exports.px(5.5), superLayer:statusBar, borderRadius:exports.px(5.5)/2, backgroundColor:"transparent", name:"signal[#{signal.length}]"
 				nonDot.style.border = "#{exports.px(1)}px solid #{@color}"
 				nonDot.constraints =
 					leading:[signal[signal.length - 1], 1]
 					top:7
 				signal.push nonDot
 				exports.layout()	
-		carrier = new exports.Text style:"statusBarCarrier", text:setup.carrier, superLayer:statusBarBG, fontSize:12, color:@color, name:"carrier", textTransform:"capitalize"
+		carrier = new exports.Text style:"statusBarCarrier", text:setup.carrier, superLayer:statusBar, fontSize:12, color:@color, name:"carrier", textTransform:"capitalize"
 		carrier.constraints = 
 			leading:[signal[signal.length - 1], 7]
 			top:3
 		exports.layout()
 		if setup.carrier
-			network = new exports.Text style:"statusBarNetwork", text:setup.network, superLayer:statusBarBG, fontSize:12, color:@color, name:"network", textTransform:"uppercase"
+			network = new exports.Text style:"statusBarNetwork", text:setup.network, superLayer:statusBar, fontSize:12, color:@color, name:"network", textTransform:"uppercase"
 			network.constraints =
 				leading:[carrier, 5]
 				top:3
 		if setup.carrier == "" || setup.carrier == "wifi"
-			network = new Layer width:exports.px(14), height:exports.px(10), superLayer:statusBarBG, backgroundColor:"transparent", name:"network"
+			network = new Layer width:exports.px(14), height:exports.px(10), superLayer:statusBar, backgroundColor:"transparent", name:"network"
 			network.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 				<svg width='#{exports.px(14)}px' height='#{exports.px(10)}px' viewBox='0 0 14 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 					<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
@@ -1739,7 +1780,7 @@ exports.StatusBar = (array) ->
 			network.constraints = 
 				leading:[signal[signal.length - 1], 7]
 				top:@topConstraint
-	batteryIcon = new Layer width:exports.px(25), height:exports.px(10), superLayer:statusBarBG, backgroundColor:"transparent", name:"batteryIcon"
+	batteryIcon = new Layer width:exports.px(25), height:exports.px(10), superLayer:statusBar, backgroundColor:"transparent", name:"batteryIcon"
 	if setup.battery > 70 
 		batteryIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 			<svg width='#{exports.px(25)}px' height='#{exports.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
@@ -1782,11 +1823,11 @@ exports.StatusBar = (array) ->
 	batteryIcon.constraints =
 		trailing : 7
 		top:@topConstraint
-	batteryPercent = new exports.Text style:"statusBarBatteryPercent", text:setup.battery + "%", superLayer:statusBarBG, fontSize:12, color:@color, name:"batteryPercent"
+	batteryPercent = new exports.Text style:"statusBarBatteryPercent", text:setup.battery + "%", superLayer:statusBar, fontSize:12, color:@color, name:"batteryPercent"
 	batteryPercent.constraints = 
 		trailing: [batteryIcon, 3]
 		top:3
-	bluetooth = new Layer width:exports.px(8), height:exports.px(15), superLayer:statusBarBG, opacity:.5, backgroundColor:"transparent", name:"bluetooth"
+	bluetooth = new Layer width:exports.px(8), height:exports.px(15), superLayer:statusBar, opacity:.5, backgroundColor:"transparent", name:"bluetooth"
 	bluetooth.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 		<svg width='#{exports.px(8)}px' height='#{exports.px(15)}px' viewBox='0 0 8 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 			<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
@@ -1802,17 +1843,19 @@ exports.StatusBar = (array) ->
 	bluetooth.constraints = 
 		top: 3
 		trailing: [batteryPercent, 7]
+
 	exports.layout()
-	return {
-		all:statusBarBG
-		batteryPercent:batteryPercent
-		batteryIcon:batteryIcon
-		signal: signal
-		carrier:carrier
-		network:network
-		time:time
-		bluetooth:bluetooth
-	}
+
+	# Export statusBar
+	statusBar.battery = {}
+	statusBar.battery.percent = batteryPercent
+	statusBar.battery.icon = batteryIcon
+	statusBar.bluetooth = bluetooth
+	statusBar.time = time
+	statusBar.network = network
+	statusBar.carrier = carrier
+	statusBar.signal = signal
+	return statusBar
 
 exports.Keyboard = (array) ->
 	setup = setupComponent("keyboard", array)
@@ -3615,5 +3658,75 @@ iconLibrary = {
 					</g>
 				</g>
 			</svg>"
-
 }
+
+bannerBG = {
+	"iphone-5": "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+		<svg width='320px' height='68px' viewBox='0 0 320 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+		    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+		    <title>iphone5</title>
+		    <desc>Created with Sketch.</desc>
+		    <defs></defs>
+		    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.9'>
+		        <g id='iPhone-5/5S/5C' fill='#1A1A1C'>
+		            <path d='M0,0 L320,0 L320,68 L0,68 L0,0 Z M142,61.0048815 C142,59.897616 142.896279,59 144.0024,59 L176.9976,59 C178.103495,59 179,59.8938998 179,61.0048815 L179,61.9951185 C179,63.102384 178.103721,64 176.9976,64 L144.0024,64 C142.896505,64 142,63.1061002 142,61.9951185 L142,61.0048815 Z' id='iphone5'></path>
+		        </g>
+		    </g>
+		</svg>"
+	"iphone-6s": "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='375px' height='68px' viewBox='0 0 375 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+				<!-- Generator: Sketch 3.6 (26304) - http://www.bohemiancoding.com/sketch -->
+				<title>Notification background</title>
+				<desc>Created with Sketch.</desc>
+				<defs></defs>
+				<g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.9'>
+					<g id='iOS8-Push-Notification' transform='translate(-58.000000, -23.000000)' fill='#1A1A1C'>
+						<g transform='translate(58.000000, 7.000000)' id='Notification-container'>
+							<g>
+								<path d='M0,16 L375,16 L375,84 L0,84 L0,16 Z M169,77.0048815 C169,75.897616 169.896279,75 171.0024,75 L203.9976,75 C205.103495,75 206,75.8938998 206,77.0048815 L206,77.9951185 C206,79.102384 205.103721,80 203.9976,80 L171.0024,80 C169.896505,80 169,79.1061002 169,77.9951185 L169,77.0048815 Z' id='Notification-background'></path>
+							</g>
+						</g>
+					</g>
+				</g>
+			</svg>"
+	"iphone-6s-plus" : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='414px' height='68px' viewBox='0 0 414 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			<!-- Generator: Sketch 3.6 (26304) - http://www.bohemiancoding.com/sketch -->
+			<title>Notification background Copy</title>
+			<desc>Created with Sketch.</desc>
+			<defs></defs>
+			<g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.9'>
+				<g id='iOS8-Push-Notification' transform='translate(-43.000000, -74.000000)' fill='#1A1A1C'>
+					<g transform='translate(43.000000, 74.000000)' id='Notification-container'>
+						<g>
+							<path d='M0,0 L414,0 L414,68 L0,68 L0,0 Z M189,61.0048815 C189,59.897616 189.896279,59 191.0024,59 L223.9976,59 C225.103495,59 226,59.8938998 226,61.0048815 L226,61.9951185 C226,63.102384 225.103721,64 223.9976,64 L191.0024,64 C189.896505,64 189,63.1061002 189,61.9951185 L189,61.0048815 Z' id='Notification-background-Copy'></path>
+						</g>
+					</g>
+				</g>
+			</g>
+		</svg>"
+	"ipad" : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='768px' height='68px' viewBox='0 0 768 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+			    <title>ipad-portrait</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.9'>
+			        <g id='iPad-Portrait' fill='#1A1A1C'>
+			            <path d='M0,0 L768,0 L768,68 L0,68 L0,0 Z M366,61.0048815 C366,59.897616 366.896279,59 368.0024,59 L400.9976,59 C402.103495,59 403,59.8938998 403,61.0048815 L403,61.9951185 C403,63.102384 402.103721,64 400.9976,64 L368.0024,64 C366.896505,64 366,63.1061002 366,61.9951185 L366,61.0048815 Z' id='ipad-portrait'></path>
+			        </g>
+			    </g>
+			</svg>"
+	"ipad-pro" : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+			<svg width='1024px' height='68px' viewBox='0 0 1024 68' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+			    <title>ipad-pro-portrait</title>
+			    <desc>Created with Sketch.</desc>
+			    <defs></defs>
+			    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd' fill-opacity='0.9'>
+			        <g id='iPad-Pro-Portrait' fill='#1A1A1C'>
+			            <path d='M0,0 L1024,0 L1024,68 L0,68 L0,0 Z M494,61.0048815 C494,59.897616 494.896279,59 496.0024,59 L528.9976,59 C530.103495,59 531,59.8938998 531,61.0048815 L531,61.9951185 C531,63.102384 530.103721,64 528.9976,64 L496.0024,64 C494.896505,64 494,63.1061002 494,61.9951185 L494,61.0048815 Z' id='ipad-pro-portrait'></path>
+			        </g>
+			    </g>
+			</svg>"
+	}
