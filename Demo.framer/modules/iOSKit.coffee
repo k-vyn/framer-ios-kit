@@ -264,7 +264,8 @@ exports.getTime = ->
 ## iOS Color – This will store all of the default iOS colors intead of the default CSS colors. *This is only up here because I refer to it in the defaults.*
 exports.color = (colorString) ->
 	color = ""
-	colorString = colorString.toLowerCase()
+	if typeof colorString == "string"
+		colorString = colorString.toLowerCase()
 	switch colorString
 		when "red"
 			color = new Color("#FE3824")
@@ -295,7 +296,7 @@ exports.color = (colorString) ->
 		when "light-key" 
 			color = new Color("#9DA7B3")
 		else 
-			if colorString[0] == "#"
+			if colorString[0] == "#" || colorString.toHexString()[0] == "#"
 				color = new Color(colorString)
 			else
 				color = new Color("#929292")
@@ -334,6 +335,7 @@ defaults = {
 	}
 	framerProps :["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
 	cssProps : ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
+	styleProps: ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
 	constraintProps : ["height", "width"]
 	constraintTypes: ["top", "leading", "trailing", "bottom"]
 	constraintAligns : ["horizontalCenter", "verticalCenter", "leadingEdges", "trailingEdges", "topEdges", "bottomEdges", "align", "vertical", "horizontal"]
@@ -485,31 +487,31 @@ defaults = {
 	}
 
 	text: {
-		defaults: {
-			text: "iOS Text Layer"
-			type:"text"
-			x:0
-			y:0
-			width:-1
-			height:-1
-			superLayer:undefined
-			style:"default"
-			lines:1
-			textAlign:"left"
-			backgroundColor:"transparent"
-			color:"black"
-			fontSize: 17
-			fontFamily:"-apple-system, Helvetica, Arial, sans-serif"
-			fontWeight:"regular"
-			lineHeight:"auto"
-			name:"text layer"
-			opacity:1
-			textTransform:"none"
-			} 
+		text: "iOS Text Layer"
+		type:"text"
+		x:0
+		y:0
+		width:-1
+		height:-1
+		superLayer:undefined
+		style:"default"
+		lines:1
+		textAlign:"left"
+		backgroundColor:"transparent"
+		color:"black"
+		fontSize: 17
+		fontFamily:"-apple-system, Helvetica, Arial, sans-serif"
+		fontWeight:"regular"
+		lineHeight:"auto"
+		name:"text layer"
+		opacity:1
+		textTransform:"none"
+		name:"text layer"
+		constraints:{}
 	}
 }
 
-setProps = (object, dest) ->
+setPropsTextProps = (object, dest) ->
 	keys = Object.keys(object)
 	dest["props"] = keys
 
@@ -518,11 +520,9 @@ setPropsRedo = (object) ->
 	keys = Object.keys(object)
 	object["props"] = keys
 
-components = [defaults.alert, defaults.banner, defaults.menu, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
+components = [defaults.text, defaults.alert, defaults.banner, defaults.menu, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
 for comp in components
 	setPropsRedo(comp)
-
-setProps(defaults.text.defaults, defaults.text)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -555,6 +555,20 @@ error = (context, code) ->
 	if code == 50
 		print "Error Layer id:#{context} is not a valid Tab object. Please create a Tab using new module.Tab."
 
+# Special Characters
+specialChar = (layer) ->
+	text = layer
+	if layer.type == "button"
+		text = layer.label
+	if text.html.indexOf("-b") != -1
+		newText = text.html.replace("-b ", "")
+		exports.update(text, [{text:newText}, {fontWeight:600}])
+	if text.html.indexOf("-r") != -1
+		newText = text.html.replace("-r ", "")
+		exports.update(text, [{text:newText}, {color:"red"}])
+
+
+
 # Decides if it should be white/black text
 exports.setTextColor = (colorObject) ->
 	rgb = colorObject.toRgbString()
@@ -571,7 +585,6 @@ exports.setTextColor = (colorObject) ->
 	else
 		color = "FFF"
 	return color
-
 
 exports.sameParent = (layer1, layer2) ->
 	parentOne = layer1.superLayer
@@ -857,7 +870,6 @@ makeStyleChange = (layer, style, change) ->
 			layer.style["font-size"] = exports.px(change) + "px"
 	if defaults.framerProps.indexOf(style) != -1
 		layer[style] = change
- 
 
 textAutoSize = (textLayer) ->
 	#Define Width
@@ -879,6 +891,7 @@ textAutoSize = (textLayer) ->
 		width : textWidth.width
 		height: textWidth.height
 	}
+
 listenToKeys = (field, keyboard) ->
 
 	keypress = (key) ->
@@ -1124,9 +1137,15 @@ exports.update = (layer, array) ->
 			value = change[key]
 			if key == "text"
 				layer.html = value
-				textFrame = textAutoSize(layer)
-				layer.width = textFrame.width
-				layer.height = textFrame.height
+			if key == "fontWeight"
+				layer.style[key] = value
+			if key == "color"
+				layer.color = exports.color(value)
+
+		textFrame = textAutoSize(layer)
+		layer.width = textFrame.width
+		layer.height = textFrame.height
+
 	if layer.type == "field"
 		print "yo"
 	exports.layout()
@@ -1169,7 +1188,7 @@ exports.Alert = (array) ->
 		align:"center"
 		width:280
 		height:400
-	title = new exports.Text style:"alertTitle", superLayer:modal, text:setup.title, fontWeight:"medium",  name:"title", textAlign:"center"
+	title = new exports.Text style:"alertTitle", superLayer:modal, text:setup.title, fontWeight:"medium",  name:"title", textAlign:"center", lineHeight:20
 	title.constraints = 
 		align:"horizontal"
 		width:220
@@ -1190,7 +1209,6 @@ exports.Alert = (array) ->
 	#Title + Message + 1 set of actions
 	modal.constraints["height"] = 20 + exports.pt(title.height) + 10 + exports.pt(message.height) + 24 + 44
 
-
 	actions = []
 	switch setup.actions.length
 		when 1
@@ -1204,7 +1222,7 @@ exports.Alert = (array) ->
 			action.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action, text:actLabel, name:"label"
 			action.label.constraints = 
 				align:"horizontal"
-				bottom:14
+				bottom:16
 			actions.push action
 		when 2
 			actLabel = exports.capitalize(setup.actions[0])
@@ -1237,7 +1255,7 @@ exports.Alert = (array) ->
 			action2.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action2, text:actLabel2, name:"label"
 			action2.label.constraints = 
 				align:"horizontal"
-				bottom:14
+				bottom:16
 			actions.push action2
 		else
 			for act, index in setup.actions
@@ -1259,10 +1277,20 @@ exports.Alert = (array) ->
 					align:"horizontal"
 					bottom:14
 				actions.push action		
-				modal.constraints["height"] = modal.constraints["height"] + 42
+				modal.constraints["height"] = modal.constraints["height"] + 42 - 12
 
 	alert.actions = {}	
-	for act in actions
+	for act,index in actions
+
+		#Handle special characters
+		act.type = "button"
+		specialChar(act)
+		
+		if setup.actions[index].indexOf("-r") == 0
+			act.origColor = exports.color("red")
+		else
+			act.origColor = exports.color("blue")
+
 		#Add Touch Events
 		act.on Events.TouchStart, ->
 			@.backgroundColor = "white"
@@ -1270,7 +1298,7 @@ exports.Alert = (array) ->
 				properties:(backgroundColor:act.backgroundColor.darken(5))
 				time:.25
 			@.label.animate
-				properties:(color:act.label.color.lighten(10))
+				properties:(color:@.origColor.lighten(10))
 				time:.25
 
 		act.on Events.TouchEnd, ->
@@ -1278,7 +1306,7 @@ exports.Alert = (array) ->
 				properties:(backgroundColor:"white")
 				time:.25
 			@.label.animate
-				properties:(color:exports.color("blue"))
+				properties:(color:@.origColor)
 				time:.25
 
 		# Export actions
@@ -1418,7 +1446,7 @@ exports.Button = (array) ->
 	switch setup.type
 		when "big"
 			@fontSize = 20
-			@top = 16
+			@top = 18
 			@fontWeight = "medium"
 			button.constraints =
 				leading:10
@@ -1502,11 +1530,9 @@ exports.Button = (array) ->
 				button.subLayers[0].animate
 					properties:(color:setup.color)
 					time:.5
-
-	textLayer = new exports.Text style:"button#{setup.type}#{setup.style}", text:setup.text, color:color, superLayer:button, fontSize:@fontSize, fontWeight:@fontWeight
+	textLayer = new exports.Text text:setup.text, color:color, superLayer:button, fontSize:@fontSize, fontWeight:@fontWeight
 	textLayer.constraints =
-		align:"horizontal"
-		top:@top
+		align:"center"
 	switch setup.type 
 		when "small"
 			button.props = (width:textLayer.width + exports.px(60), height: textLayer.height + exports.px(10))
@@ -2990,8 +3016,9 @@ exports.Menu = (array) ->
 	acts = {}
 	for act, index in setup.actions
 		isRedPresent = act.search("-r")
+		redPresent = false
 		if isRedPresent == 0
-			@red = true
+			redPresent = true
 			act = act.replace("-r", "")
 			act = act.slice(1)
 		o = new Layer superLayer:actions, width:actions.width, backgroundColor:"transparent", borderRadius:exports.px(12.5)
@@ -3000,9 +3027,8 @@ exports.Menu = (array) ->
 			height:58
 		button = new exports.Button text:act, superLayer:o, fontSize:20
 		button.constraints =
-			align:"horizontal"
-			top:15
-		if @red
+			align:"center"
+		if redPresent
 			button.subLayers[0].color = "red"
 		button.color = "#FE3824"
 		if index != setup.actions.length - 1
@@ -3377,33 +3403,26 @@ exports.TableCell = (array) ->
 	}
 
 exports.Text = (array) ->
-	if array == undefined
-		array = []
-	exceptions = Object.keys(array)
-	styleArray = {}
-	for i in defaults.text.props
-		if array[i] != undefined
-			@[i] = array[i]
-		else
-			@[i] = defaults.text.defaults[i]
-		if i != "style"
-			styleArray[i] = @[i]
-	textLayer = new Layer
+	setup = setupComponent("text", array)
+	exceptions = Object.keys(setup)
+	textLayer = new Layer backgroundColor:"transparent", name:setup.name
 	textLayer.type = "text"
-	textLayer.html = @text
-	textStyle = 
-		"#{@.style}" : 
-			styleArray
-	if exports.styles[@.style] == undefined
-		exports.addStyle textStyle
-		exports.apply(textLayer, @style)
-	else
-		exports.apply(textLayer, @style)
-		for change in exceptions
-			if change != "style"
-				makeStyleChange(textLayer, change, array[change])		
+	textLayer.html = setup.text
+	for prop in defaults.framerProps
+		if setup[prop]
+			if prop == "color"
+				setup[prop] = exports.color(setup[prop])
+			textLayer[prop] = setup[prop]
+	for prop in defaults.styleProps
+		if setup[prop]
+			if setup[prop] == parseInt(setup[prop], 10) && setup[prop] < 99
+				setup[prop] = exports.px(setup[prop]) + "px"
+			textLayer.style[prop] = setup[prop]
+		
 	textFrame = textAutoSize(textLayer)
 	textLayer.props = (height:textFrame.height, width:textFrame.width)
+	textLayer.constraints = setup.constraints
+	exports.layout()
 	return textLayer
 
 
