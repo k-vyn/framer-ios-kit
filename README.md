@@ -45,7 +45,11 @@ The menu is quick action list. The menu component is super simple to create.
 #### Listening to actions
 To listen to an action, it's super easy. Just listen to the .actions object and put the action verbatim in brackets.
 
-You can listen to cancel by listening to
+For example, to listen to the delete action from the example above, you’d write this: 
+```menu.actions[“-r Delete].on”```
+
+If there are no spaces in the action, you could, in addition to brackets, use dot syntax like:
+```menu.actions.Edit.on```  
 
 ## .NavBar
 ![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.39.48.png)
@@ -111,8 +115,13 @@ Status Bar will add a touch of realism to your prototype. It has  many customiza
   
 ### .Text
 
-## Autolayout 
-Autolayout is the backbone of iOS. It enables layouts to mold to devices. To allow this functionality, it replaces the pixel level syntax that the web is built on. Autolayout for FramerJS takes a shift in how we layout screens. We define constraints and setup relationships in points instead of relying on dependent positioning like x and y.
+## Dynamic layout  
+Dynamic layout was built to bring in the logic of Auto layout into Framer. Auto layout is the backbone of iOS. It enables layouts to be constants and molded to each device. To allow this functionality, it replaces the pixel level syntax/handlers like x & y and leverages margins & centers. Autolayout for FramerJS takes a philosophical shift in how we layout screens. 
+
+If you’re new to Auto Layout, any documentation that exists on the web should help you use this feature, and hopefully by using  Dynamic layout, you’ll also learn Auto Layout. 
+
+### Dynamic layout vs. Auto layout
+There are a few major differences between layout engines. The biggest being that Auto layout, while able to be written in code, is primarily a GUI in Xcode. Dynamic layout had to be completely code, so I took some liberties in how we define  
 
 ### Positioning
 

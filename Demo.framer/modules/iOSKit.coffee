@@ -156,7 +156,6 @@ exports.getDevice = ->
 		height:exports.height
 	}
 
-
 exports.orient = () ->
 	if exports.orientation == -90
 		tempHeight = exports.height
@@ -322,7 +321,8 @@ defaults = {
 	}
 	button:{
 		text:"text"
-		type:"text"
+		type:"button"
+		buttonType:"text"
 		style:"light"
 		backgroundColor:"white"
 		color:"#007AFF"
@@ -564,6 +564,34 @@ specialChar = (layer) ->
 	if text.html.indexOf("-r") != -1
 		newText = text.html.replace("-r ", "")
 		exports.update(text, [{text:newText}, {color:"red"}])
+	if text.html.indexOf("-rb") != -1
+		newText = text.html.replace("-rb ", "")
+		exports.update(text, [{text:newText}, {color:"blue"}])
+	if text.html.indexOf("-lb") != -1
+		newText = text.html.replace("-lb ", "")
+		exports.update(text, [{text:newText}, {color:"light-blue"}])
+	if text.html.indexOf("-g") != -1
+		newText = text.html.replace("-g ", "")
+		exports.update(text, [{text:newText}, {color:"green"}])
+	if text.html.indexOf("-o") != -1
+		newText = text.html.replace("-o ", "")
+		exports.update(text, [{text:newText}, {color:"orange"}])
+	if text.html.indexOf("-p") != -1
+		newText = text.html.replace("-p ", "")
+		exports.update(text, [{text:newText}, {color:"orange"}])
+	if text.html.indexOf("-y") != -1
+		newText = text.html.replace("-y ", "")
+		exports.update(text, [{text:newText}, {color:"yellow"}])
+	if text.html.indexOf("-#") != -1
+		chosenColor = text.html.slice(1, 8)
+		newText = text.html.slice(9, text.html.length)
+		exports.update(text, [{text:newText}, {color:chosenColor}])	
+	if text.html.indexOf("-") != -1
+		newText = text.html.replace("- ", "")
+		exports.update(text, [{text:newText}])
+	if layer.buttonType == "text"
+		layer.width = text.width
+	exports.layout()
 
 # Decides if it should be white/black text
 exports.setTextColor = (colorObject) ->
@@ -606,9 +634,6 @@ exports.layout = (layer) ->
 			for a in defaults.constraintAligns
 				if layer.constraints[a]
 					layoutAlign(layer, a)
-		if layer.type == "statusBar"
-			layer.bringToFront()
-
 #Align constraints
 layoutAlign = (layer, type) ->
 	# print layer.name + ": constraints width " + layer.constraints.width
@@ -1348,6 +1373,8 @@ exports.Banner = (array) ->
 exports.Button = (array) ->
 	setup = setupComponent("button", array)
 	button = new Layer name:setup.name
+	button.buttonType = setup.buttonType
+	button.type = setup.type
 	color = ""
 	if setup.constraints
 		button.constraints = 
@@ -1355,7 +1382,7 @@ exports.Button = (array) ->
 		exports.layout()
 	if setup.superLayer 
 		setup.superLayer.addSubLayer(button)
-	switch setup.type
+	switch setup.buttonType
 		when "big"
 			@fontSize = 20
 			@top = 18
@@ -1445,7 +1472,7 @@ exports.Button = (array) ->
 	textLayer = new exports.Text text:setup.text, color:color, superLayer:button, fontSize:@fontSize, fontWeight:@fontWeight
 	textLayer.constraints =
 		align:"center"
-	switch setup.type 
+	switch setup.buttonType 
 		when "small"
 			button.props = (width:textLayer.width + exports.px(60), height: textLayer.height + exports.px(10))
 			button.on Events.TouchStart, ->
@@ -2895,7 +2922,7 @@ exports.Menu = (array) ->
 		trailing:0
 		top:0
 		bottom:0
-	exitButton = new exports.Button type:"big", text:setup.exit, blur:false, superLayer:menus
+	exitButton = new exports.Button buttonType:"big", text:setup.exit, blur:false, superLayer:menus
 	exitButton.constraints = 
 		bottom:10
 		align:"horizontal"
@@ -2926,21 +2953,14 @@ exports.Menu = (array) ->
 	exports.layout()
 	acts = {}
 	for act, index in setup.actions
-		isRedPresent = act.search("-r")
-		redPresent = false
-		if isRedPresent == 0
-			redPresent = true
-			act = act.replace("-r", "")
-			act = act.slice(1)
 		o = new Layer superLayer:actions, width:actions.width, backgroundColor:"transparent", borderRadius:exports.px(12.5)
 		o.constraints = 
 			top:index * 58 + descriptionBuffer
 			height:58
 		button = new exports.Button text:act, superLayer:o, fontSize:20
+		specialChar(button)
 		button.constraints =
 			align:"center"
-		if redPresent
-			button.subLayers[0].color = "red"
 		button.color = "#FE3824"
 		if index != setup.actions.length - 1
 			divider = new Layer superLayer:o, width:actions.width, backgroundColor:"#D6E3E7"
@@ -3041,6 +3061,7 @@ exports.NavBar = (array) ->
 	if typeof setup.title == "object" 
 		title = new exports.Text style:"navBarTitle", fontWeight:"semibold", superLayer:barArea, text:setup.title.label.html
 		bar.superLayer = setup.title.view
+	specialChar(title)
 	title.constraints = 
 		align:"horizontal"
 		bottom:12
@@ -3048,6 +3069,8 @@ exports.NavBar = (array) ->
 	# Handle Right
 	if typeof setup.right == "string"
 		bar.right = new exports.Button superLayer:barArea, text:setup.right, fontWeight:500, constraints:{bottom:12, trailing:8}
+		bar.right.type = "button"
+		specialChar(bar.right)
 	if typeof setup.right == "object"
 		bar.right =  "yo"
 
@@ -3056,14 +3079,30 @@ exports.NavBar = (array) ->
 		leading = 8
 		if setup.left.indexOf("<") != -1
 			svg = exports.svg(iconLibrary.chevron)
-			chevron = new Layer width:svg.width, height:svg.height, backgroundColor:"transparent", superLayer:barArea
-			chevron.html = svg.svg
-			chevron.constraints = {bottom:9, leading:8}
+			bar.chevron = new Layer width:svg.width, height:svg.height, backgroundColor:"transparent", superLayer:barArea
+			bar.chevron.html = svg.svg
+			bar.chevron.constraints = {bottom:9, leading:8}
 			setup.left = setup.left.slice(2, setup.left.length)
-			leading = [chevron, 4]
+			leading = [bar.chevron, 4]
+
 		bar.left = new exports.Button superLayer:barArea, text:setup.left, fontWeight:500, constraints:{bottom:12, leading:leading}
+		
+		bar.left.on Events.TouchStart, ->
+			if bar.chevron
+				bar.chevron.animate
+					properties:(opacity:.25)
+					time:.5
+		bar.left.on Events.TouchEnd, ->
+			if bar.chevron
+				bar.chevron.animate
+					properties:(opacity:1)
+					time:.5
+
 	if typeof setup.left == "object"
 		bar.left =  "yo"
+
+
+
 
 	exports.layout()
 	return bar

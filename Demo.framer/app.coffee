@@ -7,7 +7,7 @@ status = new ios.StatusBar carrier:"T-Mobile"
 home = new ios.Tab label:"Home"
 discovery = new ios.Tab label:"Do thing"
 
-nav = new ios.NavBar right:"Create", left:"< Back", title:home
+nav = new ios.NavBar right:"-b Create", left:"< Settings", title:home
 nav2 = new ios.NavBar title:discovery, right:"Search"
 
 h1 = new ios.Text constraints:{top:[nav, 40], width:200, leading:30}, fontSize:50, fontWeight:"black", superLayer:home.view
