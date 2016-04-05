@@ -42,7 +42,8 @@ The menu is quick action list. The menu component is super simple to create.
 
 **cancel** *String* - This is the string for the dismiss button on the bottom of the menu. 
 
-#### Listening to actions - to listen to an action, it's super easy. Just listen to the .actions object and put the action verbatim in brackets.
+#### Listening to actions
+To listen to an action, it's super easy. Just listen to the .actions object and put the action verbatim in brackets.
 
 You can listen to cancel by listening to
 
