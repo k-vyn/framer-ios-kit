@@ -26,7 +26,25 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 ### .LockScreen
 
-### .Menu
+## .Menu
+The menu is quick action list. The menu component is super simple to create.
+
+![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-04-04%2019.29.25.png)
+
+```menu = new ios.Menu actions:[“-r Delete, Edit, Share”], animated:true```
+
+#### Properties
+**actions** *Array of strings* - Each string will appear as an action entry. In the string, you can pass special parameters to modify the display of the actions. If you pass a -r in the beginning, it'll make the action appear red. If you pass a -b, it'll make the action bolded. 
+
+**animated** *Boolean* - Animated will handle whether the menu animates in. If set to false or ommited the menu will not animate in. The menu on click or cancel will automatically animate out.
+
+**description** *String* - The string if declared will appear above all actions.
+
+**cancel** *String* - This is the string for the dismiss button on the bottom of the menu. 
+
+#### Listening to actions - to listen to an action, it's super easy. Just listen to the .actions object and put the action verbatim in brackets.
+
+You can listen to cancel by listening to
 
 ## .NavBar
 ![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.39.48.png)
@@ -79,7 +97,7 @@ Status Bar will add a touch of realism to your prototype. It has  many customiza
 #### Example
 ```status = new ios.StatusBar carrier:”Verizon”, network:”3g”, signal:3, battery:70```
 
-#### Properies
+#### Properties
 **clock24** *Bool* - If set to true, this will modify the system clock to a 24–hour clock. 
 
 **carrier** *String* - If set, this will remove wifi and show network. 

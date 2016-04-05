@@ -412,9 +412,9 @@ defaults = {
 		description:undefined
 	}
 	navBar: {
-		title:"title"
-		leftAction:"leftAction"
-		rightAction:"rightAction"
+		title:"Title"
+		left:undefined
+		right:"Edit"
 		blur:true
 		superLayer:undefined
 		type:"navBar"
@@ -457,7 +457,7 @@ defaults = {
 		active: undefined
 		unactive: undefined
 		tabBar: undefined
-		type:"tab"
+		type: "tab"
 	}
 	table : {
 		constraints: undefined
@@ -511,18 +511,16 @@ defaults = {
 	}
 }
 
-setPropsTextProps = (object, dest) ->
-	keys = Object.keys(object)
-	dest["props"] = keys
 
-
-setPropsRedo = (object) ->
+# Component Configuration Functions
+setProps = (object) ->
 	keys = Object.keys(object)
 	object["props"] = keys
 
 components = [defaults.text, defaults.alert, defaults.banner, defaults.menu, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
+
 for comp in components
-	setPropsRedo(comp)
+	setProps(comp)
 
 setupComponent = (component, array) ->
 	if array == undefined
@@ -567,8 +565,6 @@ specialChar = (layer) ->
 		newText = text.html.replace("-r ", "")
 		exports.update(text, [{text:newText}, {color:"red"}])
 
-
-
 # Decides if it should be white/black text
 exports.setTextColor = (colorObject) ->
 	rgb = colorObject.toRgbString()
@@ -610,6 +606,8 @@ exports.layout = (layer) ->
 			for a in defaults.constraintAligns
 				if layer.constraints[a]
 					layoutAlign(layer, a)
+		if layer.type == "statusBar"
+			layer.bringToFront()
 
 #Align constraints
 layoutAlign = (layer, type) ->
@@ -781,95 +779,9 @@ layoutChange = (layer, type) ->
 #Text Layers
 exports.styles = {}
 
-## Custom Styles
-
-exports.addStyle = (array) ->
-	key = Object.keys(array)[0]
-	exports.styles[key] = array[key]
-
-exports.apply = (layer, style) ->
-	style = exports.styles[style]
-	props = Object.keys(style)
-	framerProps = ["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
-	cssProps = ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight", "textTransform"]
-	for p in props
-		if defaults.constraintTypes.indexOf(p) != -1 
-			if layer.constraints 
-				layer.constraints[p] = style[p]
-			else
-				obj = {"#{p}" : style[p]}
-				layer.constraints = obj
-		if framerProps.indexOf(p) != -1 
-			if style[p] == parseInt(style[p], 10)
-				layer[p] = exports.px(style[p])
-			else 
-				layer[p] = style[p]
-		if cssProps.indexOf(p) != -1 
-			if p == "fontSize"
-				layer.style["font-size"] = exports.px(style[p]) + "px"
-			if p == "fontFamily"
-				layer.style["font-family"] = style[p]
-			if p == "textAlign"
-				layer.style["text-align"] = style[p]
-			if p == "textTransform"
-				layer.style["text-transform"] = style[p]
-			if p == "fontWeight"
-				if style[p] == parseInt(style[p], 10)
-					layer.style["font-weight"] = style[p]
-				else
-					switch style[p]
-						when "ultrathin" then layer.style["font-weight"] = 100
-						when "thin" then layer.style["font-weight"] = 200
-						when "light" then layer.style["font-weight"] = 300
-						when "regular" then layer.style["font-weight"] = 400
-						when "medium" then layer.style["font-weight"] = 500
-						when "semibold" then layer.style["font-weight"] = 600
-						when "bold" then layer.style["font-weight"] = 700
-						when "black" then layer.style["font-weight"] = 800
-						else
-							error(p, 40)
-			if p == "lineHeight"
-				if style[p] == "auto"
-					layer.style["line-height"] = exports.px(style["fontSize"]) * 1.2 + "px"
-				else
-					layer.style["line-height"] = exports.px(style[p]) + "px"
-	if layer.type == "text"
-		frame = textAutoSize(layer)
-		layer.width = frame.width
-		layer.height = frame.height
-
 exports.bgBlur = (layer) ->
 	layer.style["-webkit-backdrop-filter"] = "blur(#{exports.px(5)}px)"
 	return layer 
-
-exports.Custom = (style, array) ->
-	layer = new Layer 
-	isStyleValid = exports.styles[style]
-	if isStyleValid == undefined
-		if array != undefined
-			exports.addStyle
-				"#{style}" :
-					array
-		else
-			exports.addStyle
-				"#{style}" :
-					width : 100
-	exports.apply(layer, style)
-	if array != undefined && isStyleValid != undefined
-		styleNum = "copy"
-		newStyleName = style + " " + styleNum
-		exports.addStyle
-			"#{newStyleName}" : 
-				array
-		exports.apply(layer, newStyleName)
-	return layer 
-
-makeStyleChange = (layer, style, change) ->
-	if defaults.cssProps.indexOf(style) != -1
-		if style == "fontSize"
-			layer.style["font-size"] = exports.px(change) + "px"
-	if defaults.framerProps.indexOf(style) != -1
-		layer[style] = change
 
 textAutoSize = (textLayer) ->
 	#Define Width
@@ -1553,6 +1465,7 @@ exports.Button = (array) ->
 		else 
 			button.props = (width:textLayer.width, height:textLayer.height)
 	exports.layout()
+	button.label = textLayer
 	return button
 
 exports.Field = (array) ->
@@ -2552,8 +2465,6 @@ exports.Keyboard = (array) ->
 		'line-height' : boardSpecs.key.height + "px"
 	}
 
-
-
 	numKey.on Events.TouchStart, ->
 		switch keyboardState
 			when 1
@@ -3124,38 +3035,38 @@ exports.NavBar = (array) ->
 		if layer.type == "statusBar"
 			@statusBar = layer
 			bar.placeBehind(@statusBar)
-	title = new exports.Text style:"navBarTitle", fontWeight:"semibold", superLayer:barArea, text:setup.title
+
+	if typeof setup.title == "string"
+		title = new exports.Text style:"navBarTitle", fontWeight:"semibold", superLayer:barArea, text:setup.title
+	if typeof setup.title == "object" 
+		title = new exports.Text style:"navBarTitle", fontWeight:"semibold", superLayer:barArea, text:setup.title.label.html
+		bar.superLayer = setup.title.view
 	title.constraints = 
 		align:"horizontal"
 		bottom:12
-	if setup.rightAction == false || setup.rightAction == ""
-		# Don't create a right action
-	else
-		if typeof setup.rightAction == "string"
-			@fontWeight = "regular"
-			if setup.rightAction.search("-b") == 0
-				@fontWeight = "semibold"
-				setup.rightAction = setup.rightAction.replace("-b ", "")
-			@rightAction = new exports.Button  style:"rightAction", superLayer:barArea, text:setup.rightAction, fontWeight:@fontWeight, name:"right action"
-			@rightAction.constraints =
-				bottom:12
-				trailing:8
-	if setup.leftAction == false || setup.leftAction == ""
-		# Don't create a left action
-	else
-		if typeof setup.rightAction == "string"
-			@leftAction = new exports.Button style:"leftAction", superLayer:barArea, text:setup.leftAction, name:"left action"
-			@leftAction.constraints =
-				bottom:12
-				leading:8
+
+	# Handle Right
+	if typeof setup.right == "string"
+		bar.right = new exports.Button superLayer:barArea, text:setup.right, fontWeight:500, constraints:{bottom:12, trailing:8}
+	if typeof setup.right == "object"
+		bar.right =  "yo"
+
+	# Handle Left
+	if typeof setup.left == "string"
+		leading = 8
+		if setup.left.indexOf("<") != -1
+			svg = exports.svg(iconLibrary.chevron)
+			chevron = new Layer width:svg.width, height:svg.height, backgroundColor:"transparent", superLayer:barArea
+			chevron.html = svg.svg
+			chevron.constraints = {bottom:9, leading:8}
+			setup.left = setup.left.slice(2, setup.left.length)
+			leading = [chevron, 4]
+		bar.left = new exports.Button superLayer:barArea, text:setup.left, fontWeight:500, constraints:{bottom:12, leading:leading}
+	if typeof setup.left == "object"
+		bar.left =  "yo"
+
 	exports.layout()
-	return {
-		all:bar
-		navBar:barArea
-		title:title
-		rightAction:@rightAction
-		leftAction:@leftAction
-	}
+	return bar
 
 exports.Tab = (array) ->
 	setup = setupComponent("tab", array)
@@ -3187,13 +3098,14 @@ exports.Tab = (array) ->
 		bottom:2
 		horizontalCenter:icon
 	exports.layout()
+
+	# Export Tab
 	tabBox.type = "tab"
-	return {
-		tab:tabBox
-		icon:icon
-		label:label
-		view:tabView
-	}
+	tabBox.icon = icon
+	tabBox.view = tabView
+	tabBox.label = label
+
+	return tabBox
 
 exports.TabBar = (array) ->
 	setup = setupComponent("tabBar", array)
@@ -3245,21 +3157,21 @@ exports.TabBar = (array) ->
 				tab.view.visible = false
 	for tab, index in setup.tabs
 		#Check for vaild tab object
-		if tab.tab.type != "tab"
-			error(tab.tab.id, 5)
+		if tab.type != "tab"
+			error(tab.id, 5)
 
-		tabBarBox.addSubLayer(tab.tab)
+		tabBarBox.addSubLayer(tab)
 		# Change colors
 		exports.changeFill(tab.icon, setup.inactiveFillColor)
 		tab.label.color = setup.inactiveLabelColor
 		tabBarBG.backgroundColor = setup.backgroundColor
 
 		if index != 0
-			tab.tab.constraints = 
-				leading:setup.tabs[index - 1].tab
+			tab.constraints = 
+				leading:setup.tabs[index - 1]
 			exports.layout()
 
-		tab.tab.on Events.TouchStart, ->
+		tab.on Events.TouchStart, ->
 			tabIndex = @.x / exports.px(tabWidth)
 			setActive(tabIndex)
 	tabBarBox.constraints =
@@ -3415,16 +3327,26 @@ exports.Text = (array) ->
 			textLayer[prop] = setup[prop]
 	for prop in defaults.styleProps
 		if setup[prop]
+			if prop == "lineHeight" && setup[prop] == "auto"
+				setup[prop] =  setup["fontSize"]
+			if prop == "fontWeight"
+				switch setup[prop]
+					when "ultrathin" then setup[prop] = 100
+					when "thin" then setup[prop] = 200
+					when "light" then setup[prop] = 300
+					when "regular" then setup[prop] = 400
+					when "medium" then setup[prop] = 500
+					when "semibold" then setup[prop] = 600
+					when "bold" then setup[prop] = 700
+					when "black" then setup[prop] = 800
 			if setup[prop] == parseInt(setup[prop], 10) && setup[prop] < 99
 				setup[prop] = exports.px(setup[prop]) + "px"
 			textLayer.style[prop] = setup[prop]
-		
 	textFrame = textAutoSize(textLayer)
 	textLayer.props = (height:textFrame.height, width:textFrame.width)
 	textLayer.constraints = setup.constraints
 	exports.layout()
 	return textLayer
-
 
 iconLibrary = {
 	activity: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
@@ -3482,6 +3404,18 @@ iconLibrary = {
 					</g>
 				</g>
 			</svg>"
+	chevron : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
+		<svg width='13px' height='22px' viewBox='0 0 13 22' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+		    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
+		    <title>Back Chevron</title>
+		    <desc>Created with Sketch.</desc>
+		    <defs></defs>
+		    <g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
+		        <g id='Navigation-Bar/Back' transform='translate(-8.000000, -31.000000)' fill='#0076FF'>
+		            <path d='M8.5,42 L19,31.5 L21,33.5 L12.5,42 L21,50.5 L19,52.5 L8.5,42 Z' id='Back-Chevron'></path>
+		        </g>
+		    </g>
+		</svg>"
 	emoji : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 		<svg width='#{exports.px(20)}px' height='#{exports.px(20)}px' viewBox='0 0 20 20' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 			<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
