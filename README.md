@@ -26,7 +26,7 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 
 
-![](https://dl.dropboxusercontent.com/u/143270556/menus.svg)
+![](https://dl.dropboxusercontent.com/u/143270556/menus.png)
 The menu is quick action list. The menu component is super simple to create.
 
 ```menu = new ios.Menu actions:[“-r Delete, Edit, Share”], animated:true```
