@@ -433,10 +433,8 @@ defaults = {
 		start:0
 		tyep:"tabBar"
 		backgroundColor:"white"
-		activeLabelColor:"#0076FF"
-		activeFillColor:"#0076FF"
-		inactiveLabelColor:"#929292"
-		inactiveFillColor:"#929292"
+		activeColor:"blue"
+		inactiveColor:"gray"
 	}
 	tab : {
 		label: "label"
@@ -464,12 +462,12 @@ defaults = {
 		type:"table"
 		content:[
 			{
-				"label": "Cats" 
-				"detail" : "Animal"
+				"label": "A" 
+				"detail" : "letter"
 			},
 			{
-				"label" : "Dogs"
-				"detail" : "Animal"
+				"label" : "B"
+				"detail" : "letter"
 
 				}
 			]
@@ -1048,6 +1046,7 @@ listenToKeys = (field, keyboard) ->
 				if e.keyCode == 97
 					field.text.backgroundColor = "rgba(0, 118, 255, .2)"
 					allSelected = true
+
 			if isCommand == false
 				e.preventDefault()
 				if e.keyCode >= 65 && e.keyCode <= 90
@@ -1583,77 +1582,6 @@ exports.Field = (array) ->
 	exports.layout()
 	return field
 
-exports.LockScreen = (array) ->
-	switch exports.device
-		when "iphone-6s" 
-			@timeFontSize = 88
-			@dateFontSize = 19
-		when "iphone-6s-plus" 
-			@timeFontSize = 88
-			@dateFontSize = 19
-		when "iphone-5" 
-			@timeFontSize = 80
-			@dateFontSize = 19
-		when "ipad-mini-4"
-			@timeFontSize = 120
-			@dateFontSize = 24
-		when "ipad-air-2"
-			@timeFontSize = 120
-			@dateFontSize = 24
-		when "ipad-pro"
-			@timeFontSize = 120
-			@dateFontSize = 24
-		else 
-			@timeFontSize = 50
-			@dateFontSize = 19
-	setup = setupComponent("lockScreen", array)
-	@time = exports.getTime()
-	BG = new Layer name:"lockScreen Background", width:exports.width, height:exports.height
-	BG.type = "lockScreen"
-	BG.style["background"] = "linear-gradient(-180deg, #00C4D0 0%, #F3DABC 100%)"
-	if setup.time == "default"
-		@timeLayer = new exports.Text style:"lockScreenTime", text:exports.timeFormatter(@time, setup.clock24), fontSize:@timeFontSize, fontWeight:"thin", color:"white", superLayer:BG
-		exports.timeDelegate(@timeLayer, setup.clock24)
-	else  
-		@timeLayer = new exports.Text style:"lockScreenTime", text:setup.time, fontSize:@timeFontSize, fontWeight:"thin", color:"white", superLayer:BG
-	@timeLayer.constraints = 
-		align:"horizontal"
-		top:60
-	if setup.date == "default"
-		@dateLayer = new exports.Text style:"lockScreenDate", text:@time.day + ", " + @time.month + " " + @time.date, fontSize:@dateFontSize, color:"white", superLayer:BG
-	else
-		@dateLayer = new exports.Text style:"lockScreenDate", text:setup.date, fontSize:@dateFontSize, color:"white", superLayer:BG
-	@dateLayer.constraints =
-		horizontalCenter:@timeLayer
-		top:[@timeLayer]
-	slideToUnlock = new exports.Text style:"lockScreenSlide", text:"slide to unlock", fontSize:24, fontWeight:"medium", opacity:.5, superLayer:BG
-	slideToUnlock.constraints = 
-		align:"horizontal"
-		bottom:70
-
-	arrow = new Layer backgroundColor:"transparent"
-	arrow.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-		<svg width='#{exports.px(11)}px' height='#{exports.px(24)}px' viewBox='0 0 11 24' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
-			<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
-			<title>Slide to Unlock Arrow</title>
-			<desc>Created with Sketch.</desc>
-			<defs></defs>
-			<g id='Page-1' stroke='none' stroke-width='1' fill='none' fill-rule='evenodd'>
-				<g id='iPhone-6/6S-Lock-Screen' transform='translate(-92.000000, -597.000000)' fill='#000000'>
-					<g id='Slide-to-Unlock' transform='translate(92.000000, 597.000000)'>
-						<path d='M10.9877324,12.0257422 L2.19629058,0.793908206 C1.85240438,0.353753949 1.22321708,0.275641031 0.788010754,0.615661475 C0.349770253,0.958052479 0.277703922,1.58676776 0.62026907,2.02523116 L8.43352455,12.0257421 L0.62026907,22.0262531 C0.277703922,22.4647165 0.349770253,23.0934318 0.788010754,23.4358228 C1.22321708,23.7758432 1.85240438,23.6977303 2.19629058,23.257576 L10.9877324,12.0257422 Z' id='Slide-to-Unlock-Arrow'></path>
-					</g>
-				</g>
-			</g>
-		</svg>"
-	arrow.constraints = 
-		height:24
-		width:11
-		verticalCenter:slideToUnlock
-		trailing:[slideToUnlock, 12]
-	exports.layout()
-	return BG
-
 exports.StatusBar = (array) ->
 	setup = setupComponent("statusBar", array)
 	statusBar = new Layer backgroundColor:"transparent", name:"statusBar.all"
@@ -2062,6 +1990,8 @@ exports.Keyboard = (array) ->
 
 	firstRowKeyWidth = 0
 	secondRowKeyWidth = 0
+
+	board.keys = {}
 	for letter in lettersArray
 		index = lettersArray.indexOf(letter) 
 		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.scale, backgroundColor:"white", color:"black", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.key.width, height:boardSpecs.key.height
@@ -2202,25 +2132,27 @@ exports.Keyboard = (array) ->
 			if shiftIcon.states.state == "on"
 				shiftIcon.states.switch("default")
 				shiftKey.backgroundColor = exports.color("light-key")
+
 				if exports.device == "ipad"
 					shiftIcon2.states.switch("default")
 					shiftKey2.backgroundColor = exports.color("light-key")
+
 				for key in keysArray
 					key.style['text-transform'] = 'lowercase'
 				box.style['text-transform'] = 'lowercase'
+
 				if setup.output
 					@newText = setup.output.text.html + @.name.toUpperCase()
+					exports.update(setup.output.text, [text:@newText])
 			else
 				if setup.output
 					@newText = setup.output.text.html + @.name
-				if setup.output
 					exports.update(setup.output.text, [text:@newText])
 
 
 
 	board.keysArray = keysArray
 
-	board.keys = {}
 
 
 	keyboardState = 1
@@ -2687,215 +2619,214 @@ exports.Keyboard = (array) ->
 	for em in frequentlyUsedEmojisRaw
 		freqEmojisArray.push emojiFormatter(em)
 
-	emojiKey.on Events.TouchStart, ->
-		emojiKey.backgroundColor = "white"
-		emojiBG = new Layer backgroundColor:"#ECEEF1"
-		box = exports.px(30)
-		emojiBG.constraints = (trailing:1, leading:1, bottom:1, height:258)
-		exports.layout()
-		emojiGalley = new ScrollComponent superLayer:emojiBG, width:emojiBG.width, height:emojiBG.height - exports.px(40)
-		emojiGalley.speedY = 0 
-		emojiSpacer = exports.px(6)
-		emojiPicker = new Layer backgroundColor:"transparent", name:"emoji picker", superLayer:emojiBG
-		emojiPicker.constraints = 
-			leading:1
-			trailing:1
-			bottom:1
-			height:42
-		ABC = new Layer backgroundColor:"transparent", superLayer:emojiPicker
-		ABC.html = "ABC"
-		ABC.style = {
-			"font-size" : exports.px(15) + "px"
-			"font-weight" : 500
-			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
-			"color" : "#4F555D"
-		}
-		ABC.constraints = 
-			leading:12
-			bottom:14
-			width:30
-			height:15
+	# emojiKey.on Events.TouchStart, ->
+	# 	emojiKey.backgroundColor = "white"
+	# 	emojiBG = new Layer backgroundColor:"#ECEEF1"
+	# 	box = exports.px(30)
+	# 	emojiBG.constraints = (trailing:1, leading:1, bottom:1, height:258)
+	# 	exports.layout()
+	# 	emojiGalley = new ScrollComponent superLayer:emojiBG, width:emojiBG.width, height:emojiBG.height - exports.px(40)
+	# 	emojiGalley.speedY = 0 
+	# 	emojiSpacer = exports.px(6)
+	# 	emojiPicker = new Layer backgroundColor:"transparent", name:"emoji picker", superLayer:emojiBG
+	# 	emojiPicker.constraints = 
+	# 		leading:1
+	# 		trailing:1
+	# 		bottom:1
+	# 		height:42
+	# 	ABC = new Layer backgroundColor:"transparent", superLayer:emojiPicker
+	# 	ABC.html = "ABC"
+	# 	ABC.style = {
+	# 		"font-size" : exports.px(15) + "px"
+	# 		"font-weight" : 500
+	# 		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
+	# 		"color" : "#4F555D"
+	# 	}
+	# 	ABC.constraints = 
+	# 		leading:12
+	# 		bottom:14
+	# 		width:30
+	# 		height:15
 
-		exports.layout()
-		row = -1
-		ABC.on Events.Click, ->
-			emojiBG.destroy()
-		frequent = new Layer superLayer:emojiPicker, backgroundColor:"transparent"
-		frequent.html = iconLibrary.frequent
-		frequent.constraints = 
-			leading : [ABC, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
-		smileys = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
-		smileys.html = iconLibrary.smileys
-		smileys.constraints =
-			leading : [frequent, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
-		animals = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
-		animals.html = iconLibrary.animals
-		animals.constraints =
-			leading : [smileys, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
-		food = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
-		food.html = iconLibrary.food
-		food.constraints =
-			leading : [animals, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
-		activity = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
-		activity.html = iconLibrary.activity
-		activity.constraints =
-			leading : [food, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
-		travel = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
-		travel.html = iconLibrary.travel
-		travel.constraints =
-			leading : [activity, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
-		objects = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
-		objects.html = iconLibrary.objects
-		objects.constraints =
-			leading : [travel, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
-		symbols = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
-		symbols.html = iconLibrary.symbols
-		symbols.constraints =
-			leading : [objects, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
-		flags = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
-		flags.html = iconLibrary.flags
-		flags.constraints =
-			leading : [symbols, 15]
-			bottom: 14
-			width:16
-			height:20
-		exports.layout()
+	# 	exports.layout()
+	# 	row = -1
+	# 	ABC.on Events.Click, ->
+	# 		emojiBG.destroy()
+	# 	frequent = new Layer superLayer:emojiPicker, backgroundColor:"transparent"
+	# 	frequent.html = iconLibrary.frequent
+	# 	frequent.constraints = 
+	# 		leading : [ABC, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
+	# 	smileys = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+	# 	smileys.html = iconLibrary.smileys
+	# 	smileys.constraints =
+	# 		leading : [frequent, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
+	# 	animals = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+	# 	animals.html = iconLibrary.animals
+	# 	animals.constraints =
+	# 		leading : [smileys, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
+	# 	food = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+	# 	food.html = iconLibrary.food
+	# 	food.constraints =
+	# 		leading : [animals, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
+	# 	activity = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+	# 	activity.html = iconLibrary.activity
+	# 	activity.constraints =
+	# 		leading : [food, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
+	# 	travel = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+	# 	travel.html = iconLibrary.travel
+	# 	travel.constraints =
+	# 		leading : [activity, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
+	# 	objects = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+	# 	objects.html = iconLibrary.objects
+	# 	objects.constraints =
+	# 		leading : [travel, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
+	# 	symbols = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+	# 	symbols.html = iconLibrary.symbols
+	# 	symbols.constraints =
+	# 		leading : [objects, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
+	# 	flags = new Layer superLayer:emojiPicker, backgroundColor:"transparent", opacity:.4
+	# 	flags.html = iconLibrary.flags
+	# 	flags.constraints =
+	# 		leading : [symbols, 15]
+	# 		bottom: 14
+	# 		width:16
+	# 		height:20
+	# 	exports.layout()
 
-		loadEmojis = (em) ->
-			row++ 
-			index = emojisArray.indexOf(em)
-			col = Math.floor(index/5)
-			if row > 4
-				row = 0 
-			emoji = new Layer x:col*box + (emojiSpacer * col) + exports.px(3), y:row*box + (emojiSpacer * row) + exports.px(40), superLayer:emojiGalley.content, width:box, height:box, name:decodeURIComponent(em), backgroundColor:"transparent"
-			emoji.html = decodeURIComponent(em)
-			emoji.style = {
-				"font-size" : exports.px(26) + "px"
-				"line-height" : box + "px"
-				"text-align" : "center"
-			}
-			emoji.on Events.Click, ->
-				print @.name
-			emojisLoaded++
-			print emojisLoaded
+	# 	loadEmojis = (em) ->
+	# 		row++ 
+	# 		index = emojisArray.indexOf(em)
+	# 		col = Math.floor(index/5)
+	# 		if row > 4
+	# 			row = 0 
+	# 		emoji = new Layer x:col*box + (emojiSpacer * col) + exports.px(3), y:row*box + (emojiSpacer * row) + exports.px(40), superLayer:emojiGalley.content, width:box, height:box, name:decodeURIComponent(em), backgroundColor:"transparent"
+	# 		emoji.html = decodeURIComponent(em)
+	# 		emoji.style = {
+	# 			"font-size" : exports.px(26) + "px"
+	# 			"line-height" : box + "px"
+	# 			"text-align" : "center"
+	# 		}
+	# 		emoji.on Events.Click, ->
+	# 			print @.name
+	# 		emojisLoaded++
+	# 		print emojisLoaded
 
-		inc = 200
-		firstLoad = .1
-		timeInc = 2
-		fullAmount = emojisArray.length
-		loads = Math.ceil(fullAmount / inc) - 1
-		partialAmount = fullAmount % inc
-		emojisLoaded = 0
-		for i in [0..loads]
-			i++
+	# 	inc = 200
+	# 	firstLoad = .1
+	# 	timeInc = 2
+	# 	fullAmount = emojisArray.length
+	# 	loads = Math.ceil(fullAmount / inc) - 1
+	# 	partialAmount = fullAmount % inc
+	# 	emojisLoaded = 0
+	# 	for i in [0..loads]
+	# 		i++
 			
-		#Scroll Load
-		emojiGalley.on Events.Move, ->
-			if emojiGalley.scrollX > 2000 && emojisLoaded < 400
-				for em in emojisArray[200...400]
-					loadEmojis(em)
-				emojiGalley.scrollX = 2001
-			if emojiGalley.scrollX > 5000 && emojisLoaded < 600
-				for em in emojisArray[400...600]
-					loadEmojis(em)
-				emojiGalley.scrollX = 5001
-			if emojiGalley.scrollX > 7500 && emojisLoaded < 800
-				for em in emojisArray[600...800]
-					loadEmojis(em)
-				emojiGalley.scrollX = 7501
-			if emojiGalley.scrollX > 10000 && emojisLoaded < 1000
-				for em in emojisArray[800...1000]
-					loadEmojis(em)
-				emojiGalley.scrollX = 10001
-			if emojiGalley.scrollX > 12500 && emojisLoaded < 1200
-				for em in emojisArray[1000...1297]
-					loadEmojis(em)
-				emojiGalley.scrollX = 12501
+	# 	#Scroll Load
+	# 	emojiGalley.on Events.Move, ->
+	# 		if emojiGalley.scrollX > 2000 && emojisLoaded < 400
+	# 			for em in emojisArray[200...400]
+	# 				loadEmojis(em)
+	# 			emojiGalley.scrollX = 2001
+	# 		if emojiGalley.scrollX > 5000 && emojisLoaded < 600
+	# 			for em in emojisArray[400...600]
+	# 				loadEmojis(em)
+	# 			emojiGalley.scrollX = 5001
+	# 		if emojiGalley.scrollX > 7500 && emojisLoaded < 800
+	# 			for em in emojisArray[600...800]
+	# 				loadEmojis(em)
+	# 			emojiGalley.scrollX = 7501
+	# 		if emojiGalley.scrollX > 10000 && emojisLoaded < 1000
+	# 			for em in emojisArray[800...1000]
+	# 				loadEmojis(em)
+	# 			emojiGalley.scrollX = 10001
+	# 		if emojiGalley.scrollX > 12500 && emojisLoaded < 1200
+	# 			for em in emojisArray[1000...1297]
+	# 				loadEmojis(em)
+	# 			emojiGalley.scrollX = 12501
 
-		#Time Load
-		Utils.delay 1, -> 
-			if emojisLoaded < 400 && emojiGalley.scrollX == 0
-				scrollX = emojiGalley.scrollX
-				for em in emojisArray[200...400]
-					loadEmojis(em)
-		Utils.delay 2.5, -> 
-			if emojisLoaded < 600 && emojiGalley.scrollX == 0
-				scrollX = emojiGalley.scrollX
-				for em in emojisArray[400...600]
-					loadEmojis(em)
-		Utils.delay 2.5, -> 
-			if emojisLoaded < 800 && emojiGalley.scrollX == 0
-				scrollX = emojiGalley.scrollX
-				for em in emojisArray[600...800]
-					loadEmojis(em)
-		Utils.delay 5.5, -> 
-			if emojisLoaded < 1000 && emojiGalley.scrollX == 0
-				scrollX = emojiGalley.scrollX
-				for em in emojisArray[800...1000]
-					loadEmojis(em)
-		Utils.delay 7, -> 
-			if emojisLoaded < 1297 && emojiGalley.scrollX == 0
-				scrollX = emojiGalley.scrollX
-				for em in emojisArray[1000...1297]
-					loadEmojis(em)
-
-
-		for em in freqEmojisArray
-			loadEmojis(em)
-		for em in emojisArray[0...inc]
-			loadEmojis(em)
+	# 	#Time Load
+	# 	Utils.delay 1, -> 
+	# 		if emojisLoaded < 400 && emojiGalley.scrollX == 0
+	# 			scrollX = emojiGalley.scrollX
+	# 			for em in emojisArray[200...400]
+	# 				loadEmojis(em)
+	# 	Utils.delay 2.5, -> 
+	# 		if emojisLoaded < 600 && emojiGalley.scrollX == 0
+	# 			scrollX = emojiGalley.scrollX
+	# 			for em in emojisArray[400...600]
+	# 				loadEmojis(em)
+	# 	Utils.delay 2.5, -> 
+	# 		if emojisLoaded < 800 && emojiGalley.scrollX == 0
+	# 			scrollX = emojiGalley.scrollX
+	# 			for em in emojisArray[600...800]
+	# 				loadEmojis(em)
+	# 	Utils.delay 5.5, -> 
+	# 		if emojisLoaded < 1000 && emojiGalley.scrollX == 0
+	# 			scrollX = emojiGalley.scrollX
+	# 			for em in emojisArray[800...1000]
+	# 				loadEmojis(em)
+	# 	Utils.delay 7, -> 
+	# 		if emojisLoaded < 1297 && emojiGalley.scrollX == 0
+	# 			scrollX = emojiGalley.scrollX
+	# 			for em in emojisArray[1000...1297]
+	# 				loadEmojis(em)
 
 
-		for sec in emojiSections
-			index = emojiSections.indexOf(sec)
-			title = new Layer superLayer:emojiGalley.content, backgroundColor:"transparent", x:index*5000 + exports.px(8), height:80, width:800
-			title.html = sec
-			title.style = {
-				"font-size" : exports.px(12) + "px"
-				"font-weight" : 600
-				"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
-				'line-height' : exports.px(42) + "px"
-				'letter-spacing' : exports.px(0.7) + "px"
-				'color' : "#A5A6A9"
-				'text-transform' : 'uppercase'
-			}
+	# 	for em in freqEmojisArray
+	# 		loadEmojis(em)
+	# 	for em in emojisArray[0...inc]
+	# 		loadEmojis(em)
 
 
-	emojiKey.on Events.TouchEnd, ->
-		emojiKey.backgroundColor = exports.color("light-key")
+	# 	for sec in emojiSections
+	# 		index = emojiSections.indexOf(sec)
+	# 		title = new Layer superLayer:emojiGalley.content, backgroundColor:"transparent", x:index*5000 + exports.px(8), height:80, width:800
+	# 		title.html = sec
+	# 		title.style = {
+	# 			"font-size" : exports.px(12) + "px"
+	# 			"font-weight" : 600
+	# 			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
+	# 			'line-height' : exports.px(42) + "px"
+	# 			'letter-spacing' : exports.px(0.7) + "px"
+	# 			'color' : "#A5A6A9"
+	# 			'text-transform' : 'uppercase'
+	# 		}
 
+
+	# emojiKey.on Events.TouchEnd, ->
+	# 	emojiKey.backgroundColor = exports.color("light-key")
 
 
 
@@ -3067,22 +2998,27 @@ exports.NavBar = (array) ->
 		bottom:12
 
 	# Handle Right
-	if typeof setup.right == "string"
+	if typeof setup.right == "string" && typeof setup.right != "boolean"
 		bar.right = new exports.Button superLayer:barArea, text:setup.right, fontWeight:500, constraints:{bottom:12, trailing:8}
 		bar.right.type = "button"
 		specialChar(bar.right)
 	if typeof setup.right == "object"
-		bar.right =  "yo"
+		bar.right = setup.right
+		bar.right.superLayer = barArea
+		bar.right.constraints = {
+			trailing:8
+			bottom:12
+		}
 
 	# Handle Left
-	if typeof setup.left == "string"
+	if typeof setup.left == "string" && typeof setup.left != "boolean"
 		leading = 8
 		if setup.left.indexOf("<") != -1
 			svg = exports.svg(iconLibrary.chevron)
 			bar.chevron = new Layer width:svg.width, height:svg.height, backgroundColor:"transparent", superLayer:barArea
 			bar.chevron.html = svg.svg
 			bar.chevron.constraints = {bottom:9, leading:8}
-			setup.left = setup.left.slice(2, setup.left.length)
+			setup.left = setup.left.replace("<", "")
 			leading = [bar.chevron, 4]
 
 		bar.left = new exports.Button superLayer:barArea, text:setup.left, fontWeight:500, constraints:{bottom:12, leading:leading}
@@ -3099,7 +3035,12 @@ exports.NavBar = (array) ->
 					time:.5
 
 	if typeof setup.left == "object"
-		bar.left =  "yo"
+		bar.left = setup.left
+		bar.left.superLayer = barArea
+		bar.left.constraints = {
+			leading:8
+			bottom:12
+		}
 
 
 
@@ -3187,13 +3128,14 @@ exports.TabBar = (array) ->
 	setActive = (tabIndex) ->
 		for tab, index in setup.tabs
 			if index == tabIndex
-				exports.changeFill(tab.icon, setup.activeFillColor)
-				tab.label.color = setup.activeLabelColor
+				exports.changeFill(tab.icon, exports.color(setup.activeColor))
+				tab.label.color = exports.color(setup.activeColor)
 				tab.view.visible = true
 			else
-				exports.changeFill(tab.icon, setup.inactiveFillColor)
-				tab.label.color = setup.inactiveLabelColor
+				exports.changeFill(tab.icon, exports.color(setup.inactiveColor))
+				tab.label.color = exports.color(setup.inactiveColor)
 				tab.view.visible = false
+
 	for tab, index in setup.tabs
 		#Check for vaild tab object
 		if tab.type != "tab"
@@ -3201,8 +3143,8 @@ exports.TabBar = (array) ->
 
 		tabBarBox.addSubLayer(tab)
 		# Change colors
-		exports.changeFill(tab.icon, setup.inactiveFillColor)
-		tab.label.color = setup.inactiveLabelColor
+		exports.changeFill(tab.icon, exports.color(setup.inactiveColor))
+		tab.label.color = exports.color(setup.inactiveColor)
 		tabBarBG.backgroundColor = setup.backgroundColor
 
 		if index != 0
@@ -3221,137 +3163,6 @@ exports.TabBar = (array) ->
 	exports.layout()
 	return tabBar
 
-exports.Table = (array) ->
-	setup = setupComponent("table", array)
-	table = new ScrollComponent name:"table", backgroundColor:"white"
-	table.scrollHorizontal = false
-	if setup.constraints
-		table.constraints = setup.constraints
-		exports.layout()
-	if setup.superLayer 
-		setup.superLayer.addSubLayer(table)
-	if setup.cell == "default"
-		@types = {
-			"label" : {
-				"fontSize"
-				"color" : "#030303"
-				"leading" : 16
-				"top" : 14
-			}, "detail" : {
-				"color" : "#8F8E94"
-				"trailing" : 16
-				"top" : 14
-			}
-				}
-		@cellHeight = exports.px(50)
-	else
-		@types = setup.cell.frame
-		@cellHeight = exports.px(setup.cell.height)
-	cellHeight = @cellHeight
-	cells = []
-	if setup.cell.isSwipe == true
-		buttonCreated = false
-		buttonLabel = new exports.Text style:"swipeTextLabel", text:setup.cell.swipe.label, color:setup.cell.swipe.textColor
-		button = new Layer maxX:table.content.width, height:cellHeight, superLayer:table.content, backgroundColor:setup.cell.swipe.color, name:"swipe button", width:buttonLabel.width + exports.px(20)
-		button.addSubLayer(buttonLabel)
-		buttonLabel.constraints = 
-			align:"center"
-		button.visible = false
-		buttonCell = 0
-		button.sendToBack()
-	for row, index in setup.content
-		cell = new Layer superLayer:table.content, y:(index * cellHeight), height:cellHeight, backgroundColor:"white", name:"cell " + index
-		cell.constraints =
-			leading:0
-			trailing:0
-		cells.push cell
-		divider = new Layer backgroundColor:"#C8C7CC", superLayer:table.content, width:table.content.width, height:exports.px(1)
-		divider.maxY = cell.maxY
-		keys = Object.keys(row)
-		for key, i in keys
-			textLayer = new exports.Text style:"#{key}#{Utils.randomNumber(0,1000)}", text:row[key], superLayer:cell, name:key + " " + row[key]
-			textStyle = 
-				"table#{key}" : 
-					@types[key]
-			if exports.styles["table#{key}"] == undefined
-				exports.addStyle textStyle
-				exports.apply(textLayer, "table#{key}")
-			else
-				exports.apply(textLayer, "table#{key}")
-
-		if setup.cell.isSwipe
-			cell.draggable = true
-			cell.speedX = .5
-			cell.draggable.vertical = false
-			cell.draggable.overdrag = false
-			cell.on Events.TouchStart, ->
-				if buttonCreated == true
-					for row in cells
-						row.animate
-							properties:(maxX:table.content.width)
-							time:.3
-					Utils.delay .2, ->
-						button.visible = false
-						buttonCreated = false
-			cell.on Events.Swipe, ->
-				if buttonCreated == false
-					if @.x < exports.px(-41)
-						buttonCreated = true
-						button.visible = true
-						button.y = @.y
-						buttonCell = @.y/cellHeight
-			
-				else
-					for row in cells 
-						row.animate
-							properties:(maxX:table.content.width)
-							time:.2
-			cell.on Events.SwipeEnd, ->
-				row = @.y/cellHeight
-				if @.x < exports.px(-41) && buttonCreated == true
-					@.animate
-						properties:(maxX:button.x)
-						time:.1
-				if row != buttonCell && buttonCreated == true
-					@.animate
-						properties:(maxX:table.content.width)
-						time:.1
-					Utils.delay .1, ->
-						button.visible = false
-						buttonCreated = false
-
-			table.action = button
-
-
-	return table
-
-exports.TableCell = (array) ->
-	setup = setupComponent("tableCell", array)
-	if setup.properties == "default"
-		@cellStructure = {
-				"label" : {
-					"fontSize"
-					"color" : "#030303"
-					"leading" : 16
-					"top" : 14
-				}, "detail" : {
-					"color" : "#8F8E94"
-					"trailing" : 16
-					"top" : 14
-				}
-					}
-	else
-		@cellStructure = setup.properties
-	return {
-		frame: @cellStructure
-		height: setup.height
-		isSwipe: setup.swipe
-		swipe:{
-			label:setup.swipeAction
-			color:setup.swipeColor
-			textColor:setup.swipeTextColor
-		}
-	}
 
 exports.Text = (array) ->
 	setup = setupComponent("text", array)

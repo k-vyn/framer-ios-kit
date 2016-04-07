@@ -24,16 +24,14 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 ### .Keyboard
 
-### .LockScreen
 
-## .Menu
+
+![](https://dl.dropboxusercontent.com/u/143270556/menus.svg)
 The menu is quick action list. The menu component is super simple to create.
-
-![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-04-04%2019.29.25.png)
 
 ```menu = new ios.Menu actions:[“-r Delete, Edit, Share”], animated:true```
 
-#### Properties
+### Properties
 **actions** *Array of strings* - Each string will appear as an action entry. In the string, you can pass special parameters to modify the display of the actions. If you pass a -r in the beginning, it'll make the action appear red. If you pass a -b, it'll make the action bolded. 
 
 **animated** *Boolean* - Animated will handle whether the menu animates in. If set to false or ommited the menu will not animate in. The menu on click or cancel will automatically animate out.

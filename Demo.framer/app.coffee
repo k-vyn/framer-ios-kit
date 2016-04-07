@@ -2,23 +2,19 @@
 ios = require 'iOSKit'
 
 whiteBG = new BackgroundLayer backgroundColor: "white"
+
+
+nav = new ios.NavBar right:"Share", left:"Delete", title:"Note"
+
+nav.right.on Events.TouchEnd, ->
+	menu = new ios.Menu actions:["Facebook", "Twitter", "Pinterest"], animated:true
+
+nav.left.on Events.TouchEnd, ->
+	alert = new ios.Alert title:"Delete note?", message:"Are you sure you wish to delete the note?", actions:["Cancel", "-r Delete note"]
+
 status = new ios.StatusBar carrier:"T-Mobile"
 
-home = new ios.Tab label:"Home"
-discovery = new ios.Tab label:"Do thing"
+keyboard = new ios.Field constraints:{align:"center"}, placeholderText:"Say something"
 
-nav = new ios.NavBar right:"-b Create", left:"< Settings", title:home
-nav2 = new ios.NavBar title:discovery, right:"Search"
-
-h1 = new ios.Text constraints:{top:[nav, 40], width:200, leading:30}, fontSize:50, fontWeight:"black", superLayer:home.view
-
-h2 = new ios.Text constraints:{top:[h1, 20], leadingEdges:h1}, superLayer:home.view
-
-button = new ios.Button constraints:{top:[h2, 20], leadingEdges:h1}
-
-bar = new ios.TabBar tabs:[home, discovery]
-
-nav.right.on Events.Click, ->
-	menu = new ios.Menu animated:true, actions:["Share", "Edit", "-r Delete"]
-	
-field = new ios.Field constraints:{top:[button, 20], leadingEdges:h1}
+Utils.delay 7, ->
+	banner = new ios.Banner title:"Twitter", message:"You have a new follower", animated:true
