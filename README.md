@@ -11,7 +11,7 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 ## System Components
 
 ### .Alert 
-![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-04%2014.26.26.png)
+![](https://dl.dropboxusercontent.com/u/143270556/alerts.png)
 
 **Example**
 ```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
@@ -19,6 +19,7 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 #### Properties
  
 ### .Banner
+![](https://dl.dropboxusercontent.com/u/143270556/banners.png)
 
 ### .Button
 
