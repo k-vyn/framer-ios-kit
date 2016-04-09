@@ -48,6 +48,7 @@ For example, to listen to the delete action from the example above, you’d writ
 ```menu.actions[“-r Delete].on”```
 
 If there are no spaces in the action, you could, in addition to brackets, use dot syntax like:
+
 ```menu.actions.Edit.on```  
 
 
