@@ -1,34 +1,73 @@
-# Framer iOS Kit
+# iOS Kit for FramerJS
+iOS Kit was created to make prototyping iOS fast and easy without compromising the quality or customization options that Framer is so good at. 
+
+There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is also the rich component library that’ll save you time, and finally there’s the supporting functions that help power the foundation & components, but are opened up so that you may find value in them by themselves.
 
 ## Setup
 To setup the kit, add the iOSKit.coffee file to your modules folder in your project. 
 
 In Framer Studio, write – 
-```ios = require 'iOSKit' ```
+`ios = require 'iOSKit'`
 
 You can write any variable name you'd like, but for the purposes of this guide. We'll be referencing ios. 
+
+## Foundational Elements 
+### Real device override
+This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built on an iPhone 6 in an iPhone 6+. You’ll see a lot of white space. When this module is on, you’re frame will be overridden by the device, so the iPhone 6+ will no longer see the iPhone 6 frame. 
+
+### Device details library
+You’ll now be able to refer to a set of new variables that’ll allow you to get more details on the device
+
+##### ios.scale 
+returns 1, 2, or 3
+##### ios.height 
+returns the height of the device in pixels
+##### ios.width
+returns the width of the device in pixels
+##### ios.device
+returns one of the device names below
+- ```ipad``` for any iPad other than the pro
+- ```ipad-pro```  for the iPad Pro
+- ```iphone-5``` for iPhone 5, iPhone 5s, iPhone 5c, and iPhone SE
+- ```iphone-6s``` for iPhone 6 & 6s
+- ```iphone-6s-plus``` for iPhone 6 plus & 6s plus
+
+
+### Dynamic Layout
+This is 
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/dynamic.png)
+
+The most fundamental piece of this module is Dynamic Layout. Dynamic Layout is a robust layout engine that’ll help make positioning layers easier and smarter. It also 
+
 
 ## System Components
  
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/alert.png)
 
+Alerts are blocking notifications that make users address the notification and provide a few necessary actions.
+
+****
+
+
+
 **Example**
-```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
+`alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”`
 
 #### Properties
  
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/banner.png)
+(img)
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/button.png)
+(img)
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/keyboard.png)
+(img)
 
 
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
+(img)
 The menu is quick action list. The menu component is super simple to create.
 
-```menu = new ios.Menu actions:[“-r Delete, Edit, Share”], animated:true```
+`menu = new ios.Menu actions:[“-r Delete, Edit, Share”], animated:true`
 
 ### Properties
 **actions** *Array of strings* - Each string will appear as an action entry. In the string, you can pass special parameters to modify the display of the actions. If you pass a -r in the beginning, it'll make the action appear red. If you pass a -b, it'll make the action bolded. 
@@ -43,14 +82,14 @@ The menu is quick action list. The menu component is super simple to create.
 To listen to an action, it's super easy. Just listen to the .actions object and put the action verbatim in brackets.
 
 For example, to listen to the delete action from the example above, you’d write this: 
-```menu.actions[“-r Delete"].on```
+`menu.actions[“-r Delete"].on`
 
 If there are no spaces in the action, you could, in addition to brackets, use dot syntax like:
 
-``` menu.actions.Edit.on ```
+`menu.actions.Edit.on`
 
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/navbar.png)
+(img)
 #### Properties
 
 **title** *String* 
@@ -63,11 +102,11 @@ If there are no spaces in the action, you could, in addition to brackets, use do
 
 **superLayer** *Layer* – When needed the navbar can be a part of a view. If you’re using tabs, you can set this to be inside of a view by settings this to tabLayer.*view*.
 
-![StatusBar](https://dl.dropboxusercontent.com/u/143270556/ioskit/statusbar.png)
+(img)
 Status Bar will add a touch of realism to your prototype. It has  many customizable properties that’ll make it suit any situation. It also has a clock that shows the real time. 
 
 #### Example
-```status = new ios.StatusBar carrier:”Verizon”, network:”3g”, signal:3, battery:70```
+`status = new ios.StatusBar carrier:”Verizon”, network:”3g”, signal:3, battery:70`
 
 #### Properties
 **clock24** *Bool* - If set to true, this will modify the system clock to a 24–hour clock. 
@@ -78,61 +117,59 @@ Status Bar will add a touch of realism to your prototype. It has  many customiza
 
 **battery** *Int* - Changes the remaining battery percentage
 
-**signal**  *Int (0-5)* - This will change the number of bars shown  the signal. 0 being no network, and 5 being full reception.  
-  
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/text.png)
+**signal**  *Int (0-5)* - This will change the number of bars shown  the signal. 0 being no network, and 5 being full reception.   
+(img)
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/dynamic.png)
+(img)
 Dynamic layout was built to bring in the logic of Auto layout into Framer. Auto layout is the backbone of iOS. It enables layouts to be constants and molded to each device. To allow this functionality, it replaces the pixel level syntax/handlers like x & y and leverages margins & centers. Autolayout for FramerJS takes a philosophical shift in how we layout screens. 
 
 If you’re new to Auto Layout, any documentation that exists on the web should help you use this feature, and hopefully by using  Dynamic layout, you’ll also learn Auto Layout. 
 
 ### Dynamic layout vs. Auto layout
-There are a few major differences between layout engines. The biggest being that Auto layout, while able to be written in code, is primarily a GUI in Xcode. Dynamic layout had to be completely code, so I took some liberties in how we define  
-
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/positioning.png)
+There are a few major differences between layout engines. The biggest being that Auto layout, while able to be written in code, is primarily a GUI in Xcode. Dynamic layout had to be completely code, so I took some liberties in how we define 
+(img)
 
 For Autolayout in Framer, we set constraints, and then we call a build. By building, we allow the logic to set the x and y, and when we set opposing constraints, we enable the logic to set widths and heights.
 
 Simple constraints would look like this: 
 
-```layer.constraints =
+\`\`\`layer.constraints =
 top: 10
 leading:10
 
-ios.build()```
+ios.build()\`\`\`
 
 On an iPhone 6s, this will put the x cord at 20 and y at 20, and on iPhone 6s Plus, it'll be 30 and 30 because it's 3x. 
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/alignment.png)
+(img)
 The next progression in AutoLayout be a breeze. In constraints, you can set the align property to familiar things like horizontal, vertical, and center.
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/relationship.png)
+(img)
 To establish a relationship, set a constraint to a layer. 
 * Note that *align* property does not accept any layers
 
-```childLayer.constraints = 
-	top:parentLayer
-	
-ios.build()```
+\`\`\`childLayer.constraints = 
+'' top:parentLayer
+ 
+ios.build()\`\`\`
 
 This will set the top of the *childLayer*’s top to the bottom of the *parentLayer*.
 
 To make this more useful, you can add additional space between the layers.
 
-```childLayer.constraints = 
-	top:[parentLayer, 10]
-	
-ios.build()```
+\`\`\`childLayer.constraints = 
+'' top:[parentLayer, 10]
+ 
+ios.build()\`\`\`
 
 This will add 10pts of space between the bottom of the *parentLayer* and the top of the *childLayer*.
 
 You can also use alignment properties
 
-``` childLayer.constraints = 
-	horizontalCenter:parentLayer
+\`\`\` childLayer.constraints = 
+'' horizontalCenter:parentLayer
 
-ios.build()```
+ios.build()\`\`\`
 
 This will align the horizontal of the childLayer to the center of the parentLayer. 
 
