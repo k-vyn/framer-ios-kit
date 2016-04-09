@@ -9,21 +9,19 @@ In Framer Studio, write –
 You can write any variable name you'd like, but for the purposes of this guide. We'll be referencing ios. 
 
 ## System Components
-
-### .Alert 
-![](https://dl.dropboxusercontent.com/u/143270556/alerts.png)
+ 
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/alert.png)
 
 **Example**
 ```alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”```
 
 #### Properties
  
-### .Banner
-![](https://dl.dropboxusercontent.com/u/143270556/banners.png)
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/banner.png)
 
-### .Button
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/button.png)
 
-### .Keyboard
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/keyboard.png)
 
 
 
