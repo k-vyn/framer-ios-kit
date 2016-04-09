@@ -50,11 +50,10 @@ For example, to listen to the delete action from the example above, you’d writ
 If there are no spaces in the action, you could, in addition to brackets, use dot syntax like:
 ```menu.actions.Edit.on```  
 
-## .NavBar
-![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.39.48.png)
 
-## StatusBar
-![](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-12%2022.44.36.png)
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/navbar.png)
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/statusbar.png)
 The status bar component is a dynamic component that’s fully customizable. It has a fully functioning clock that’ll update in real time! You can easily modify each part of the status bar to suit your needs. 
 
 #### Example
@@ -73,10 +72,7 @@ The status bar component is a dynamic component that’s fully customizable. It 
 
 **battery** *Int (0-100)* - You can modify what battery the device has. The battery icon will adjust to match what the percentage is. By default, it’s set to 100.
 
-## Tab 
-## TabBar
-## Table
-## TableCell
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/tabs.png)
 
 #### Example
 
@@ -94,8 +90,7 @@ The status bar component is a dynamic component that’s fully customizable. It 
 
 **superLayer** *Layer* – When needed the navbar can be a part of a view. If you’re using tabs, you can set this to be inside of a view by settings this to tabLayer.*view*.
 
-## .StatusBar
-![StatusBar](https://dl.dropboxusercontent.com/u/143270556/Screenshot%202016-03-09%2015.34.00.png)
+![StatusBar](https://dl.dropboxusercontent.com/u/143270556/ioskit/statusbar.png)
 Status Bar will add a touch of realism to your prototype. It has  many customizable properties that’ll make it suit any situation. It also has a clock that shows the real time. 
 
 #### Example

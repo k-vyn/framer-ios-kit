@@ -64,6 +64,8 @@ exports.orientation = 0
 
 screen = {}
 
+
+
 # getDevice will populate device variables, and it'll override the frame if the device is different. 
 exports.getDevice = ->
 
@@ -1494,6 +1496,7 @@ exports.Button = (array) ->
 	button.label = textLayer
 	return button
 
+
 exports.Field = (array) ->
 	setup = setupComponent("field", array)
 	field = new Layer borderRadius:exports.px(setup.borderRadius), backgroundColor:setup.backgroundColor, width:exports.px(setup.width), height:exports.px(setup.height)
@@ -1525,7 +1528,6 @@ exports.Field = (array) ->
 		field.placeholder = placeholder
 
 	field.on Events.TouchEnd, ->
-		
 		field.active = true
 		text.visible = true
 		clickZone = new Layer name:"fieldActive", backgroundColor:"transparent"
