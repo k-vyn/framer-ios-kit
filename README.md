@@ -25,7 +25,7 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 
 
-![](https://dl.dropboxusercontent.com/u/143270556/menus.png)
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
 The menu is quick action list. The menu component is super simple to create.
 
 ```menu = new ios.Menu actions:[“-r Delete, Edit, Share”], animated:true```
@@ -49,6 +49,8 @@ If there are no spaces in the action, you could, in addition to brackets, use do
 
 ``` menu.actions.Edit.on ```
 
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/navbar.png)
 #### Properties
 
 **title** *String* 
@@ -78,9 +80,9 @@ Status Bar will add a touch of realism to your prototype. It has  many customiza
 
 **signal**  *Int (0-5)* - This will change the number of bars shown  the signal. 0 being no network, and 5 being full reception.  
   
-### .Text
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/text.png)
 
-## Dynamic layout  
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/dynamic.png)
 Dynamic layout was built to bring in the logic of Auto layout into Framer. Auto layout is the backbone of iOS. It enables layouts to be constants and molded to each device. To allow this functionality, it replaces the pixel level syntax/handlers like x & y and leverages margins & centers. Autolayout for FramerJS takes a philosophical shift in how we layout screens. 
 
 If you’re new to Auto Layout, any documentation that exists on the web should help you use this feature, and hopefully by using  Dynamic layout, you’ll also learn Auto Layout. 
@@ -88,7 +90,7 @@ If you’re new to Auto Layout, any documentation that exists on the web should 
 ### Dynamic layout vs. Auto layout
 There are a few major differences between layout engines. The biggest being that Auto layout, while able to be written in code, is primarily a GUI in Xcode. Dynamic layout had to be completely code, so I took some liberties in how we define  
 
-### Positioning
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/positioning.png)
 
 For Autolayout in Framer, we set constraints, and then we call a build. By building, we allow the logic to set the x and y, and when we set opposing constraints, we enable the logic to set widths and heights.
 
@@ -102,10 +104,10 @@ ios.build()```
 
 On an iPhone 6s, this will put the x cord at 20 and y at 20, and on iPhone 6s Plus, it'll be 30 and 30 because it's 3x. 
 
-### Alignment
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/alignment.png)
 The next progression in AutoLayout be a breeze. In constraints, you can set the align property to familiar things like horizontal, vertical, and center.
 
-### Relationships
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/relationship.png)
 To establish a relationship, set a constraint to a layer. 
 * Note that *align* property does not accept any layers
 
