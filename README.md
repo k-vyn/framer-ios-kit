@@ -45,39 +45,11 @@ The menu is quick action list. The menu component is super simple to create.
 To listen to an action, it's super easy. Just listen to the .actions object and put the action verbatim in brackets.
 
 For example, to listen to the delete action from the example above, you’d write this: 
-```menu.actions[“-r Delete].on”```
+```menu.actions[“-r Delete"].on```
 
 If there are no spaces in the action, you could, in addition to brackets, use dot syntax like:
 
-```menu.actions.Edit.on```  
-
-
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/navbar.png)
-
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/statusbar.png)
-The status bar component is a dynamic component that’s fully customizable. It has a fully functioning clock that’ll update in real time! You can easily modify each part of the status bar to suit your needs. 
-
-#### Example
-``status = new ios.StatusBar carrier:"Verizon", signal:4, battery:70``
-
-#### Properties 
-**carrier** *String* - By default, the carrier is set to empty, and the network is wifi, but as soon as you set a carrier, the network will no longer be set to wifi.
-
-**network** *String* - By default, the carrier will be set to LTE, but you can replace it with other speeds like 3G.
-
-**signal** *Int (0-5)* - Signal is the strength of the network. By default, it’ll be set to 5 bars. If you set the signal to 0, you’ll see the signal, network, and carrier be replaced with "No network."
-
-**style** *Light* or *Dark* – This will toggle the status bar to be black or white. Light being white and dark being black. By default, it’ll be set to dark.
-
-**clock24** *Bool* - The clock is by default set to a 12 hour clock, but if you’d prefer a 24 hour clock, set clock24 to true. 
-
-**battery** *Int (0-100)* - You can modify what battery the device has. The battery icon will adjust to match what the percentage is. By default, it’s set to 100.
-
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/tabs.png)
-
-#### Example
-
-```nav = new ios.NavBar title:”Home”, rightAction:”-b Edit”, blur:false```
+``` menu.actions.Edit.on ```
 
 #### Properties
 
@@ -128,8 +100,7 @@ Simple constraints would look like this:
 top: 10
 leading:10
 
-ios.build()
-```
+ios.build()```
 
 On an iPhone 6s, this will put the x cord at 20 and y at 20, and on iPhone 6s Plus, it'll be 30 and 30 because it's 3x. 
 
@@ -140,41 +111,33 @@ The next progression in AutoLayout be a breeze. In constraints, you can set the 
 To establish a relationship, set a constraint to a layer. 
 * Note that *align* property does not accept any layers
 
-```
-childLayer.constraints = 
+```childLayer.constraints = 
 	top:parentLayer
 	
-ios.build()	
-```
+ios.build()```
 
 This will set the top of the *childLayer*’s top to the bottom of the *parentLayer*.
 
 To make this more useful, you can add additional space between the layers.
 
-```
-childLayer.constraints = 
+```childLayer.constraints = 
 	top:[parentLayer, 10]
 	
-ios.build()	
-
-```
+ios.build()```
 
 This will add 10pts of space between the bottom of the *parentLayer* and the top of the *childLayer*.
 
 You can also use alignment properties
 
-``` 
-childLayer.constraints = 
+``` childLayer.constraints = 
 	horizontalCenter:parentLayer
 
-ios.build()
-```
+ios.build()```
 
 This will align the horizontal of the childLayer to the center of the parentLayer. 
 
 Align edges
-There will be times you’d prefer not to align 
-```
+There will be times you’d prefer not to align
 
 ## Supporting Functions
 ### getTime
