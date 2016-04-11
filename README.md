@@ -159,7 +159,6 @@ You’ll now be able to refer to a set of new variables that’ll allow you to g
 ## System components
 These are easy to implement & fully customizable native iOS components. The idea is that implementing native iOS components should be easy & quick, so that you can spend the time working on what makes your prototype unique. 
 
-###   Components overview
 Every component in this module was written to feel native to Framer, so the way you create components should feel as familar as creating a new layer. The difference is in addition to Framer properties there's added customization parameters that'll be accepted, and any component that can accept constraints from Dynamic Layout is able to. 
 
 After creation, components will operate as native layers under the variable name you declared. The only difference is the sublayers of the component are accessible via dot notation, so it's easier for you to turn on event listeners etc. 
@@ -177,7 +176,7 @@ To provide even more customization, any string in an action context can have the
 `-y` - make string yellow<br>
 `-#000000` - change color to any 6 digit hex code. <br><br>
 
-### Alerts
+## Alert
  
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/alert.png)
 
@@ -198,11 +197,11 @@ alert = new ios.Alert
 
 #### Schema
 <pre>
-alert: {
+alert : {
 	alert.modal 
 		alert.title
 		alert.message
-		alert.actions: { OK, Cancel }
+		alert.actions : { OK, Cancel }
 	alert.overlay
 }
 </pre>
@@ -213,7 +212,7 @@ To listen to different actions, you can use dot notation if it's a single word o
 - Dot notation <br> `alert.actions.OK.on Events...`
 - Square bracket notation <br> `alert.actions["OK"].on Events...`
 
-### Banner 
+## Banner 
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/banner.png)
 
@@ -252,7 +251,7 @@ To make the banner clickable, you can write -
 banner.on Events... 
 </pre>
 
-### Menu 
+## Menu 
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
 
@@ -280,7 +279,7 @@ menu : {
 	menu.cancel 
 	menu.overlay
 	menu.description
-	menu.actions :{"-r Delete", Edit, Share}
+	menu.actions : {"-r Delete", Edit, Share}
 }
 </pre>
 #### Listening to actions
@@ -289,7 +288,43 @@ To listen to different actions, you can use dot notation if it's a single word o
 - Dot notation <br> `menu.actions.Share.on Events...`
 - Square bracket notation <br> `menu.actions["-r Delete"].on Events...`
 
-### Cookie 
+## Status Bar 
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/statusbar.png)
+
+The status bar allows users to see the connection, current time, and battery. 
+
+####Properties
+- **carrier** *String* <br> Carrier name ex. Verizon/Orange/FramerJS
+- **network** *String* <br> network strength ex. 3G/LTE. Only will be showed when a carrier is set. By default, this is set to the wifi icon. Upon setting carrier, this will be set to LTE. 
+- **battery** *Integer* <br> Battery percentage - this will change the battery icon
+- **signal** *Integer 0 - 5 * <br> Changes number of filled/unfilled dots. Zero will set the singal to "No Network"
+- **style** *String* <br> Dark is black text. Light is white text.  
+- **clock24** *Boolean* <br> By default, it's set to false, so it's a 12 hour clock with AM/PM. When set to true, the clock will cycle through 0-23 hours and removes AM/PM. 
+
+#### Example
+<pre>
+statusBar = new ios.StatusBar
+	carrier:"Verizon"
+	network:"3G"
+	battery:70
+	style:"light"
+</pre>
+
+####Schema
+<pre>
+statusBar : {
+    statusBar.battery.percent
+    statusBar.battery.icon
+    statusBar.bluetooth
+    statusBar.time
+    statusBar.network
+    statusBar.carrier
+    statusBar.signal
+}
+</pre>
+
+## Cookie 
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
 
