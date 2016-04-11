@@ -20,7 +20,7 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 The most fundamental piece of this module is Dynamic Layout. Dynamic Layout is a robust layout engine that’ll not only help make positioning layers easier and smarter. It'll make positioning layers across devices possible. 
 
-##### The Point 
+#### The Point 
 In Dynamic Layout like in iOS, everything is based around the point instead of the pixel. The exactly number of pixels will change from device to device, but the number of points will not. Theres's a simple equation for finding points. 
 
 `1pt = 1px * scale`
@@ -36,12 +36,84 @@ As we get away from using pixel positioning, we won't be using x & y based posit
 To set a leading & top constraint on a box, it's super easy.
 
 <pre>layer = new Layer
-layer.constraint = 
+layer.constraints = 
     top:10
     leading:10
 ios.layout()</pre>
 
-This will position the layer at x:20, y:20 on iPhone 6, and x:30, y:30 on iPhone 6 plus.
+This will position the layer at x:20, y:20 on iPhone 6, and x:30, y:30 on iPhone 6 plus. 
+
+Side note, you can also do this on one line if you'd prefer using this syntax. Just replace the the layer.constraints line from above with this line. You'll still need to run the ios.layout function.
+<pre>layer.constraints = {top:10, leading:10}</pre>
+
+**Setting Opposing Constraints**<br>
+If you set a leading & trailing or a top & bottom, Dynamic Layout will do its best to honor the constraints, which will mean the height/width will be adjusted. For example, if you set your constraints to  leading:0 and trailing:0, you layer's width will be the device's width.
+
+WARNING - If you set too many opposing constraints, I'm sure not what'll happen. Best of luck.  `¯\_(ツ)_/¯` 
+
+#### Relationships 
+One of the most powerful things of Dynamic Layout is relationships. Relationships allows you to link a layer onto another layer in a variety of ways. 
+
+**Positioning Relationships**<br>
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/positioning.png)
+When you declare a constraint, you can set a constraint as a layer instead of a integer. For example, if you have two layers (boxA & boxB) you can set boxB's top as boxA. 
+<pre>boxB.constraints = 
+	<b>top:boxA</b>
+ios.layout()</pre>
+
+This will stack the boxes, so that boxB's top edge is constrained to below boxA, but what if you want a little buffer? That's really easy. We'll use a little different syntax with wrapping the layer and buffer in brackets
+
+<pre>boxB.constraints = 
+	<b>top:[boxA, 10]</b>
+ios.layout()</pre>
+
+This will set boxB's top edge to 10 points below boxA. 
+
+**Center Relationships**<br>
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/centering.png)
+There are a couple other types of constraints that'll help make positioning layers even easier.  There are two centering constraints: verticalCenter, horizontalCenter. These constraints will only accept just a layer as a constraint. 
+
+For example, if you'd like boxB to be horizontally centered on boxA, write this: 
+<pre>boxB.constraints = 
+	top:[boxA, 10]
+	<b>horizontalCenter:boxA</b>
+ios.layout()</pre>
+
+This will set boxB 10 points below boxA, and it'll center it within boxA on the x-axis. The other centering constraint verticalCenter will work simliarly where it'll center the boxB within boxA on the y-axis. If you've set a top/bottom constraint, it'll ignore those constraints.
+
+**Align Relationships**<br>
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/align.png)
+The last type of relationships will allow you to align any edge of layer onto another layer. To do this, there are four constraints at your disposal: *leadingEdges, trailingEdges, topEdges, and bottomEdges*. These layers like centers will not accept anything other than another layer.
+
+If you'd like to align boxB's trailing edge onto boxA's trailing edge, write this:
+<pre>boxB.constraints = 
+	top:[boxA, 10]
+	<b>trailingEdges:boxA</b>
+ios.layout()</pre>
+
+#### Size Constraints
+You can also set height/width constraints just like above. This will insure that your layers will remain a particular size.  The big difference in setting a height/width constraint than a property height/width is that you'll need to set the height/width constraint in points. 
+
+<pre>boxB.constraints = 
+	top:[boxA, 10]
+	trailingEdges:boxA
+	<b>height:100</b>
+	<b>width:100</b>
+ios.layout()</pre>
+
+#### Understanding ios.layout()
+This function only need to be called once for all constraints. It'll cycle through all the layers in order of creation, and it'll fulfill all constraints. 
+
+**When to call it**
+You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer. You'll need to call ios.layout before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout(), it'll set the position to the accurate position. 
+
+**Mixing up the queue**
+ios.layout will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be layed out before others.
+
+<pre>ios.layout(boxB)</pre>
+This will only layout boxB and not boxA. 
+
+You may also want to play with the creation order if you're having issues with relationships.  
 
 ### Real device override
 This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built on an iPhone 6 in an iPhone 6+. You’ll see a lot of white space. When this module is on, you’re frame will be overridden by the device in your hand, so the iPhone 6+ will no longer see the iPhone 6 frame. Using Dynamic Layout will insure that your prototype looks presentable at every size.
@@ -49,19 +121,18 @@ This module is meant to make prototyping look real, and one of things that preve
 ### Device details library
 You’ll now be able to refer to a set of new variables that’ll allow you to get more details on the device
 
- **ios.scale**  – returns 1, 2, or 3
- 
- **ios.height**  – returns the height of the device in pixels
- 
-**ios.width** – returns the width of the device in pixels
+<pre><b>ios.scale</b> # returns 1,2,3
+<b>ios.height</b> # returns the height of the device in pixels
+<b>ios.width</b> # returns the width of the device in pixels
+<b>ios.device</b> # returns one of the device names below 
+	<b>ipad</b> # for any iPad other than the pro
+	<b>ipad-pro</b> # for the iPad Pro
+	<b>iphone-5</b> # for iPhone 5, iPhone 5s, iPhone 5c, and iPhone SE
+	<b>iphone-6s</b> # for iPhone 6 & 6s
+	<b>iphone-6s-plus</b> # for iPhone 6 plus & 6s plus
+</pre>
 
-**ios.device** – returns one of the device names below: 
 
-- ```ipad``` for any iPad other than the pro
-- ```ipad-pro```  for the iPad Pro
-- ```iphone-5``` for iPhone 5, iPhone 5s, iPhone 5c, and iPhone SE
-- ```iphone-6s``` for iPhone 6 & 6s
-- ```iphone-6s-plus``` for iPhone 6 plus & 6s plus
 
 ## System Components
  
