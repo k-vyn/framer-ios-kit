@@ -35,11 +35,11 @@ As we get away from using pixel positioning, we won't be using x & y based posit
 
 To set a leading & top constraint on a box, it's super easy.
 
-```layer = new Layer
-layer.constraint = 
-	top:10
-	leading:10
-ios.layout()```
+`layer = new Layer`<br>
+`layer.constraint = `<br>
+&nbsp;&nbsp;&nbsp;&nbsp;`top:10` <br>
+&nbsp;&nbsp;&nbsp;&nbsp;`leading:10` <br>
+`ios.layout()`
 
 This will position the layer at x:20, y:20 on iPhone 6, and x:30, y:30 on iPhone 6 plus.
 
