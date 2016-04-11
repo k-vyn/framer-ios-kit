@@ -20,14 +20,31 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 The most fundamental piece of this module is Dynamic Layout. Dynamic Layout is a robust layout engine that’ll not only help make positioning layers easier and smarter. It'll make positioning layers across devices possible. 
 
-#### The Point 
+##### The Point 
 In Dynamic Layout like in iOS, everything is based around the point instead of the pixel. The exactly number of pixels will change from device to device, but the number of points will not. Theres's a simple equation for finding points. 
 
 `1pt = 1px * scale`
 
+Side note, you can also use the built-in functions. 
+`ios.pt(6) #returns 3 points on iPhone 6 and 2 points on iPhone 6 plus` 
+`ios.px(1) #returns 2 pixels on iPhone 6 and 3 pixels on iPhone 6 plus`
+
+#### Positioning
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/positioning.png)
+As we get away from using pixel positioning, we won't be using x & y based positioning. Instead, we'll be setting things called constraints. When you set a constraint, it's like saying that a layer can't go beyond a certain position. There are four constraints: leading, trailing, top, and bottom. 
+
+To set a leading & top constraint on a box, it's super easy.
+
+`layer = new Layer
+layer.constraint = 
+	top:10
+	leading:10
+ios.layout()`
+
+This will position the layer at x:20, y:20 on iPhone 6, and x:30, y:30 on iPhone 6 plus.
 
 ### Real device override
-This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built on an iPhone 6 in an iPhone 6+. You’ll see a lot of white space. When this module is on, you’re frame will be overridden by the device, so the iPhone 6+ will no longer see the iPhone 6 frame. 
+This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built on an iPhone 6 in an iPhone 6+. You’ll see a lot of white space. When this module is on, you’re frame will be overridden by the device in your hand, so the iPhone 6+ will no longer see the iPhone 6 frame. Using Dynamic Layout will insure that your prototype looks presentable at every size.
 
 ### Device details library
 You’ll now be able to refer to a set of new variables that’ll allow you to get more details on the device
@@ -45,10 +62,6 @@ You’ll now be able to refer to a set of new variables that’ll allow you to g
 - ```iphone-5``` for iPhone 5, iPhone 5s, iPhone 5c, and iPhone SE
 - ```iphone-6s``` for iPhone 6 & 6s
 - ```iphone-6s-plus``` for iPhone 6 plus & 6s plus
-
-
-
-
 
 ## System Components
  
