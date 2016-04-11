@@ -188,7 +188,7 @@ Alerts are blocking notifications that will force the users to address the alert
 - **message** *String* <br>  Body text before actions.
 - **actions** *Array of Strings* <br> Series of actions that can be taken on the alert.  
 
-**Example**
+#### Example
 <pre>
 alert = new ios.Alert
 	title:"Warning"
@@ -197,7 +197,6 @@ alert = new ios.Alert
 </pre>
 
 #### Schema
-After declaration, you'd have something that looked like this – 
 <pre>
 alert: {
 	alert.modal 
@@ -211,128 +210,110 @@ alert: {
 #### Listening to Actions
 To listen to different actions, you can use dot notation if it's a single word or brackets for any case
 
-- **Dot notation** – `alert.actions.OK.on Events...`
-- **Bracket notation** – `alert.actions["OK"].on Events...`
+- Dot notation <br> `alert.actions.OK.on Events...`
+- Square bracket notation <br> `alert.actions["OK"].on Events...`
+
+### Banner 
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/banner.png)
+
+The banner is a non-blocking notification. Typically, the banner will send you to a specific screen in an app.
+
+####Properties
+- **title** *String* <br> Embolded top text
+-  **message** *String* <br> Body text
+- **time** *String* <br> time string that appears next to title. 
+- **icon** *Layer* <br> This will put the layer inside the banner and size it accordingly. By default, it's a green box. 
+- **duration** *Integer* <br> This will override the time before the banner animates-out. By default, this is set to 7. 
+- **animated** *Boolean* <br> When set to `true` menu will animate-in.
+
+**NOTE - ** The banner will be by default draggable. If you drag down, it'll reset, and if you drag up, it'll dismiss & destroy the banner. 
+
+#### Example
+<pre>
+banner = new ios.Banner 
+	title:"Time to do something"
+	message:"Don't miss out"
+	icon:iconLayer
+	animated:true
+</pre>
+
+#### Schema
+<pre>
+banner : {
+	banner.icon
+	banner.title
+	banner.message
+}
+</pre>
+#### Listening to actions
+To make the banner clickable, you can write - 
+<pre>
+banner.on Events... 
+</pre>
 
 ### Menu 
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
 
-(img)
 The menu is quick action list. The menu component is super simple to create.
 
-`menu = new ios.Menu actions:[“-r Delete, Edit, Share”], animated:true`
+####Properties
+- **actions** *Array of strings* <br> Series of actions that can be taken on the menu.
+- **animated** *Boolean* <br> When set to `true` menu will animate-in.
+- **description** *String* <br> When declared, a small grey text will appear at the top of the menu. By default, this will not appear. 
+- **cancel** *String* <br> This will override the label on the dismiss button. 
 
-### Properties
-**actions** *Array of strings* - Each string will appear as an action entry. In the string, you can pass special parameters to modify the display of the actions. If you pass a -r in the beginning, it'll make the action appear red. If you pass a -b, it'll make the action bolded. 
-
-**animated** *Boolean* - Animated will handle whether the menu animates in. If set to false or ommited the menu will not animate in. The menu on click or cancel will automatically animate out.
-
-**description** *String* - The string if declared will appear above all actions.
-
-**cancel** *String* - This is the string for the dismiss button on the bottom of the menu. 
-
-#### Listening to actions
-To listen to an action, it's super easy. Just listen to the .actions object and put the action verbatim in brackets.
-
-For example, to listen to the delete action from the example above, you’d write this: 
-`menu.actions[“-r Delete"].on`
-
-If there are no spaces in the action, you could, in addition to brackets, use dot syntax like:
-
-`menu.actions.Edit.on`
-
-
-(img)
-#### Properties
-
-**title** *String* 
-
-**leftAction** *String* or *Object* - This will set the action to the left. It can either be an image, layer, or string. 
-
-**rightAction** *String* or *Object* - This will set the action the right. It can either be an image, layer, or string. You can also use -b at the beginning of your string to make the text semibold. 
-
-**blur** *Bool* - By default or when set to true, the background will have a iOS background blur effect turned on. If you’d like to disable this, set blur to false.
-
-**superLayer** *Layer* – When needed the navbar can be a part of a view. If you’re using tabs, you can set this to be inside of a view by settings this to tabLayer.*view*.
-
-(img)
-Status Bar will add a touch of realism to your prototype. It has  many customizable properties that’ll make it suit any situation. It also has a clock that shows the real time. 
+**NOTE - ** The cancel button will always animate-out. You don't have to add any additional code to handle/animate that. 
 
 #### Example
-`status = new ios.StatusBar carrier:”Verizon”, network:”3g”, signal:3, battery:70`
+<pre>
+menu = new ios.Menu 
+	actions:[“-r Delete, Edit, Share”]
+	animated:true
+	description:"Do something"
+</pre>
 
-#### Properties
-**clock24** *Bool* - If set to true, this will modify the system clock to a 24–hour clock. 
+####Schema
+<pre>
+menu : {
+	menu.cancel 
+	menu.overlay
+	menu.description
+	menu.actions :{"-r Delete", Edit, Share}
+}
+</pre>
+#### Listening to actions
+To listen to different actions, you can use dot notation if it's a single word or brackets for any case
 
-**carrier** *String* - If set, this will remove wifi and show network. 
+- Dot notation <br> `menu.actions.Share.on Events...`
+- Square bracket notation <br> `menu.actions["-r Delete"].on Events...`
 
-**network** *String* - Sets the network when carrier is modified. 
+### Cookie 
 
-**battery** *Int* - Changes the remaining battery percentage
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
 
-**signal**  *Int (0-5)* - This will change the number of bars shown  the signal. 0 being no network, and 5 being full reception.   
-(img)
+The menu is quick action list. The menu component is super simple to create.
 
-(img)
-Dynamic layout was built to bring in the logic of Auto layout into Framer. Auto layout is the backbone of iOS. It enables layouts to be constants and molded to each device. To allow this functionality, it replaces the pixel level syntax/handlers like x & y and leverages margins & centers. Autolayout for FramerJS takes a philosophical shift in how we layout screens. 
+####Properties
+- **actions** *Array of strings* <br> Series of actions that can be taken on the menu.
+- **animated** *Boolean* <br> When set to `true` menu will animate-in.
+- **description** *String* <br> When declared, a small grey text will appear at the top of the menu. By default, this will not appear. 
+- **cancel** *String* <br> This will override the label on the dismiss button. 
 
-If you’re new to Auto Layout, any documentation that exists on the web should help you use this feature, and hopefully by using  Dynamic layout, you’ll also learn Auto Layout. 
 
-### Dynamic layout vs. Auto layout
-There are a few major differences between layout engines. The biggest being that Auto layout, while able to be written in code, is primarily a GUI in Xcode. Dynamic layout had to be completely code, so I took some liberties in how we define 
-(img)
 
-For Autolayout in Framer, we set constraints, and then we call a build. By building, we allow the logic to set the x and y, and when we set opposing constraints, we enable the logic to set widths and heights.
+#### Example
+<pre>
+</pre>
 
-Simple constraints would look like this: 
+####Schema
+<pre>
+: {
+}
+</pre>
+#### Listening to actions
+To listen to different actions, you can use dot notation if it's a single word or brackets for any case
 
-\`\`\`layer.constraints =
-top: 10
-leading:10
-
-ios.build()\`\`\`
-
-On an iPhone 6s, this will put the x cord at 20 and y at 20, and on iPhone 6s Plus, it'll be 30 and 30 because it's 3x. 
-
-(img)
-The next progression in AutoLayout be a breeze. In constraints, you can set the align property to familiar things like horizontal, vertical, and center.
-
-(img)
-To establish a relationship, set a constraint to a layer. 
-* Note that *align* property does not accept any layers
-
-\`\`\`childLayer.constraints = 
-'' top:parentLayer
- 
-ios.build()\`\`\`
-
-This will set the top of the *childLayer*’s top to the bottom of the *parentLayer*.
-
-To make this more useful, you can add additional space between the layers.
-
-\`\`\`childLayer.constraints = 
-'' top:[parentLayer, 10]
- 
-ios.build()\`\`\`
-
-This will add 10pts of space between the bottom of the *parentLayer* and the top of the *childLayer*.
-
-You can also use alignment properties
-
-\`\`\` childLayer.constraints = 
-'' horizontalCenter:parentLayer
-
-ios.build()\`\`\`
-
-This will align the horizontal of the childLayer to the center of the parentLayer. 
-
-Align edges
-There will be times you’d prefer not to align
-
-## Supporting Functions
-### getTime
-### timeDelegate
-### sameParent
-### addStyle
-### apply
+- Dot notation <br> ``
+- Square bracket notation <br> ``
