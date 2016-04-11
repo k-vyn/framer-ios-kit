@@ -1,7 +1,8 @@
 # iOS Kit for FramerJS
-iOS Kit was created to make prototyping iOS fast and easy without compromising the quality or customization options that Framer is so good at. 
 
-There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is also the rich component library that’ll save you time, and finally there’s the supporting functions that help power the foundation & components, but are opened up so that you may find value in them by themselves.
+iOS Kit was created to make prototyping iOS fast and easy without compromising the quality or customization options.
+
+There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
 
 ## Setup
 To setup the kit, add the iOSKit.coffee file to your modules folder in your project. 
@@ -12,6 +13,19 @@ In Framer Studio, write –
 You can write any variable name you'd like, but for the purposes of this guide. We'll be referencing ios. 
 
 ## Foundational Elements 
+
+### Dynamic Layout
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/dynamic.png)
+
+The most fundamental piece of this module is Dynamic Layout. Dynamic Layout is a robust layout engine that’ll not only help make positioning layers easier and smarter. It'll make positioning layers across devices possible. 
+
+#### The Point 
+In Dynamic Layout like in iOS, everything is based around the point instead of the pixel. The exactly number of pixels will change from device to device, but the number of points will not. Theres's a simple equation for finding points. 
+
+`1pt = 1px * scale`
+
+
 ### Real device override
 This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built on an iPhone 6 in an iPhone 6+. You’ll see a lot of white space. When this module is on, you’re frame will be overridden by the device, so the iPhone 6+ will no longer see the iPhone 6 frame. 
 
@@ -33,12 +47,7 @@ You’ll now be able to refer to a set of new variables that’ll allow you to g
 - ```iphone-6s-plus``` for iPhone 6 plus & 6s plus
 
 
-### Dynamic Layout
-This is 
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/dynamic.png)
-
-The most fundamental piece of this module is Dynamic Layout. Dynamic Layout is a robust layout engine that’ll help make positioning layers easier and smarter. It also 
 
 
 ## System Components
