@@ -54,7 +54,7 @@ WARNING - If you set too many opposing constraints, I'm sure not what'll happen.
 #### Relationships 
 One of the most powerful things of Dynamic Layout is relationships. Relationships allows you to link a layer onto another layer in a variety of ways. 
 
-**Positioning Relationships**<br>
+#####Positioning Relationships
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/positioning.png)
 When you declare a constraint, you can set a constraint as a layer instead of a integer. For example, if you have two layers (boxA & boxB) you can set boxB's top as boxA. 
 <pre>boxB.constraints = 
@@ -69,7 +69,7 @@ ios.layout()</pre>
 
 This will set boxB's top edge to 10 points below boxA. 
 
-**Center Relationships**<br>
+#####Center Relationships
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/centering.png)
 There are a couple other types of constraints that'll help make positioning layers even easier.  There are two centering constraints: verticalCenter, horizontalCenter. These constraints will only accept just a layer as a constraint. 
 
@@ -81,7 +81,7 @@ ios.layout()</pre>
 
 This will set boxB 10 points below boxA, and it'll center it within boxA on the x-axis. The other centering constraint verticalCenter will work simliarly where it'll center the boxB within boxA on the y-axis. If you've set a top/bottom constraint, it'll ignore those constraints.
 
-**Align Relationships**<br>
+#####Align Relationships
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/align.png)
 The last type of relationships will allow you to align any edge of layer onto another layer. To do this, there are four constraints at your disposal: *leadingEdges, trailingEdges, topEdges, and bottomEdges*. These layers like centers will not accept anything other than another layer.
 
@@ -91,7 +91,7 @@ If you'd like to align boxB's trailing edge onto boxA's trailing edge, write thi
 	<b>trailingEdges:boxA</b>
 ios.layout()</pre>
 
-#### Size Constraints
+####Size Constraints
 You can also set height/width constraints just like above. This will insure that your layers will remain a particular size.  The big difference in setting a height/width constraint than a property height/width is that you'll need to set the height/width constraint in points. 
 
 <pre>boxB.constraints = 
@@ -101,18 +101,18 @@ You can also set height/width constraints just like above. This will insure that
 	<b>width:100</b>
 ios.layout()</pre>
 
-#### Understanding ios.layout()
+####Understanding ios.layout()
 This function only need to be called once for all constraints. It'll cycle through all the layers in order of creation, and it'll fulfill all constraints. 
 
-**When to call it**
-You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer. You'll need to call ios.layout before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout(), it'll set the position to the accurate position. 
+<b>When to call it</b><br>
+You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer. You'll need to call ios.layout before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout(), it'll set the position to the accurate position. <br><br>
 
-**Mixing up the queue**
-ios.layout will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be layed out before others.
+<b>Mixing up the queue</b><br>
+ios.layout will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be layed out before others.<br>
 
 <pre>ios.layout(boxB)</pre>
 This will only layout boxB and not boxA. 
-
+<br>
 You may also want to play with the creation order if you're having issues with relationships.  
 
 ### Real device override
