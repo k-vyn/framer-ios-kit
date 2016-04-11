@@ -156,28 +156,67 @@ You’ll now be able to refer to a set of new variables that’ll allow you to g
 
 
 
-## System Components
+## System components
+These are easy to implement & fully customizable native iOS components. The idea is that implementing native iOS components should be easy & quick, so that you can spend the time working on what makes your prototype unique. 
+
+###   Components overview
+Every component in this module was written to feel native to Framer, so the way you create components should feel as familar as creating a new layer. The difference is in addition to Framer properties there's added customization parameters that'll be accepted, and any component that can accept constraints from Dynamic Layout is able to. 
+
+After creation, components will operate as native layers under the variable name you declared. The only difference is the sublayers of the component are accessible via dot notation, so it's easier for you to turn on event listeners etc. 
+
+##### Action string shortcuts
+To provide even more customization, any string in an action context can have these prepended shortcuts. 
+
+`-b` - bold string<br>
+`-g` - make string green<br>
+`-r` - make string red<br>
+`-rb` - make string blue <br>
+`-lb` - make string light blue<br>
+`-o` - make string orange<br>
+`-p` - make string pink<br>
+`-y` - make string yellow<br>
+`-#000000` - change color to any 6 digit hex code. <br><br>
+
+### Alerts
  
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/alert.png)
 
-Alerts are blocking notifications that make users address the notification and provide a few necessary actions.
-
-****
-
-
-
-**Example**
-`alert = new ios.Alert title:”Warning”, message:”Don’t do it”, action:”OK”, secondaryAction:”Cancel”`
+Alerts are blocking notifications that will force the users to address the alert before continuing. 
 
 #### Properties
- 
-(img)
+- **title** *String* <br> Embolded text at the top.
+- **message** *String* <br>  Body text before actions.
+- **actions** *Array of Strings* <br> Series of actions that can be taken on the alert.  
 
-(img)
+**Example**
+<pre>
+alert = new ios.Alert
+	title:"Warning"
+	message:"Don't do this"
+	actions:["OK", "Cancel"]
+</pre>
 
-(img)
+#### Schema
+After declaration, you'd have something that looked like this – 
+<pre>
+alert: {
+	alert.modal 
+		alert.title
+		alert.message
+		alert.actions: { OK, Cancel }
+	alert.overlay
+}
+</pre>
 
+#### Listening to Actions
+To listen to different actions, you can use dot notation if it's a single word or brackets for any case
 
+- **Dot notation** – `alert.actions.OK.on Events...`
+- **Bracket notation** – `alert.actions["OK"].on Events...`
+
+### Menu 
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
 
 (img)
 The menu is quick action list. The menu component is super simple to create.
