@@ -19,9 +19,13 @@ This module is meant to make prototyping look real, and one of things that preve
 You’ll now be able to refer to a set of new variables that’ll allow you to get more details on the device
 
  **ios.scale**  – returns 1, 2, or 3
+ 
  **ios.height**  – returns the height of the device in pixels
+ 
 **ios.width** – returns the width of the device in pixels
+
 **ios.device** – returns one of the device names below: 
+
 - ```ipad``` for any iPad other than the pro
 - ```ipad-pro```  for the iPad Pro
 - ```iphone-5``` for iPhone 5, iPhone 5s, iPhone 5c, and iPhone SE
