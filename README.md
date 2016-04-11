@@ -63,7 +63,7 @@ One of the most powerful things of Dynamic Layout is relationships. Relationship
 
 #####Positioning Relationships
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/positioning.png)
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/relationship.png)
 
 When you declare a constraint, you can set a constraint as a layer instead of a integer. For example, if you have two layers (boxA & boxB) you can set boxB's top as boxA. <br>
 
