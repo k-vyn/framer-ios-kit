@@ -4,6 +4,11 @@ iOS Kit was created to make prototyping iOS fast and easy without compromising t
 
 There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
 
+# Table of Contents
+1. [Setup](#Setup)
+2. [Dynamic Layout](#dynamic)
+
+
 ## Setup
 To setup the kit, add the iOSKit.coffee file to your modules folder in your project. 
 
@@ -13,7 +18,7 @@ In Framer Studio, write –
 You can write any variable name you'd like, but for the purposes of this guide. We'll be referencing ios. 
 
 ## Foundational Elements 
-
+<div id='dynamic' />
 ### Dynamic Layout
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/dynamic.png)
@@ -298,7 +303,7 @@ The status bar allows users to see the connection, current time, and battery.
 - **carrier** *String* <br> Carrier name ex. Verizon/Orange/FramerJS
 - **network** *String* <br> network strength ex. 3G/LTE. Only will be showed when a carrier is set. By default, this is set to the wifi icon. Upon setting carrier, this will be set to LTE. 
 - **battery** *Integer* <br> Battery percentage - this will change the battery icon
-- **signal** *Integer 0 - 5 * <br> Changes number of filled/unfilled dots. Zero will set the singal to "No Network"
+- **signal** *Integer(0 - 5)* <br> Changes number of filled/unfilled dots. Zero will set the singal to "No Network"
 - **style** *String* <br> Dark is black text. Light is white text.  
 - **clock24** *Boolean* <br> By default, it's set to false, so it's a 12 hour clock with AM/PM. When set to true, the clock will cycle through 0-23 hours and removes AM/PM. 
 
@@ -323,6 +328,67 @@ statusBar : {
     statusBar.signal
 }
 </pre>
+
+## Tab
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/tabs.png)
+
+Tabs are light-weight objects that fit into the tab bar component. 
+
+####Properties
+- **label** *String* <br> name of tab
+- **icon** *SVG String* <br> only accepts an SVG string  
+
+#### Example
+<pre>
+home = new ios.Tab
+	label:"home"
+	icon:"< svg>...< /svg>"
+</pre>
+
+####Schema
+<pre>
+home: {
+	home.label
+	home.icon
+	home.view
+}
+</pre> 
+####Adding contents to a tab
+Creating a tab will give you access **tab.view**. In this case, you'll have `home.view`. If you set `home.view` as the superLayer, only when the home tab is active those layers will be shown.
+
+`discovery = new Layer superLayer:home.view` 
+
+The discovery layer will only be shown when the home tab is active in the tab bar. 
+
+## Tab Bar
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/tabs.png)
+
+The tab bar is comprised of multiple tabs. It'll handle switching of tabs and views.
+
+####Properties
+- **tabs** *Array of tabs* <br> Add the tabs you made to this array
+- **activeColor** *String* <br> This is the color that will be shown on the active tabs and label.
+- **inactiveColor** *String* <br> the color that will be shown on inactive tabs and labels.
+
+
+#### Example
+<pre>
+tabBar = ios.TabBar tabs:[home, discovery, profile], activeColor:"#blue", inactiveColor:"grey"
+</pre>
+
+####Schema
+<pre>
+: {
+}
+</pre>
+
+#### Listening to Tabs
+Since tabs are their own objects. You'll just need to listen to the tab object instead.
+
+- Dot notation <br> ``
+- Square bracket notation <br> ``
 
 ## Cookie 
 
@@ -351,4 +417,4 @@ The menu is quick action list. The menu component is super simple to create.
 To listen to different actions, you can use dot notation if it's a single word or brackets for any case
 
 - Dot notation <br> ``
-- Square bracket notation <br> ``
+## - Square bracket notation <br> ``
