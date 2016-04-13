@@ -18,7 +18,7 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 	- [Size Constraints](#size-constraints)
 	- [Understanding ios.layout()](#layout)
 - [Real device override](#real)
-- [Device details library](#details)
+- [Device details library](#details)<br>
 <u>[System Components](#system)</u>
 - [Action String Shortcuts](#shortcuts)
 - [Alert](#alert)
