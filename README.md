@@ -23,6 +23,10 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 - [Action String Shortcuts](#shortcuts)
 - [Alert](#alert)
 - [Banner](#banner)
+- [Button](#button)
+- [Field](#field)
+- [Keyboard](#keyboard)
+- [Navigation Bar](#nav)
 - [Menu](#menu)
 - [Status Bar](#status)
 - [Tab](#tab)
@@ -278,6 +282,121 @@ To make the banner clickable, you can write -
 banner.on Events... 
 </pre>
 
+## Button 
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/button.png)
+
+Button is a small versital component that handles press states automatically.
+
+####Properties
+- **text** *String* <br> Sets button text
+- **buttonType** *String* <br> Can be `text`, `big`, `small`
+- **style** *String* <br> Can be `light`, `dark`, or `custom`
+- **backgroundColor** *Hex Color* <br> Will set the background on big buttons.
+- **color** *Hex Color* <br> Sets `small` and `text` colors. 
+- **fontSize** *Integer* <br> When custom, sets the fontSize style property.
+- **fontWeight** *Integer* <br> When custom, sets the fontWeight style property.
+- **blur** *Boolean* <br> On big buttons, this will turn it slightly opaque and add background blur. 
+- **superLayer** *Layer* <br> set the passed layer as the super layer. 
+- **constraints** *Constraints Object* <br> will set constraints using [Dynamic Layout](#dynamic). 
+
+#### Example
+<pre>
+button = new ios.Button
+	text:"Download"
+	buttonType:"small"
+	color:"red"
+</pre>
+
+####Schema
+<pre>
+button: {
+	button.label 
+}
+</pre>
+#### Listening to buttons
+Listening to buttons is no different than normal framer.<br>
+`button.on Events...`
+
+## Field 
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/field.png)
+
+A versital input for the keyboard object's output. Please note, this is not a HTML Field.
+
+####Properties
+- **text** *String* <br> Adds text by default to the field.
+- **placeholderText** *String* <br> Sets the placeholder text.
+- **placeholderColor** *Color String* <br> Sets the placeholder text color.
+- **borderRadius** *Integer* <br>Sets border radius of field.
+- **borderWidth** *Integer* <br> Sets border width.
+- **borderColor** *Color String* <br> Sets border color.
+- **color** *Color String* <br> Sets text color.
+- **backgroundColor** *Color String* <br> Sets field background color.
+- **width** *Integer* <br> Sets width in points.
+- **height** *Integer* <br> Sets height in points.
+- **constraints** *Constraints Object* <br> Will set the field's constraints and run layout using [Dynamic Layout](#dynamic)
+- **textConstraints** *Constraints Object* <br> Will set the text's constraints and run layout using [Dynamic Layout](#dynamic)
+
+####Example
+<pre>
+	field = new ios.Field
+		placeholderText:"Enter a name or email address"
+		constraints:{align:"center"}
+</pre>
+
+####Schema
+<pre>
+field: {
+	field.placeholder
+	field.text
+}
+</pre>
+
+## Keyboard 
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/keyboard.png)
+
+The keyboard is a fully rendered component that mimics the native iOS keyboard. It'll adapt to all devices. (Not currently supported on iPad Pro)
+
+####Properties
+- **returnText** *String* <br> Overrides the text on the return button.
+- **returnColor** *Hexcode String* <br> Will set the return button color
+- **animated** *Boolean* <br> Will determine if the keyboard is animated in. By default, this is set to false. 
+
+
+
+#### Example
+<pre>
+board = new ios.Keyboard
+	returnText = "Done"
+</pre>
+
+####Schema
+<pre>
+board: {
+	board.keysArray #contains all keys A-Z in array object
+	board.keys {
+		board.keys.a - board.keys.z
+		board.keys.shift
+		boards.keys.return
+		boards.keys.num
+		boards.keys.space
+		boards.keys.emoji
+		
+		# if on iPad
+		boards.keys.shift2
+		boards.keys.num2
+		boards.keys.dismiss
+	} 
+}
+</pre>
+#### Listening to Keys
+You can listen to keys using dot notation or square bracket notation.
+
+- Dot notation <br> `board.keys.return.on Events...`
+- Square bracket notation <br> `board.keys["return"].on Events...`
+
 ## Menu 
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
@@ -351,6 +470,42 @@ statusBar : {
 }
 </pre>
 
+<div id="nav" />
+## Navigation Bar
+
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/navbar.png)
+
+The navigation 
+
+####Properties
+- **right** *Layer or String* <br> A layer or string will appear on the right side of the navigation bar. If you do not want a right action, set this to `false`.
+- **left** *Layer or String* <br> A layer or string will appear on the left side of the navigation bar
+- **title** *String or Tab* <br> You can either pass a string that'll appear as the title on the Nav. You can also pass a tab object. If you pass a tab, the navigation bar's title will be the label of the tab. 
+- **blur** *Boolean* <br> If set to true, the bar will be slightly opaque and have a background blur applied. By default, this is set to true. If false, the bar will be solid white without a blur. 
+
+#### Example
+<pre>
+nav = new ios.NavBar 
+	right:"Share"
+	left:"Cancel"
+	title:"Document"
+	blur:false
+</pre>
+
+####Schema
+<pre>
+bar: {
+	bar.right
+	bar.left
+	bar.title
+}
+</pre>
+#### Listening to actions
+To listen to different actions, you can use dot notation if it's a single word or brackets for any case
+
+- Dot notation <br> `bar.right`
+- Square bracket notation <br> `bar["right"]`
+
 ## Tab
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/tabs.png)
@@ -400,43 +555,33 @@ The tab bar is comprised of multiple tabs. It'll handle switching of tabs and vi
 tabBar = ios.TabBar tabs:[home, discovery, profile], activeColor:"#blue", inactiveColor:"grey"
 </pre>
 
-####Schema
-<pre>
-: {
-}
-</pre>
-
 #### Listening to Tabs
-Since tabs are their own objects. You'll just need to listen to the tab object instead.
+Tab switching is automatically given, so there shouldn't necessarily be anything you need to do. If you'd like to do something additional when a user clicks a tab. You can reference your tab object. 
 
-- Dot notation <br> ``
-- Square bracket notation <br> ``
+## Text 
 
-## Cookie 
+![](https://dl.dropboxusercontent.com/u/143270556/ioskit/text.png)
 
-![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
-
-The menu is quick action list. The menu component is super simple to create.
+A dynamic text object that'll automatically size for you. 
 
 ####Properties
-- **actions** *Array of strings* <br> Series of actions that can be taken on the menu.
-- **animated** *Boolean* <br> When set to `true` menu will animate-in.
-- **description** *String* <br> When declared, a small grey text will appear at the top of the menu. By default, this will not appear. 
-- **cancel** *String* <br> This will override the label on the dismiss button. 
+- **text** *String* <br> Adds text by default to the field.
+- **fontSize** *Integer* <br>Sets font size in points.
+- **fontWeight** *Integer* <br> Sets font weight.
+- **fontFamily** *String* <br> Sets font family.
+- **lineHeight** *Integer* <br> Sets line height in points. It's automatically done if left unset.
+- **textTransform** *String* <br> Sets text-transform style property.
+- **opacity** *Integer* <br> Sets opacity.
+- **width** *Integer* <br> Sets width in points. 
+- **height** *Integer* <br> Sets height in points.
+- **constraints** *Constraints Object* <br> Will set the text's constraints and run layout using [Dynamic Layout](#dynamic)
 
-
-
-#### Example
+####Example
 <pre>
+	text = new ios.Text
+		text:"Try iOS Kit for Framer JS"
+		fontSize:21
+		fontWeight:100
+		width:320
+		constraints:{align:"center"}
 </pre>
-
-####Schema
-<pre>
-: {
-}
-</pre>
-#### Listening to actions
-To listen to different actions, you can use dot notation if it's a single word or brackets for any case
-
-- Dot notation <br> ``
-## - Square bracket notation <br> ``

@@ -2286,7 +2286,7 @@ exports.Keyboard = (array) ->
 		keyboardIcon.html = iconLibrary.keyboard
 		keyboardIcon.center()
 
-
+		board.keys.dismiss = keyboardKey
 		shiftKey2 = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius,color:exports.color("black"), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey2, height:boardSpecs.sideKey
 		shiftKey2.constraints = (trailingEdges:deleteKey, bottomEdges:shiftKey)
 		shiftIcon2 = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey2, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x+exports.px(10), y:boardSpecs.shiftIcon.y
@@ -2300,6 +2300,7 @@ exports.Keyboard = (array) ->
 			'line-height' : (boardSpecs.key.height) + "px"
 
 		}
+		board.keys.shift2
 
 
 		shiftIcon2.states.add
@@ -2359,7 +2360,7 @@ exports.Keyboard = (array) ->
 
 		}
 		numKey2.constraints = {trailing:[keyboardKey, 12], bottomEdges:keyboardKey}
-
+		board.keys.numKey2
 		numKey2.on Events.TouchStart, ->
 			switch keyboardState
 				when 1
