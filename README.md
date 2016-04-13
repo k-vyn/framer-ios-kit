@@ -6,12 +6,12 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 
 # Table of Contents
 - [Setup](#setup)<br>
-<u>[Foundational Elements](#foundational)</u>
+<u><b>[Foundational Elements](#foundational)</b></u>
 -  [Dynamic Layout](#dynamic)
 	-	[The Point](#point)
 	-	[Positioning](#positioning)
 		- [Setting opposite constraints](#opposite)
-	-	[Relationships]
+	-	[Relationships](#relationships)
 		- [Position](#pos-rel)
 		- [Center](#center-rel)
 		- [Align](#align-rel)
@@ -19,7 +19,7 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 	- [Understanding ios.layout()](#layout)
 - [Real device override](#real)
 - [Device details library](#details)<br>
-<u>[System Components](#system)</u>
+<u><b>[System Components](#system)</b></u>
 - [Action String Shortcuts](#shortcuts)
 - [Alert](#alert)
 - [Banner](#banner)
