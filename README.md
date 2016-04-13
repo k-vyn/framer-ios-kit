@@ -5,10 +5,29 @@ iOS Kit was created to make prototyping iOS fast and easy without compromising t
 There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
 
 # Table of Contents
-1. [Setup](#Setup)
-2. [Dynamic Layout](#dynamic)
-
-
+- [Setup](#setup)<br>
+#####<u>[Foundational Elements](#foundational)</u>
+-  [Dynamic Layout](#dynamic)
+	-	[The Point](#point)
+	-	[Positioning](#positioning)
+		- [Setting opposite constraints](#opposite)
+	-	[Relationships]
+		- [Position](#pos-rel)
+		- [Center](#center-rel)
+		- [Align](#align-rel)
+	- [Size Constraints](#size-constraints)
+	- [Understanding ios.layout()](#layout)
+- [Real device override](#real)
+- [Device details library](#details)
+#####<u>[System Components](#system)</u>
+- [Action String Shortcuts](#shortcuts)
+- [Alert](#alert)
+- [Banner](#banner)
+- [Menu](#menu)
+- [Status Bar](#status)
+- [Tab](#tab)
+- [Tab Bar](#tabbar)
+<div id='setup' />
 ## Setup
 To setup the kit, add the iOSKit.coffee file to your modules folder in your project. 
 
@@ -16,15 +35,15 @@ In Framer Studio, write –
 `ios = require 'iOSKit'`
 
 You can write any variable name you'd like, but for the purposes of this guide. We'll be referencing ios. 
-
-## Foundational Elements 
+<div id='foundational' />
+## Foundational Elements
 <div id='dynamic' />
 ### Dynamic Layout
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/dynamic.png)
 
 The most fundamental piece of this module is Dynamic Layout. Dynamic Layout is a robust layout engine that’ll not only help make positioning layers easier and smarter. It'll make positioning layers across devices possible. 
-
+<div id='point' />
 #### The Point 
 In Dynamic Layout like in iOS, everything is based around the point instead of the pixel. The exactly number of pixels will change from device to device, but the number of points will not. Theres's a simple equation for finding points. 
 
@@ -57,7 +76,7 @@ Side note, you can also do this on one line if you'd prefer using this syntax. J
 <pre>
 layer.constraints = {top:10, leading:10}
 </pre>
-
+<div id='opposite' />
 ##### Setting Opposing Constraints
 If you set a leading & trailing or a top & bottom, Dynamic Layout will do its best to honor the constraints, which will mean the height/width will be adjusted. For example, if you set your constraints to  leading:0 and trailing:0, you layer's width will be the device's width.
 
@@ -66,6 +85,7 @@ WARNING - If you set too many opposing constraints, I'm sure not what'll happen.
 #### Relationships 
 One of the most powerful things of Dynamic Layout is relationships. Relationships allows you to link a layer onto another layer in a variety of ways. 
 
+<div id='pos-rel' />
 #####Positioning Relationships
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/relationship.png)
@@ -87,7 +107,7 @@ ios.layout()
 </pre>
 
 This will set boxB's top edge to 10 points below boxA. 
-
+<div id='center-rel' />
 #####Center Relationships
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/centering.png)
@@ -103,7 +123,7 @@ ios.layout()
 </pre>
 
 This will set boxB 10 points below boxA, and it'll center it within boxA on the x-axis. The other centering constraint verticalCenter will work simliarly where it'll center the boxB within boxA on the y-axis. If you've set a top/bottom constraint, it'll ignore those constraints.
-
+<div id='align-rel' />
 #####Align Relationships
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/align.png)
 The last type of relationships will allow you to align any edge of layer onto another layer. To do this, there are four constraints at your disposal: leadingEdges, trailingEdges, topEdges, and bottomEdges. These layers like centers will not accept anything other than another layer.
@@ -115,7 +135,7 @@ boxB.constraints =
 	<b>trailingEdges:boxA</b>
 ios.layout()
 </pre>
-
+<div id='size-constraints' />
 ####Size Constraints
 You can also set height/width constraints just like above. This will insure that your layers will remain a particular size.  The big difference in setting a height/width constraint than a property height/width is that you'll need to set the height/width constraint in points. 
 
@@ -127,7 +147,7 @@ boxB.constraints =
 	<b>width:100</b>
 ios.layout()
 </pre>
-
+<div id='layout' />
 ####Understanding ios.layout()
 This function only need to be called once for all constraints. It'll cycle through all the layers in order of creation, and it'll fulfill all constraints. 
 
@@ -141,10 +161,10 @@ ios.layout will accept layers in the parathesis. This will layout **only** that 
 This will only layout boxB and not boxA. 
 <br>
 You may also want to play with the creation order if you're having issues with relationships.  
-
+<div id='real' />
 ### Real device override
 This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built on an iPhone 6 in an iPhone 6+. You’ll see a lot of white space. When this module is on, you’re frame will be overridden by the device in your hand, so the iPhone 6+ will no longer see the iPhone 6 frame. Using Dynamic Layout will insure that your prototype looks presentable at every size.
-
+<div id='details' />
 ### Device details library
 You’ll now be able to refer to a set of new variables that’ll allow you to get more details on the device
 
@@ -160,14 +180,14 @@ You’ll now be able to refer to a set of new variables that’ll allow you to g
 </pre>
 
 
-
+<div id='system' />
 ## System components
 These are easy to implement & fully customizable native iOS components. The idea is that implementing native iOS components should be easy & quick, so that you can spend the time working on what makes your prototype unique. 
 
 Every component in this module was written to feel native to Framer, so the way you create components should feel as familar as creating a new layer. The difference is in addition to Framer properties there's added customization parameters that'll be accepted, and any component that can accept constraints from Dynamic Layout is able to. 
 
 After creation, components will operate as native layers under the variable name you declared. The only difference is the sublayers of the component are accessible via dot notation, so it's easier for you to turn on event listeners etc. 
-
+<div id='shortcuts' />
 ##### Action string shortcuts
 To provide even more customization, any string in an action context can have these prepended shortcuts. 
 
@@ -292,7 +312,7 @@ To listen to different actions, you can use dot notation if it's a single word o
 
 - Dot notation <br> `menu.actions.Share.on Events...`
 - Square bracket notation <br> `menu.actions["-r Delete"].on Events...`
-
+<div id='status' />
 ## Status Bar 
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/statusbar.png)
@@ -360,7 +380,7 @@ Creating a tab will give you access **tab.view**. In this case, you'll have `hom
 `discovery = new Layer superLayer:home.view` 
 
 The discovery layer will only be shown when the home tab is active in the tab bar. 
-
+<div id='tabbar' />
 ## Tab Bar
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/tabs.png)
