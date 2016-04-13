@@ -435,6 +435,7 @@ To listen to different actions, you can use dot notation if it's a single word o
 
 - Dot notation <br> `menu.actions.Share.on Events...`
 - Square bracket notation <br> `menu.actions["-r Delete"].on Events...`
+
 <div id='status' />
 ## Status Bar 
 
