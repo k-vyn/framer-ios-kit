@@ -1,6 +1,6 @@
 # iOS Kit for FramerJS
 
-iOS Kit was created to make prototyping iOS fast and easy without compromising the quality or customization options.
+iOS Kit was created to make prototyping iOS fast and easy without compromising the quality or customization.
 
 There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
 
@@ -352,7 +352,19 @@ A versital input for the keyboard object's output. Please note, this is not a HT
 field: {
 	field.placeholder
 	field.text
+	# after touchEnd event
+	field.keyboard { 
+		... Keyboard Schema
+	}
 }
+</pre>
+
+####Listening to keys inside of a field
+In order to listen for the return key or any other key, you'll need to wrap it up in a touch event since the keyboard only exists after the field is being touched. 
+
+<pre>
+field.on Events.TouchEnd, ->
+	field.keyboard.keys.return.on Events...
 </pre>
 
 ## Keyboard 
@@ -374,6 +386,7 @@ board = new ios.Keyboard
 	returnText = "Done"
 </pre>
 
+<div id="keyboard-schema" />
 ####Schema
 <pre>
 board: {

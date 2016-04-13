@@ -380,6 +380,8 @@ defaults = {
 		borderColor:"transparent"
 		color:"#090908"
 		backgroundColor:"#FFF"
+		returnText:"return"
+		returnColor:"light-key"
 		style:"light"
 		type:"field"
 		constraints:undefined
@@ -1496,7 +1498,6 @@ exports.Button = (array) ->
 	button.label = textLayer
 	return button
 
-
 exports.Field = (array) ->
 	setup = setupComponent("field", array)
 	field = new Layer borderRadius:exports.px(setup.borderRadius), backgroundColor:setup.backgroundColor, width:exports.px(setup.width), height:exports.px(setup.height)
@@ -1532,7 +1533,8 @@ exports.Field = (array) ->
 		text.visible = true
 		clickZone = new Layer name:"fieldActive", backgroundColor:"transparent"
 		if setup.input
-			keyboard = new exports.Keyboard animated:true, output:field	
+			keyboard = new exports.Keyboard animated:true, output:field, returnText:setup.returnText, returnColor:setup.returnColor
+			field.keyboard = keyboard
 			clickZone.constraints = 
 				top:0
 				bottom:keyboard.specs.height
@@ -2078,7 +2080,6 @@ exports.Keyboard = (array) ->
 			key.x = rowsMap[2].padding + (rowIndex*boardSpecs.spacer) + (rowIndex*key.width)
 			key.y = rowsMap[2].marginTop + key.height * 2
 
-
 		path.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
 			<svg width='#{@pathWidth}px' height='#{@pathHeight}' viewBox='0 0 63 114' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<title>Rectangle 44 Copy</title>
@@ -2157,7 +2158,7 @@ exports.Keyboard = (array) ->
 
 
 
-	keyboardState = 1
+	board.keyboardState = 1
 
 	## SHIFT KEY
 
@@ -2184,7 +2185,7 @@ exports.Keyboard = (array) ->
 
 
 	shiftKey.on Events.TouchEnd, ->
-		switch keyboardState 
+		switch board.keyboardState 
 			when 1
 				shiftIcon.states.next()
 				if exports.device == "ipad"
@@ -2207,7 +2208,7 @@ exports.Keyboard = (array) ->
 				for key, index in keysArray
 					key.html = thirdArray[index]
 					key.name = thirdArray[index]
-				keyboardState = 3
+				board.keyboardState = 3
 				shiftKey.html = "123"
 				if exports.device == "ipad"
 					shiftKey2.html = "123"
@@ -2223,10 +2224,7 @@ exports.Keyboard = (array) ->
 				shiftKey.html = "#+="
 				if exports.device == "ipad"
 					shiftKey2.html = "#+="
-				keyboardState = 2
-
-
-
+				board.keyboardState = 2
 
 	board.keys.shift = shiftKey
 	board.keys.shift.icon = shiftIcon
@@ -2286,7 +2284,7 @@ exports.Keyboard = (array) ->
 		keyboardIcon.html = iconLibrary.keyboard
 		keyboardIcon.center()
 
-		board.keys.dismiss = keyboardKey
+
 		shiftKey2 = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius,color:exports.color("black"), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey2, height:boardSpecs.sideKey
 		shiftKey2.constraints = (trailingEdges:deleteKey, bottomEdges:shiftKey)
 		shiftIcon2 = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey2, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x+exports.px(10), y:boardSpecs.shiftIcon.y
@@ -2300,7 +2298,6 @@ exports.Keyboard = (array) ->
 			'line-height' : (boardSpecs.key.height) + "px"
 
 		}
-		board.keys.shift2
 
 
 		shiftIcon2.states.add
@@ -2310,7 +2307,7 @@ exports.Keyboard = (array) ->
 		  time: .01
 
 		shiftIcon2.on Events.TouchStart, ->
-			switch keyboardState 
+			switch board.keyboardState 
 				when 1
 					shiftIcon.states.next()
 					shiftIcon2.states.next()
@@ -2330,7 +2327,7 @@ exports.Keyboard = (array) ->
 					for key, index in keysArray
 						key.html = thirdArray[index]
 						key.name = thirdArray[index]
-					keyboardState = 3
+					board.keyboardState = 3
 					shiftKey.html = "123"
 					if exports.device == "ipad"
 						shiftKey2.html = "123"
@@ -2346,7 +2343,7 @@ exports.Keyboard = (array) ->
 					shiftKey.html = "#+="
 					if exports.device == "ipad"
 						shiftKey2.html = "#+="
-					keyboardState = 2
+					board.keyboardState = 2
 
 
 		numKey2 = new Layer superLayer:board, name:"num", borderRadius:boardSpecs.sideKeyRadius, color:exports.color("black"), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey2, height:boardSpecs.key.height
@@ -2360,9 +2357,9 @@ exports.Keyboard = (array) ->
 
 		}
 		numKey2.constraints = {trailing:[keyboardKey, 12], bottomEdges:keyboardKey}
-		board.keys.numKey2
+
 		numKey2.on Events.TouchStart, ->
-			switch keyboardState
+			switch board.keyboardState
 				when 1
 					## Change Letters
 					for key, index in keysArray
@@ -2389,7 +2386,7 @@ exports.Keyboard = (array) ->
 						shiftIcon2.visible = false
 						shiftKey2.html = "#+="
 						numKey2.html = "ABC"
-					keyboardState = 2
+					board.keyboardState = 2
 				else
 					for key, index in keysArray
 						if key.html == "undo" || "redo"
@@ -2408,7 +2405,7 @@ exports.Keyboard = (array) ->
 						numKey2.html = ".?123"
 						shiftKey2.html = ""
 						shiftIcon2.visible = true
-					keyboardState = 1
+					board.keyboardState = 1
 
 
 	## NUM KEY top:exports.pt(boardSpecs.marginTop.row4 + boardSpecs.key.height*3)
@@ -2428,7 +2425,7 @@ exports.Keyboard = (array) ->
 	}
 
 	numKey.on Events.TouchStart, ->
-		switch keyboardState
+		switch board.keyboardState
 			when 1
 				## Change Letters		
 				switch exports.device
@@ -2450,7 +2447,7 @@ exports.Keyboard = (array) ->
 						shiftIcon2.visible = false
 						shiftKey2.html = "#+="
 						numKey2.html = "ABC"
-						keyboardState = 2
+						board.keyboardState = 2
 					else
 						rowIndex = 0 
 						secondRowKeyWidth = 0
@@ -2474,7 +2471,7 @@ exports.Keyboard = (array) ->
 								exports.layout()
 							if index > 24
 								key.visible = false
-						keyboardState = 2
+						board.keyboardState = 2
 
 
 				## Handle num keys and shift keys
@@ -2517,7 +2514,7 @@ exports.Keyboard = (array) ->
 					numKey2.html = ".?123"
 					shiftKey2.html = ""
 					shiftIcon2.visible = true
-				keyboardState = 1
+				board.keyboardState = 1
 
 
 	exports.layout()
