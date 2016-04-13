@@ -6,7 +6,7 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 
 # Table of Contents
 - [Setup](#setup)<br>
-#####<u>[Foundational Elements](#foundational)</u>
+<u>[Foundational Elements](#foundational)</u>
 -  [Dynamic Layout](#dynamic)
 	-	[The Point](#point)
 	-	[Positioning](#positioning)
@@ -19,7 +19,7 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 	- [Understanding ios.layout()](#layout)
 - [Real device override](#real)
 - [Device details library](#details)
-#####<u>[System Components](#system)</u>
+<u>[System Components](#system)</u>
 - [Action String Shortcuts](#shortcuts)
 - [Alert](#alert)
 - [Banner](#banner)
@@ -27,6 +27,8 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 - [Status Bar](#status)
 - [Tab](#tab)
 - [Tab Bar](#tabbar)
+
+
 <div id='setup' />
 ## Setup
 To setup the kit, add the iOSKit.coffee file to your modules folder in your project. 
