@@ -599,7 +599,7 @@ This was specifically intended for text objects. Because if the html or style of
 ios.update(headerOne, [text:"Done!"]
 </pre>
 
-#### ios.pt(num) & ios.px(num)
+#### ios.pt(int) & ios.px(int)
 These functions will automatically convert pixels -> points and points -> pixels.
 <pre>
 ios.pt(6) # will return 3 points on an iPhone 6
