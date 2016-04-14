@@ -27,7 +27,7 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 - [Field](#field)
 - [Keyboard](#keyboard)
 - [Navigation Bar](#nav)
-- [Menu](#menu)
+- [Sheet](#sheet)
 - [Status Bar](#status)
 - [Tab](#tab)
 - [Tab Bar](#tabbar)
@@ -257,7 +257,7 @@ The banner is a non-blocking notification. Typically, the banner will send you t
 - **time** *String* <br> time string that appears next to title. 
 - **icon** *Layer* <br> This will put the layer inside the banner and size it accordingly. By default, it's a green box. 
 - **duration** *Integer* <br> This will override the time before the banner animates-out. By default, this is set to 7. 
-- **animated** *Boolean* <br> When set to `true` menu will animate-in.
+- **animated** *Boolean* <br> When set to `true` sheet will animate-in.
 
 **NOTE - ** The banner will be by default draggable. If you drag down, it'll reset, and if you drag up, it'll dismiss & destroy the banner. 
 
@@ -412,23 +412,23 @@ You can listen to keys using dot notation or square bracket notation.
 - Dot notation <br> `board.keys.return.on Events...`
 - Square bracket notation <br> `board.keys["return"].on Events...`
 
-## Menu 
+##Sheet 
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/menu.png)
 
-The menu is quick action list. The menu component is super simple to create.
+The sheet is quick action list. The sheet component is super simple to create.
 
 ####Properties
-- **actions** *Array of strings* <br> Series of actions that can be taken on the menu.
-- **animated** *Boolean* <br> When set to `true` menu will animate-in.
-- **description** *String* <br> When declared, a small grey text will appear at the top of the menu. By default, this will not appear. 
+- **actions** *Array of strings* <br> Series of actions that can be taken on the sheet.
+- **animated** *Boolean* <br> When set to `true` sheet will animate-in.
+- **description** *String* <br> When declared, a small grey text will appear at the top of the sheet. By default, this will not appear. 
 - **cancel** *String* <br> This will override the label on the dismiss button. 
 
 **NOTE - ** The cancel button will always animate-out. You don't have to add any additional code to handle/animate that. 
 
 #### Example
 <pre>
-menu = new ios.Menu 
+sheet = new ios.sheet 
 	actions:[“-r Delete, Edit, Share”]
 	animated:true
 	description:"Do something"
@@ -436,18 +436,18 @@ menu = new ios.Menu
 
 ####Schema
 <pre>
-menu : {
-	menu.cancel 
-	menu.overlay
-	menu.description
-	menu.actions : {"-r Delete", Edit, Share}
+sheet : {
+	sheet.cancel 
+	sheet.overlay
+	sheet.description
+	sheet.actions : {"-r Delete", Edit, Share}
 }
 </pre>
 #### Listening to actions
 To listen to different actions, you can use dot notation if it's a single word or brackets for any case
 
-- Dot notation <br> `menu.actions.Share.on Events...`
-- Square bracket notation <br> `menu.actions["-r Delete"].on Events...`
+- Dot notation <br> `sheet.actions.Share.on Events...`
+- Square bracket notation <br> `sheet.actions["-r Delete"].on Events...`
 
 <div id='status' />
 ## Status Bar 

@@ -409,7 +409,7 @@ defaults = {
 		animated:false
 		output:undefined
 	}
-	menu: {
+	sheet: {
 		actions:["OK"]
 		exit:"Cancel"
 		animated:false
@@ -519,7 +519,7 @@ setProps = (object) ->
 	keys = Object.keys(object)
 	object["props"] = keys
 
-components = [defaults.text, defaults.alert, defaults.banner, defaults.menu, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
+components = [defaults.text, defaults.alert, defaults.banner, defaults.sheet, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
 
 for comp in components
 	setProps(comp)
@@ -638,7 +638,6 @@ exports.layout = (layer) ->
 					layoutAlign(layer, a)
 #Align constraints
 layoutAlign = (layer, type) ->
-	# print layer.name + ": constraints width " + layer.constraints.width
 	declaredConstraint = layer.constraints[type]
 	if layer.superLayer
 		@superLayer = layer.superLayer
@@ -1086,8 +1085,7 @@ exports.update = (layer, array) ->
 		layer.width = textFrame.width
 		layer.height = textFrame.height
 
-	if layer.type == "field"
-		print "yo"
+
 	exports.layout()
 
 exports.timeDelegate = (layer, clockType) ->
@@ -1517,7 +1515,6 @@ exports.Field = (array) ->
 			field.cursor.constraints = {align:"vertical", leading:8}
 		else
 			field.cursor.constraints = {align:"vertical", trailingEdges:text}
-		exports.layout()
 		if field.placeholder
 			field.placeholder.visible = false
 
@@ -1526,6 +1523,7 @@ exports.Field = (array) ->
 		if setup.textConstraints 
 			placeholder.constraints =
 				setup.textConstraints
+
 		field.placeholder = placeholder
 
 	field.on Events.TouchEnd, ->
@@ -2057,7 +2055,9 @@ exports.Keyboard = (array) ->
 				when "," then extraSymbol.html = "!"
 				when "." then extraSymbol.html = "?"
 			key.style["line-height"] = key.height + exports.px(10) + "px"
+
 		key.html = letter
+		
 		if index <= rowsMap[0].endIndex
 			rowIndex = index - rowsMap[0].startIndex
 			key.x = rowsMap[0].padding + (rowIndex*boardSpecs.spacer) + (firstRowKeyWidth)
@@ -2496,6 +2496,7 @@ exports.Keyboard = (array) ->
 							rowIndex = index - rowsMap[2].startIndex
 							key.x = rowsMap[2].padding + (rowIndex*boardSpecs.spacer) + (rowIndex*key.width)
 							key.y = rowsMap[2].marginTop + key.height * 2
+							key.constraints = {}
 
 				for key, index in keysArray
 					if key.html == "undo" || "redo"
@@ -2832,37 +2833,37 @@ exports.Keyboard = (array) ->
 
 	return board
 
-exports.Menu = (array) ->
-	setup = setupComponent("menu", array)
-	menu = new Layer backgroundColor:"transparent"
-	menu.constraints = 
+exports.Sheet = (array) ->
+	setup = setupComponent("sheet", array)
+	sheet = new Layer backgroundColor:"transparent"
+	sheet.constraints = 
 		leading:0
 		trailing:0
 		top:0
 		bottom:0
-	overlay = new Layer backgroundColor:"rgba(0, 0, 0, .4)", superLayer:menu, name:"overlay"
+	overlay = new Layer backgroundColor:"rgba(0, 0, 0, .4)", superLayer:sheet, name:"overlay"
 	overlay.constraints =
 		leading:0
 		trailing:0
 		top:0
 		bottom:0
 	exports.bgBlur(overlay)
-	menus = new Layer backgroundColor:"transparent", superLayer:menu
-	menus.constraints = 
+	sheets = new Layer backgroundColor:"transparent", superLayer:sheet
+	sheets.constraints = 
 		leading:0
 		trailing:0
 		top:0
 		bottom:0
-	exitButton = new exports.Button buttonType:"big", text:setup.exit, blur:false, superLayer:menus
+	exitButton = new exports.Button buttonType:"big", text:setup.exit, blur:false, superLayer:sheets
 	exitButton.constraints = 
 		bottom:10
 		align:"horizontal"
 
-	actions = new Layer superLayer:menus, borderRadius:exports.px(12.5), backgroundColor:"rgba(255,255,255, .85)"
+	actions = new Layer superLayer:sheets, borderRadius:exports.px(12.5), backgroundColor:"rgba(255,255,255, .85)"
 
 	descriptionBuffer = 0
 	if setup.description
-		description = new exports.Text style:"menuDescription", text:setup.description, superLayer:actions, fontSize:13, color:"#8F8E94", textAlign:"center"
+		description = new exports.Text style:"sheetDescription", text:setup.description, superLayer:actions, fontSize:13, color:"#8F8E94", textAlign:"center"
 		description.constraints = 
 			top:21
 			align:"horizontal"
@@ -2908,51 +2909,51 @@ exports.Menu = (array) ->
 			@.animate
 				properties:(backgroundColor:"transparent")
 				time:.5
-			menus.animate 
+			sheets.animate 
 				properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
 				time:.3
 			overlay.animate
 				properties: (opacity:0)
 				time:.3
 			Utils.delay .3, ->
-				menu.destroy()
+				sheet.destroy()
 		acts[act] = o
 
 	if setup.animated == true
 		overlay.opacity = 0 
-		menus.maxY = exports.height + exports.px((setup.actions.length + 3) * 58)
+		sheets.maxY = exports.height + exports.px((setup.actions.length + 3) * 58)
 		overlay.animate
 			properties:(opacity:1)
 			time:.3
-		menus.animate
+		sheets.animate
 			properties:(maxY:exports.height)
 			time:.3
 
 	overlay.on Events.TouchEnd, ->
-		menus.animate 
+		sheets.animate 
 			properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
 			time:.3
 		overlay.animate
 			properties: (opacity:0)
 			time:.3
 		Utils.delay .3, ->
-			menu.destroy()		
+			sheet.destroy()		
 
 	exitButton.on Events.TouchEnd, ->
-		menus.animate 
+		sheets.animate 
 			properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
 			time:.3
 		overlay.animate
 			properties: (opacity:0)
 			time:.3
 		Utils.delay .3, ->
-			menu.destroy()
+			sheet.destroy()
 
-	menu.cancel = exitButton
-	menu.description = description
-	menu.overlay = overlay
-	menu.actions = acts
-	return menu
+	sheet.cancel = exitButton
+	sheet.description = description
+	sheet.overlay = overlay
+	sheet.actions = acts
+	return sheet
 
 exports.NavBar = (array) ->
 	setup = setupComponent("navBar", array)
