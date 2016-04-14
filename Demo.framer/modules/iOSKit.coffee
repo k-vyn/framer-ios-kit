@@ -1115,7 +1115,6 @@ exports.Alert = (array) ->
 		top:0
 		bottom:0
 	overlay = new Layer backgroundColor:"rgba(0,0,0,.3)", superLayer:alert, name:"overlay"
-	exports.bgBlur(overlay)
 	overlay.constraints =
 		leading:0
 		trailing:0
@@ -1126,7 +1125,7 @@ exports.Alert = (array) ->
 		align:"center"
 		width:280
 		height:400
-	title = new exports.Text style:"alertTitle", superLayer:modal, text:setup.title, fontWeight:"medium",  name:"title", textAlign:"center", lineHeight:20
+	title = new exports.Text style:"alertTitle", superLayer:modal, text:setup.title, fontWeight:"semibold",  name:"title", textAlign:"center", lineHeight:20
 	title.constraints = 
 		align:"horizontal"
 		width:220
@@ -2847,7 +2846,6 @@ exports.Sheet = (array) ->
 		trailing:0
 		top:0
 		bottom:0
-	exports.bgBlur(overlay)
 	sheets = new Layer backgroundColor:"transparent", superLayer:sheet
 	sheets.constraints = 
 		leading:0

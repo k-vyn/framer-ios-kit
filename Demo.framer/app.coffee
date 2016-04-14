@@ -3,12 +3,39 @@ ios = require 'iOSKit'
 
 whiteBG = new BackgroundLayer backgroundColor: "white"
 
-status = new ios.StatusBar carrier:"Verizon", signal:2
+status = new ios.StatusBar 
+	carrier:"Verizon"
+	network:"LTE"
+	signal:2
+	battery:50
 
-key = new ios.Keyboard
-print key.keys["z"].constraints
+nav = new ios.NavBar 
+	title:"Post Editor"
+	right:"-b Share"
+	left:"< Back"
 
-field = new ios.Field constraints:{align:"center"}
+##Field Component
+field = new ios.Field 
+	constraints:{leading:10, top:[nav, 20]}
+	placeholderText:"Write something..."
 
-field.text.on "change:html", ->
-	print field.keyboard.keys["z"].constraints
+nav.right.on Events.TouchEnd, ->
+	sheet = new ios.Sheet 
+		animated:true
+		actions:["Facebook", "Twitter", "Pinterest"]
+	
+	sheet.actions.Facebook.on Events.TouchEnd, ->
+		alert = new ios.Alert 
+			title:"Successfully shared!"
+			message:"Your post has been successfully shared to Facebook"
+			actions:["View post", "OK"]
+		alert.actions.OK.on Events.TouchEnd, ->
+			alert.destroy()
+
+nav.left.on Events.TouchEnd, ->
+	alert = new ios.Alert 
+		title:"I'm afraid I can't do that"
+		message:""
+		actions:["OK"]
+	alert.actions.OK.on Events.TouchEnd, ->
+		alert.destroy()
