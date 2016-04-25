@@ -721,10 +721,10 @@ exports.animateLayout = (array) ->
 	else
 		animatedLayers = Framer.CurrentContext.layers
 
-	if setup.layer
+	if setup.target
 		if setup.constraints
 			for newConstraint in Object.keys(setup.constraints)
-				setup.layer.constraints[newConstraint] = setup.constraints[newConstraint]
+				setup.target.constraints[newConstraint] = setup.constraints[newConstraint]
 
 	#Translate new constraints
 	for layer, index in animatedLayers
@@ -807,10 +807,6 @@ exports.animateLayout = (array) ->
 				if layer.constraints.top == parseInt(layer.constraints.top, 10)	
 					props.y = exports.px(layer.constraints.top)
 				else
-					#If the layer referenced hasn't been set
-					if layer.constraints.top[0].end == undefined
-							exports.animateLayout
-								layer:layer.constraints.top[0]
 					#If it's a layer
 					if layer.constraints.top.length == undefined
 						props.y = layer.constraints.top.end.y + layer.constraints.top.end.height
@@ -1000,6 +996,8 @@ layoutAlign = (layer, type) ->
 		if declaredConstraint == "vertical"
 			layer.centerY()
 
+
+
 #Size Constraints
 layoutSize = (layer, type) ->
 	if layer.constraints[type]
@@ -1100,7 +1098,6 @@ layoutChange = (layer, type) ->
 							else
 								@.objLayer = object
 							layer[prop] = @.objLayer[objProp2] - exports.scale * @.objInt
-
 #Text Layers
 exports.styles = {}
 
@@ -1679,7 +1676,6 @@ exports.Button = (array) ->
 	if setup.constraints
 		button.constraints = 
 			setup.constraints
-		exports.layout()
 	if setup.superLayer 
 		setup.superLayer.addSubLayer(button)
 	switch setup.buttonType
@@ -1687,10 +1683,14 @@ exports.Button = (array) ->
 			@fontSize = 20
 			@top = 18
 			@fontWeight = "medium"
-			button.constraints =
-				leading:10
-				trailing:10
-				height:57
+			if button.constraints == undefined
+				button.constraints = {}
+			if button.constraints.leading == undefined
+				button.constraints.leading = 10
+			if button.constraints.trailing == undefined
+				button.constraints.trailing = 10
+			if button.constraints.height == undefined
+				button.constraints.height = 57
 			button.borderRadius = exports.px(12.5)
 			backgroundColor = ""
 			switch setup.style
@@ -1811,6 +1811,9 @@ exports.Field = (array) ->
 	if setup.superLayer
 		setup.superLayer.addSubLayer(field)
 
+
+
+
 	##Handle keypress
 	text.on "change:html", ->
 		if text.html == ""
@@ -1830,7 +1833,7 @@ exports.Field = (array) ->
 	field.on Events.TouchEnd, ->
 		field.active = true
 		text.visible = true
-		clickZone = new Layer name:"fieldActive", backgroundColor:"transparent"
+		clickZone = new Layer name:"fieldActive", opacity:0
 		if setup.input
 			keyboard = new exports.Keyboard animated:true, output:field, returnText:setup.returnText, returnColor:setup.returnColor
 			field.keyboard = keyboard
@@ -1847,10 +1850,16 @@ exports.Field = (array) ->
 				trailing:0
 
 		clickZone.on Events.TouchEnd, (handler) ->
-			## listen for something else
-			if handler.offsetX < field.x || handler.offsetX > field.maxX || handler.offsetY < field.y || handler.offsetY > field.maxY
+			# # listen for something else
+			# if handler.offsetX < field.x || handler.offsetX > field.maxX || handler.offsetY < field.y || handler.offsetY > field.maxY
+			# 	field.active = false
+			field.keyboard.animate
+				properties:(y:exports.height)
+				time:.4
+				curve:"ease-in-out"
+			Utils.delay .5, ->
+				field.keyboard.destroy()
 				field.active = false
-				keyboard.destroy()
 				clickZone.destroy()
 		field.clickZone = clickZone
 
@@ -1908,8 +1917,15 @@ exports.StatusBar = (array) ->
 	switch exports.device
 		when "iphone-6s-plus"
 			@topConstraint = 5
+			@batteryIcon = 6
+			@bluetooth = 5
+		when "fullscreen"
+			@batteryIcon = - 12
+			@bluetooth = - 10
 		else
 			@topConstraint = 3
+			@batteryIcon = 2
+			@bluetooth = 3
 	if setup.style == "light"
 		@color = "white"
 	else
@@ -2043,16 +2059,17 @@ exports.StatusBar = (array) ->
 					</g>
 				</g>
 			</svg>"
-	batteryIcon.constraints =
-		trailing : 7
-		top:@topConstraint
+
 	batteryPercent = new exports.Text style:"statusBarBatteryPercent", text:setup.battery + "%", superLayer:statusBar, fontSize:12, color:@color, name:"batteryPercent"
 	batteryPercent.constraints = 
 		trailing: [batteryIcon, 3]
-		top:3
+		verticalCenter:time
+	batteryIcon.constraints =
+		trailing : 7
+		top:@batteryIcon
 	bluetooth = new Layer width:exports.px(8), height:exports.px(15), superLayer:statusBar, opacity:.5, backgroundColor:"transparent", name:"bluetooth"
 	bluetooth.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-		<svg width='#{exports.px(8)}px' height='#{exports.px(15)}px' viewBox='0 0 8 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+		<svg width='#{exports.px(7)}px' height='#{exports.px(13)}px' viewBox='0 0 8 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 			<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
 			<title>Bluetooth</title>
 			<desc>Created with Sketch.</desc>
@@ -2064,7 +2081,7 @@ exports.StatusBar = (array) ->
 			</g>
 		</svg>"
 	bluetooth.constraints = 
-		top: 3
+		top: @bluetooth
 		trailing: [batteryPercent, 7]
 
 	exports.layout()
@@ -2181,7 +2198,7 @@ exports.Keyboard = (array) ->
 
 			boardSpecs.shiftIcon = {x:exports.px(13), y:exports.px(2)}
 			boardSpecs.deleteIcon = {x:exports.px(11), y:exports.px(14)}
-			boardSpecs.emojiIcon = {x:exports.px(11), y:exports.px(11)}
+			boardSpecs.emojiIcon = {x:exports.px(13), y:exports.px(13)}
 
 			boardSpecs.bottomRow = 6
 
