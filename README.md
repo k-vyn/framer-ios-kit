@@ -15,6 +15,7 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 		- [Position](#pos-rel)
 		- [Center](#center-rel)
 		- [Align](#align-rel)
+	- [Animating Constraints](#animating)
 	- [Size Constraints](#size-constraints)
 	- [Understanding ios.layout()](#layout)
 - [Real device override](#real)
