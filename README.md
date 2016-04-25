@@ -678,9 +678,7 @@ ios.px(6) # will return 12 pixels on an iPhone 6
 
 ####ios.clean(string)
 This will remove any space or bracket HTML syntax from a string.
-<pre>
-ios.clean("`Hi,&nbsp;how&nbsp;are&nbsp;you?`<br>") #returns "Hi, how are you?"
-</pre>
+ios.clean("`Hi,&nbsp;how&nbsp;are&nbsp;you?<br>`") returns "Hi, how are you?"
 
 ####ios.svg(svg path)
 This does a series of things: it'll rewrite the SVG path into points, and it'll provide variables to set the layer's height and width.
