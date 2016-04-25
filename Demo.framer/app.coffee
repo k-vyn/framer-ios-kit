@@ -1,41 +1,37 @@
 ## Import Module
 ios = require 'iOSKit'
+status = new ios.StatusBar
+whiteBG = new BackgroundLayer backgroundColor:"rgb(238, 240, 240)"
+layers = []
 
-whiteBG = new BackgroundLayer backgroundColor: "white"
+runOrder = (layer, index) ->
+	if index == 0 then layer.constraints.top = 50
+	else layer.constraints.top = [layers[index - 1], 30]
 
-status = new ios.StatusBar 
-	carrier:"Verizon"
-	network:"LTE"
-	signal:2
-	battery:50
-
-nav = new ios.NavBar 
-	title:"Post Editor"
-	right:"-b Share"
-	left:"< Back"
-
-##Field Component
-field = new ios.Field 
-	constraints:{leading:10, top:[nav, 20]}
-	placeholderText:"Write something..."
-
-nav.right.on Events.TouchEnd, ->
-	sheet = new ios.Sheet 
-		animated:true
-		actions:["Facebook", "Twitter", "Pinterest"]
+for i in [0...10]
+	l = new Layer borderRadius:ios.px(15), backgroundColor:"white", shadowColor: "rgba(0,0,0,.3)", shadowBlur: ios.px(20)
+	l.constraints = {height:100, leading:50, trailing:50}
+	runOrder(l, i)
 	
-	sheet.actions.Facebook.on Events.TouchEnd, ->
-		alert = new ios.Alert 
-			title:"Successfully shared!"
-			message:"Your post has been successfully shared to Facebook"
-			actions:["View post", "OK"]
-		alert.actions.OK.on Events.TouchEnd, ->
-			alert.destroy()
+	l.on Events.TouchEnd, ->
+		index = layers.indexOf(@)
+		layers.splice(index, 1)
+		@.constraints = {top:-500, leading:0, trailing:0, height:200}
+		for l, i in layers
+			runOrder(l, i)
 
-nav.left.on Events.TouchEnd, ->
-	alert = new ios.Alert 
-		title:"I'm afraid I can't do that"
-		message:""
-		actions:["OK"]
-	alert.actions.OK.on Events.TouchEnd, ->
-		alert.destroy()
+		## Call this to process the animations
+		ios.animateLayout
+			target:@
+			fadeOut:@
+			time:.2
+			
+		ios.animateLayout
+			target:layers
+			stagger:0.1
+			curve:"spring(200,25,15)"
+		
+	layers.push l
+
+ios.layout()
+

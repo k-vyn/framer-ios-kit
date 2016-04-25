@@ -305,6 +305,19 @@ exports.color = (colorString) ->
 
 ## Defaults for everything
 defaults = {
+	animations: {
+		target:undefined
+		constraints: undefined
+		curve : "ease-in-out"
+		curveOptions: undefined
+		time:1
+		delay:0
+		repeat:undefined
+		colorModel:undefined
+		stagger:undefined
+		fadeOut:false
+		fadeIn:false
+	}
 	alert: {
 		title: "Title"
 		message:"Message"
@@ -385,6 +398,7 @@ defaults = {
 		style:"light"
 		type:"field"
 		constraints:undefined
+		superLayer:undefined
 		width:258
 		height:30
 		fontSize:15
@@ -435,10 +449,11 @@ defaults = {
 	tabBar : {
 		tabs: []
 		start:0
-		tyep:"tabBar"
+		type:"tabBar"
 		backgroundColor:"white"
 		activeColor:"blue"
 		inactiveColor:"gray"
+		blur:true
 	}
 	tab : {
 		label: "label"
@@ -620,6 +635,285 @@ exports.sameParent = (layer1, layer2) ->
 	else 
 		return false
 
+
+# updateConstraints = (layer) ->
+# 	if layer.constraints.leading
+# 		#If it's a number
+# 		if layer.constraints.leading == parseInt(layer.constraints.leading, 10)	
+# 			layer.constraints.leading = exports.pt(layer.x)
+# 		else
+# 			#If it's a layer
+# 			if layer.constraints.leading.length == undefined
+# 				layer.constraints.leading = exports.pt(layer.x)
+# 			else
+# 				#If it's a relationship
+# 				layer.constraints.leading = [layer.constraints.leading[0], exports.pt(layer.x - layer.constraints.leading[0].maxX)]
+
+# 	if layer.constraints.trailing
+# 		#If it's a number
+# 		if layer.constraints.trailing == parseInt(layer.constraints.trailing, 10)	
+# 			layer.constraints.trailing = exports.pt(layer.maxX)
+# 		else
+# 			#If it's a layer
+# 			if layer.constraints.trailing.length == undefined
+# 				layer.constraints.trailing = exports.pt(layer.maxX)
+# 			else
+# 				#If it's a relationship
+# 				layer.constraints.trailing = [layer.constraints.trailing[0], exports.pt(layer.constraints.trailing[0].x - layer.maxX)]
+
+# 	if layer.constraints.top
+# 		#If it's a number
+# 		if layer.constraints.top == parseInt(layer.constraints.top, 10)	
+# 			layer.constraints.top = exports.pt(layer.y)
+# 		else
+# 			#If it's a layer
+# 			if layer.constraints.top.length == undefined
+# 				layer.constraints.top = exports.pt(layer.y)
+# 			else
+# 				#If it's a relationship
+# 				layer.constraints.top = [layer.constraints.top[0], exports.pt(layer.y - layer.constraints.top[0].maxY)]
+
+# 	if layer.constraints.bottom
+# 		#If it's a number
+# 		if layer.constraints.bottom == parseInt(layer.constraints.bottom, 10)	
+# 			layer.constraints.bottom = exports.pt(layer.maxY)
+# 		else
+# 			#If it's a layer
+# 			if layer.constraints.bottom.length == undefined
+# 				layer.constraints.bottom = exports.pt(layer.maxY)
+# 			else
+# 				#If it's a relationship
+# 				layer.constraints.bottom = [layer.constraints.bottom[0], exports.pt(layer.constraints.bottom[0].y - layer.maxY)]
+
+# 	if layer.constraints.align == "center"
+# 		layer.constraints.align = undefined
+# 		layer.constraints.leading = exports.pt(layer.x)
+# 		layer.constraints.top = exports.pt(layer.y)
+
+# 	if layer.constraints.align == "horizontal"
+# 		layer.constraints.align = undefined
+# 		layer.constraints.leading = exports.pt(layer.x)
+
+# 	if layer.constraints.align == "vertical"
+# 		layer.constraints.align = undefined
+# 		layer.constraints.top = exports.pt(layer.y)
+
+# 	if layer.constraints.width
+# 		layer.constraints.width = exports.pt(layer.width)
+# 	if layer.constraints.height
+# 		layer.constraints.width = exports.pt(layer.height)
+ 
+exports.animateLayout = (array) ->
+	setup = {}
+	animatedLayers = []
+	if array
+		for i in Object.keys(defaults.animations)
+			if array[i]
+				setup[i] = array[i]
+			else
+				setup[i] = defaults.animations[i]
+
+	if setup.target 
+		if setup.target.length 
+			animatedLayers = setup.target
+		else
+			animatedLayers.push setup.target
+	else
+		animatedLayers = Framer.CurrentContext.layers
+
+	if setup.layer
+		if setup.constraints
+			for newConstraint in Object.keys(setup.constraints)
+				setup.layer.constraints[newConstraint] = setup.constraints[newConstraint]
+
+	#Translate new constraints
+	for layer, index in animatedLayers
+		if layer.constraints
+			layer.end = {}
+			props = {}
+			layer.superFrame = {}
+
+			if layer.superLayer
+				layer.superFrame.height = layer.superLayer.height
+				layer.superFrame.width = layer.superLayer.width
+			else
+				layer.superFrame.height = exports.height
+				layer.superFrame.width = exports.width
+			
+			if layer.constraints.leading != undefined && layer.constraints.trailing != undefined
+				layer.constraints.autoWidth = {}	
+
+			if layer.constraints.top != undefined && layer.constraints.bottom != undefined
+				layer.constraints.autoHeight = {}
+
+			# Size constraints
+			if layer.constraints.width != undefined
+				props.width = exports.px(layer.constraints.width)
+			else 
+				props.width = layer.width
+
+			if layer.constraints.height != undefined
+				props.height = exports.px(layer.constraints.height)
+			else
+				props.height = layer.height
+
+			# Positioning constraints
+			if layer.constraints.leading != undefined
+				#If it's a number`
+				if layer.constraints.leading == parseInt(layer.constraints.leading, 10)	
+					props.x = exports.px(layer.constraints.leading)
+				else
+					#If the layer referenced hasn't been set
+					if layer.constraints.leading[0].end == undefined
+							exports.animateLayout
+								layer:layer.constraints.leading[0]
+					#If it's a layer
+					if layer.constraints.leading.length == undefined
+						props.x = layer.constraints.leading.end.x + layer.constraints.leading.end.width
+					#If it's a relationship
+					else
+						props.x = layer.constraints.leading[0].end.x + layer.constraints.leading[0].end.width + exports.px(layer.constraints.leading[1])
+
+			# Opposing constraints handler
+			if layer.constraints.autoWidth != undefined
+				layer.constraints.autoWidth.startX = props.x
+
+			if layer.constraints.trailing != undefined
+				#If it's a number
+				if layer.constraints.trailing == parseInt(layer.constraints.trailing, 10)	
+					props.x = layer.superFrame.width - exports.px(layer.constraints.trailing) - props.width
+				else
+					#If the layer referenced hasn't been set
+					if layer.constraints.trailing[0].end == undefined
+							exports.animateLayout
+								layer:layer.constraints.trailing[0]
+					#If it's a layer
+					if layer.constraints.trailing.length == undefined
+						props.x = layer.constraints.trailing.end.x - props.width
+					#If it's a relationship
+					else
+						props.x = layer.constraints.trailing[0].end.x - exports.px(layer.constraints.trailing[1]) - props.width
+
+			# Opposing constraints handler
+			if layer.constraints.autoWidth != undefined
+				layer.constraints.autoWidth.endX = props.x
+
+				##perform autosize
+				props.x = layer.constraints.autoWidth.startX
+				props.width = layer.constraints.autoWidth.endX - layer.constraints.autoWidth.startX + props.width
+
+			if layer.constraints.top != undefined
+				#If it's a number
+				if layer.constraints.top == parseInt(layer.constraints.top, 10)	
+					props.y = exports.px(layer.constraints.top)
+				else
+					#If the layer referenced hasn't been set
+					if layer.constraints.top[0].end == undefined
+							exports.animateLayout
+								layer:layer.constraints.top[0]
+					#If it's a layer
+					if layer.constraints.top.length == undefined
+						props.y = layer.constraints.top.end.y + layer.constraints.top.end.height
+					#If it's a relationship
+					else
+						props.y = layer.constraints.top[0].end.y + layer.constraints.top[0].end.height + exports.px(layer.constraints.top[1])
+
+			# Opposing constraints handler
+			if layer.constraints.autoHeight != undefined
+				layer.constraints.autoHeight.startY = props.y
+
+
+			if layer.constraints.bottom != undefined
+				#If it's a number
+				if layer.constraints.bottom == parseInt(layer.constraints.bottom, 10)	
+					props.y = layer.superFrame.height - exports.px(layer.constraints.bottom) - props.height
+
+				else
+					#If the layer referenced hasn't been set
+					if layer.constraints.bottom[0].end == undefined
+							exports.animateLayout
+								layer:layer.constraints.bottom[0]
+					#If it's a layer
+					if layer.constraints.bottom.length == undefined
+						props.y = layer.constraints.bottom.end.y - props.height
+					#If it's a relationship
+					else 
+						props.y = layer.constraints.bottom[0].end.y -  exports.px(layer.constraints.bottom[1])
+
+			# Opposing constraints handler
+			if layer.constraints.autoHeight != undefined
+				layer.constraints.autoHeight.endY = props.y
+				## perform autosize
+				props.height = layer.constraints.autoHeight.endY - layer.constraints.autoHeight.startY 
+				props.y = layer.constraints.autoHeight.startY
+
+
+			# Alignment constraints
+			if layer.constraints.align != undefined
+				#Set the centering frame
+				if layer.constraints.align == "horizontal"
+					props.x = layer.superFrame.width / 2 - props.width / 2 
+
+				if layer.constraints.align == "vertical"
+					props.y = layer.superFrame.height / 2 - props.height / 2 
+
+				if layer.constraints.align == "center"
+					props.x = layer.superFrame.width / 2 - props.width / 2 
+					props.y = layer.superFrame.height / 2 - props.height / 2 
+
+
+			# Centering constraints
+			if layer.constraints.horizontalCenter != undefined
+				props.x = layer.constraints.horizontalCenter.end.x + (layer.constraints.horizontalCenter.end.width - props.width) / 2
+
+			if layer.constraints.verticalCenter != undefined
+				props.y = layer.constraints.verticalCenter.end.y + (layer.constraints.verticalCenter.end.height - props.height) / 2
+
+			if layer.constraints.center != undefined
+				props.x = layer.constraints.center.end.x + (layer.constraints.center.end.width - props.width) / 2
+				props.y = layer.constraints.center.end.y + (layer.constraints.center.end.height - props.height) / 2
+
+			# Aligning constraints
+			if layer.constraints.leadingEdges != undefined
+				props.x = layer.constraints.leadingEdges.end.x 
+
+			if layer.constraints.trailingEdges != undefined
+				props.x = layer.constraints.trailingEdges.end.x - props.width + layer.constraints.trailingEdges.end.width
+
+
+			if layer.constraints.topEdges != undefined
+				props.y = layer.constraints.topEdges.end.y
+			
+			if layer.constraints.bottomEdges != undefined
+				props.y = layer.constraints.bottomEdges.end.y - props.height + layer.constraints.bottomEdges.end.height 
+
+			#Timing
+			delay = setup.delay
+			if setup.stagger
+				stag = setup.stagger
+				delay = ((index) * stag)
+
+			if setup.fadeOut
+				# if typeof == "boolean"
+				# 	props.opacity = 0
+				if layer == setup.fadeOut
+					props.opacity = 0
+
+			if setup.fadeIn
+				props.opacity = 1
+
+
+			layer.animate
+				properties:props
+				time:setup.time
+				delay:delay
+				curve:setup.curve
+				repeat:setup.repeat
+				colorModel:setup.colorModel
+				curveOptions:setup.curveOptions
+
+			layer.end = props
+
 #Refreshes Layer or All Layers
 exports.layout = (layer) ->
 	if layer == undefined
@@ -627,7 +921,7 @@ exports.layout = (layer) ->
 	else 
 		@.array = [layer]
 	for layer in @.array
-		if layer.constraints != undefined
+		if layer.constraints
 			for p in defaults.constraintProps
 				layoutSize(layer, p)
 			for c in defaults.constraintTypes
@@ -636,6 +930,11 @@ exports.layout = (layer) ->
 			for a in defaults.constraintAligns
 				if layer.constraints[a]
 					layoutAlign(layer, a)
+
+			#Updates the constraints if the layer is manipulated through other means
+			if layer.constraintListener == undefined
+				layer.constraintListener = true
+
 #Align constraints
 layoutAlign = (layer, type) ->
 	declaredConstraint = layer.constraints[type]
@@ -1343,7 +1642,7 @@ exports.Banner = (array) ->
 
 
 	# Buffer that sits above the banner
-	bannerBuffer = new Layer y:200, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.width, maxY:banner.y, height:exports.height
+	bannerBuffer = new Layer maxY:0, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.width, maxY:banner.y, height:exports.height
 	exports.bgBlur(bannerBuffer)
 
 	# Animate-in
@@ -1508,6 +1807,9 @@ exports.Field = (array) ->
 			setup.textConstraints
 	field.text = text
 
+	if setup.superLayer
+		setup.superLayer.addSubLayer(field)
+
 	##Handle keypress
 	text.on "change:html", ->
 		if text.html == ""
@@ -1522,7 +1824,6 @@ exports.Field = (array) ->
 		if setup.textConstraints 
 			placeholder.constraints =
 				setup.textConstraints
-
 		field.placeholder = placeholder
 
 	field.on Events.TouchEnd, ->
@@ -1551,6 +1852,18 @@ exports.Field = (array) ->
 				keyboard.destroy()
 				clickZone.destroy()
 		field.clickZone = clickZone
+
+		if exports.device == "ipad"
+			field.keyboard.keys.dismiss.on Events.TouchEnd, ->
+				field.keyboard.animate
+					properties:(y:exports.height)
+					time:.4
+					curve:"ease-in-out"
+				Utils.delay .5, ->
+					field.keyboard.destroy()
+					field.active = false
+					clickZone.destroy()
+ 
 
 		## Default Cursor
 		keys = Object.keys(setup.cursor)
@@ -1631,7 +1944,8 @@ exports.StatusBar = (array) ->
 			@time.stamp = ""
 		time = new exports.Text style:"statusBarTime", text:exports.timeFormatter(@time, setup.clock24) + " " + @time.stamp, fontSize:12, fontWeight:"semibold", superLayer:statusBar, color:@color, name:"time"
 		time.constraints =
-			align:"center"
+			align:"horizontal"
+			top:@topConstraint
 	signal = []
 	if setup.signal < 1
 		noNetwork = new exports.Text superLayer:statusBar, fontSize:12, text:"No Network"
@@ -1768,7 +2082,7 @@ exports.StatusBar = (array) ->
 exports.Keyboard = (array) ->
 	setup = setupComponent("keyboard", array)
 
-	#This will hold all of the specs for each device's device
+	#This will hold all of the specs for each device's keyboard
 	boardSpecs = {}
 
 	#This will set the specs
@@ -1933,6 +2247,7 @@ exports.Keyboard = (array) ->
 
 	#Letters to be made
 	lettersArray = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v",  "b", "n", "m"]
+	#These arrays are depenedent on the Device
 	secondArray = []
 	thirdArray = []
 
@@ -1946,7 +2261,6 @@ exports.Keyboard = (array) ->
 	if exports.device == "ipad"
 		lettersArray.push ","
 		lettersArray.push "."
-
 
 	#Numbers to be made (depending on device)
 	numsArray = [0..9]
@@ -2151,11 +2465,7 @@ exports.Keyboard = (array) ->
 					@newText = setup.output.text.html + @.name
 					exports.update(setup.output.text, [text:@newText])
 
-
-
 	board.keysArray = keysArray
-
-
 
 	board.keyboardState = 1
 
@@ -2283,6 +2593,7 @@ exports.Keyboard = (array) ->
 		keyboardIcon.html = iconLibrary.keyboard
 		keyboardIcon.center()
 
+		board.keys.dismiss = keyboardKey
 
 		shiftKey2 = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius,color:exports.color("black"), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey2, height:boardSpecs.sideKey
 		shiftKey2.constraints = (trailingEdges:deleteKey, bottomEdges:shiftKey)
@@ -2966,7 +3277,8 @@ exports.NavBar = (array) ->
 		leading:0
 		trailing:0
 	if setup.blur 
-		bar.backgroundColor = "rgba(255, 255, 255, .9)"
+		bar.backgroundColor = "rgba(255, 255, 255, .8)"
+		exports.bgBlur(bar)
 	else
 		bar.backgroundColor = "rgba(255, 255, 255, 1)"
 		exports.bgBlur(bar)
@@ -3099,8 +3411,8 @@ exports.TabBar = (array) ->
 			tabWidth = 55
 		else
 			tabWidth = 75
-	tabBar = new Layer backgroundColor:"transparent"
-	tabBarBG = new BackgroundLayer backgroundColor:"white", opacity:.9, superLayer:tabBar, name:"tabBar background"
+	tabBar = new Layer backgroundColor:"transparent", name:"tab bar"
+	tabBarBG = new BackgroundLayer superLayer:tabBar, name:"tabBar background"
 	tabBar.constraints =
 		leading:0
 		trailing:0
@@ -3145,6 +3457,9 @@ exports.TabBar = (array) ->
 		exports.changeFill(tab.icon, exports.color(setup.inactiveColor))
 		tab.label.color = exports.color(setup.inactiveColor)
 		tabBarBG.backgroundColor = setup.backgroundColor
+		if setup.blur
+			tabBarBG.backgroundColor = "rgba(255,255,255, .9)"
+			exports.bgBlur(tabBarBG)
 
 		if index != 0
 			tab.constraints = 
@@ -3161,7 +3476,6 @@ exports.TabBar = (array) ->
 
 	exports.layout()
 	return tabBar
-
 
 exports.Text = (array) ->
 	setup = setupComponent("text", array)

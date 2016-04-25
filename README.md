@@ -143,6 +143,32 @@ boxB.constraints =
 	<b>trailingEdges:boxA</b>
 ios.layout()
 </pre>
+
+<div id='animating' />
+#### Animating Constraints
+You can animate constraints by running ` ios.animateLayout()`. There's a lot of customization options you have.
+
+##### Properties
+- **target (optional)** *Layer or Array of layers* <br> When set, this will only animate the target layers with updated constraints. When this is not set, it'll animate all layers with updated constraints.
+- **curve, curveOptions, delay, repeat, colorModel** *String* <br>  Each of these properties will work the same as native animations
+- **time** *Num* <br> This will be the time of each layer's animation, not the entire animation. 
+- **stagger** *Num* <br> This will put a incremental delay across all target layers.
+- **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers opacity to 0. When set to a layer, that layer's opacity will be set to 0.
+- **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers opacity to 1. When set to a layer, that layer's opacity will be set to 1.
+
+#### Example
+If we have a bunch of layers in a column, and we want them to all move up. We can move the `topLayer`'s constraint to 50, and all the layers with a relationship with topLayer will also move up. 
+
+<pre>
+topLayer.constraints.top = 50 ##Set a new constraint
+
+ios.animateLayout
+	stagger:.05
+	curve:"spring"
+
+</pre>
+
+
 <div id='size-constraints' />
 ####Size Constraints
 You can also set height/width constraints just like above. This will insure that your layers will remain a particular size.  The big difference in setting a height/width constraint than a property height/width is that you'll need to set the height/width constraint in points. 
