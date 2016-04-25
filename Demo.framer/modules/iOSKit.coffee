@@ -1400,6 +1400,7 @@ exports.timeFormatter = (timeObj, clockType) ->
 	if clockType == false 
 		if timeObj.hours > 12
 			timeObj.hours = timeObj.hours - 12
+		if timeObj.hours == 0 then timeObj.hours = 12
 	if timeObj.mins < 10
 		timeObj.mins = "0" + timeObj.mins
 	return timeObj.hours + ":" + timeObj.mins
