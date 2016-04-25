@@ -1,6 +1,6 @@
 # iOS Kit for FramerJS
 
-iOS Kit was created to make prototyping iOS fast and easy without compromising the quality or customization.
+iOS Kit was created to make prototyping for iOS fast and easy without compromising the quality or customization.
 
 There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
 
@@ -43,7 +43,8 @@ To setup the kit, add the iOSKit.coffee file to your modules folder in your proj
 In Framer Studio, write – 
 `ios = require 'iOSKit'`
 
-You can write any variable name you'd like, but for the purposes of this guide. We'll be referencing ios. 
+You can write any variable name you'd like, but for the purposes of this guide we'll be using `ios`.
+
 <div id='foundational' />
 ## Foundational Elements
 <div id='dynamic' />
@@ -51,14 +52,15 @@ You can write any variable name you'd like, but for the purposes of this guide. 
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/dynamic.png)
 
-The most fundamental piece of this module is Dynamic Layout. Dynamic Layout is a robust layout engine that’ll not only help make positioning layers easier and smarter. It'll make positioning layers across devices possible. 
+The most fundamental piece of this module is Dynamic Layout. Dynamic Layout is a robust layout engine that’ll not only help make positioning layers easier and smarter, it'll will make positioning layers across devices possible. 
+
 <div id='point' />
 #### The Point 
-In Dynamic Layout like in iOS, everything is based around the point instead of the pixel. The exactly number of pixels will change from device to device, but the number of points will not. Theres's a simple equation for finding points. 
+In Dynamic Layout, like in iOS, everything is based around the point instead of the pixel. The exact number of pixels will change from device to device, but the number of points will not. There's a simple equation for finding points. 
 
 `1pt = 1px * scale`
 
-Side note, you can also use the built-in functions. 
+Side note: you can also use the built-in functions. 
 `ios.pt(6) #returns 3 points on iPhone 6 and 2 points on iPhone 6 plus` 
 `ios.px(1) #returns 2 pixels on iPhone 6 and 3 pixels on iPhone 6 plus`
 
@@ -68,7 +70,7 @@ Side note, you can also use the built-in functions.
 
 As we get away from using pixel positioning, we won't be using x & y based positioning. Instead, we'll be setting things called constraints. When you set a constraint, it's like saying that a layer can't go beyond a certain position. There are four constraints for positioning: leading, trailing, top, and bottom. 
 
-To set a leading & top constraint on a box, it's super easy.
+To set a leading & top constraint on a box, write this –
 
 <pre>
 layer = new Layer
@@ -80,16 +82,17 @@ ios.layout()
 
 This will position the layer at x:20, y:20 on iPhone 6, and x:30, y:30 on iPhone 6 plus.
 
-Side note, you can also do this on one line if you'd prefer using this syntax. Just replace the the layer.constraints line from above with this line. You'll still need to run the ios.layout function.
+Side note: you can also do this on one line if you'd prefer using this syntax. Just replace the layer.constraints line from above with this line. You'll still need to run the ios.layout function.
 
 <pre>
 layer.constraints = {top:10, leading:10}
 </pre>
 <div id='opposite' />
-##### Setting Opposing Constraints
-If you set a leading & trailing or a top & bottom, Dynamic Layout will do its best to honor the constraints, which will mean the height/width will be adjusted. For example, if you set your constraints to  leading:0 and trailing:0, you layer's width will be the device's width.
 
-WARNING - If you set too many opposing constraints, I'm sure not what'll happen. Best of luck. `¯\_(ツ)_/¯` 
+##### Setting Opposing Constraints
+If you set a leading & trailing or a top & bottom, Dynamic Layout will do its best to honor the constraints, which will mean the height/width will need to be adjusted. For example, if you set the constraints of a layer to  `leading: 0` and `trailing:0`, the layer's width will be adjusted to the device's width.
+
+WARNING - If you set too many opposing constraints, I'm not sure what'll happen. Best of luck. `¯\_(ツ)_/¯` Try to just set no more than one of each constraint. 
 
 #### Relationships 
 One of the most powerful things of Dynamic Layout is relationships. Relationships allows you to link a layer onto another layer in a variety of ways. 
@@ -99,7 +102,7 @@ One of the most powerful things of Dynamic Layout is relationships. Relationship
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/relationship.png)
 
-When you declare a constraint, you can set a constraint as a layer instead of a integer. For example, if you have two layers (boxA & boxB) you can set boxB's top as boxA. <br>
+When you declare a constraint, you can set a constraint as a layer instead of an integer. For example, if you have two layers (boxA & boxB) you can set boxB's top as boxA. <br>
 
 <pre>
 boxB.constraints = 
@@ -107,7 +110,7 @@ boxB.constraints =
 ios.layout()
 </pre>
 
-<p>This will stack the boxes, so that boxB's top edge is constrained to below boxA, but what if you want a little buffer? That's really easy. We'll use a little different syntax with wrapping the layer and buffer in brackets</p>
+<p>This will stack the boxes so that boxB's top edge is constrained to below boxA, but what if you want a little buffer? That's really easy. We'll use a little different syntax with wrapping the layer and buffer in brackets.</p>
 
 <pre>
 boxB.constraints = 
@@ -131,11 +134,12 @@ boxB.constraints =
 ios.layout()
 </pre>
 
-This will set boxB 10 points below boxA, and it'll center it within boxA on the x-axis. The other centering constraint verticalCenter will work simliarly where it'll center the boxB within boxA on the y-axis. If you've set a top/bottom constraint, it'll ignore those constraints.
+This will set boxB 10 points below boxA, and it'll center it within boxA on the x-axis. The other centering constraint verticalCenter will work simliarly center boxB within boxA on the y-axis. If you've set a top/bottom constraint, it'll ignore those constraints.
+
 <div id='align-rel' />
 #####Align Relationships
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/align.png)
-The last type of relationships will allow you to align any edge of layer onto another layer. To do this, there are four constraints at your disposal: leadingEdges, trailingEdges, topEdges, and bottomEdges. These layers like centers will not accept anything other than another layer.
+The last type of relationships will allow you to align any edge of layer onto another layer's edge. To do this, there are four constraints at your disposal: leadingEdges, trailingEdges, topEdges, and bottomEdges. These layers, like centers, will not accept anything other than another layer.
 
 If you'd like to align boxB's trailing edge onto boxA's trailing edge, write this:
 <pre>
@@ -147,18 +151,18 @@ ios.layout()
 
 <div id='animating' />
 #### Animating Constraints
-You can animate constraints by running ` ios.animateLayout()`. There's a lot of customization options you have.
+You can animate between constraints by running ` ios.animateLayout()`. 
 
 ##### Properties
-- **target (optional)** *Layer or Array of layers* <br> When set, this will only animate the target layers with updated constraints. When this is not set, it'll animate all layers with updated constraints.
+- **target (optional)** *Layer or Array of layers* <br> When set, this will only animate the target layers with updated constraints. When this is not set, it'll animate all layers with their updated constraints.
 - **curve, curveOptions, delay, repeat, colorModel** *String* <br>  Each of these properties will work the same as native animations
-- **time** *Num* <br> This will be the time of each layer's animation, not the entire animation. 
-- **stagger** *Num* <br> This will put a incremental delay across all target layers.
-- **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers opacity to 0. When set to a layer, that layer's opacity will be set to 0.
-- **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers opacity to 1. When set to a layer, that layer's opacity will be set to 1.
+- **time** *Num* <br> This will be the time of each layer's animation, not the entire animation of all the layers. 
+- **stagger** *Num* <br> This will put an incremental delay across all layers being animated.
+- **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers' opacity to 0. When set to a layer, that layer's opacity will be set to 0.
+- **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers' opacity to 1. When set to a layer, that layer's opacity will be set to 1.
 
 #### Example
-If we have a bunch of layers in a column, and we want them to all move up. We can move the `topLayer`'s constraint to 50, and all the layers with a relationship with topLayer will also move up. 
+If we have a bunch of layers in a column and we want them to all move up, we can set the `topLayer`'s constraint to 50, and all the layers with a relationship with topLayer will also move up. 
 
 <pre>
 topLayer.constraints.top = 50 ##Set a new constraint
@@ -170,9 +174,32 @@ ios.animateLayout
 </pre>
 
 
+Note: When updating a constraint on a layer, please be careful on your syntax. Writing `layer.constraints =` will wipe out your previous object. 
+
+This will wipe out your top constraint.
+<pre>
+topLayer.constraints = 
+	top:50
+	leading:10
+	
+topLayer.constraints = 
+	leading:20
+</pre>
+
+Where as, this will keep your top constraint.
+<pre>
+topLayer.constraints = 
+	top:50
+	leading:10
+	
+topLayer.constraints.leading = 20
+</pre>
+
+
+
 <div id='size-constraints' />
 ####Size Constraints
-You can also set height/width constraints just like above. This will insure that your layers will remain a particular size.  The big difference in setting a height/width constraint than a property height/width is that you'll need to set the height/width constraint in points. 
+You can also set height/width constraints just like above. This will ensure that your layers will remain a particular size.  One big difference in setting a height/width constraint over a property height/width is that you'll need to set the height/width constraint in points. 
 
 <pre>
 boxB.constraints = 
@@ -182,15 +209,16 @@ boxB.constraints =
 	<b>width:100</b>
 ios.layout()
 </pre>
+
 <div id='layout' />
 ####Understanding ios.layout()
 This function only need to be called once for all constraints. It'll cycle through all the layers in order of creation, and it'll fulfill all constraints. 
 
 #####When to call it
-You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer. You'll need to call ios.layout before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout(), it'll set the position to the accurate position. <br><br>
+You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer, you'll need to call ios.layout before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout(), it'll set the position to the accurate position. <br><br>
 
 #####Mixing up the queue
-ios.layout will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be layed out before others.<br>
+ios.layout will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be laid out before others.<br>
 
 `ios.layout(boxB)`
 This will only layout boxB and not boxA. 
@@ -198,10 +226,11 @@ This will only layout boxB and not boxA.
 You may also want to play with the creation order if you're having issues with relationships.  
 <div id='real' />
 ### Real device override
-This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built on an iPhone 6 in an iPhone 6+. You’ll see a lot of white space. When this module is on, you’re frame will be overridden by the device in your hand, so the iPhone 6+ will no longer see the iPhone 6 frame. Using Dynamic Layout will insure that your prototype looks presentable at every size.
+This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built for an iPhone 6 on an iPhone 6+. If you do this, you’ll end up seeing a lot of white space. When this module is on, your frame will be overridden by the device in your hand, so the iPhone 6+ will no longer see the iPhone 6 frame. Using Dynamic Layout will ensure that your prototype looks presentable at every size.
+
 <div id='details' />
 ### Device details library
-You’ll now be able to refer to a set of new variables that’ll allow you to get more details on the device
+You’ll now be able to refer to a set of new variables that’ll allow you to get more details on the device.
 
 <pre><b>ios.scale</b> # returns 1,2,3
 <b>ios.height</b> # returns the height of the device in pixels
@@ -219,7 +248,7 @@ You’ll now be able to refer to a set of new variables that’ll allow you to g
 ## System components
 These are easy to implement & fully customizable native iOS components. The idea is that implementing native iOS components should be easy & quick, so that you can spend the time working on what makes your prototype unique. 
 
-Every component in this module was written to feel native to Framer, so the way you create components should feel as familar as creating a new layer. The difference is in addition to Framer properties there's added customization parameters that'll be accepted, and any component that can accept constraints from Dynamic Layout is able to. 
+Every component in this module was written to feel native to Framer, so the way you create components should feel as familar as creating a new layer. The difference is that in addition to Framer properties there's added customization parameters, which will be accepted, and any component that can accept constraints from Dynamic Layout is able to. 
 
 After creation, components will operate as native layers under the variable name you declared. The only difference is the sublayers of the component are accessible via dot notation, so it's easier for you to turn on event listeners etc. 
 <div id='shortcuts' />
@@ -286,7 +315,7 @@ The banner is a non-blocking notification. Typically, the banner will send you t
 - **duration** *Integer* <br> This will override the time before the banner animates-out. By default, this is set to 7. 
 - **animated** *Boolean* <br> When set to `true` sheet will animate-in.
 
-**NOTE - ** The banner will be by default draggable. If you drag down, it'll reset, and if you drag up, it'll dismiss & destroy the banner. 
+**NOTE - ** The banner will be, by default, draggable. If you drag down, it'll reset, and if you drag up it'll dismiss & destroy the banner. 
 
 #### Example
 <pre>
@@ -315,7 +344,7 @@ banner.on Events...
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/button.png)
 
-Button is a small versital component that handles press states automatically.
+Button is a small versatile component that handles press states automatically.
 
 ####Properties
 - **text** *String* <br> Sets button text
@@ -351,7 +380,7 @@ Listening to buttons is no different than normal framer.<br>
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/field.png)
 
-A versital input for the keyboard object's output. Please note, this is not a HTML Field.
+The field is a versatile input for the keyboard. Please note, this is not a HTML field.
 
 ####Properties
 - **text** *String* <br> Adds text by default to the field.
@@ -518,11 +547,11 @@ statusBar : {
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/navbar.png)
 
-The navigation 
+The navigation bar is made up of 3 elements, two actions and a title. 
 
 ####Properties
-- **right** *Layer or String* <br> A layer or string will appear on the right side of the navigation bar. If you do not want a right action, set this to `false`.
-- **left** *Layer or String* <br> A layer or string will appear on the left side of the navigation bar
+- **right** *Layer or String or Bool* <br> A layer or string will appear on the right side of the navigation bar. If you do not want a right action, set this to `false`.
+- **left** *Layer or String* <br> A layer or string will appear on the left side of the navigation bar. You can add a < to show a back arrow. 
 - **title** *String or Tab* <br> You can either pass a string that'll appear as the title on the Nav. You can also pass a tab object. If you pass a tab, the navigation bar's title will be the label of the tab. 
 - **blur** *Boolean* <br> If set to true, the bar will be slightly opaque and have a background blur applied. By default, this is set to true. If false, the bar will be solid white without a blur. 
 
@@ -530,7 +559,7 @@ The navigation
 <pre>
 nav = new ios.NavBar 
 	right:"Share"
-	left:"Cancel"
+	left:"< Back"
 	title:"Document"
 	blur:false
 </pre>
@@ -575,7 +604,7 @@ home: {
 }
 </pre> 
 ####Adding contents to a tab
-Creating a tab will give you access **tab.view**. In this case, you'll have `home.view`. If you set `home.view` as the superLayer, only when the home tab is active those layers will be shown.
+Creating a tab will give you access to **tab.view**. In this case, you'll have `home.view`. When the home tab is active only those layers inside of `home.view` will be shown. 
 
 `discovery = new Layer superLayer:home.view` 
 
@@ -599,7 +628,7 @@ tabBar = ios.TabBar tabs:[home, discovery, profile], activeColor:"#blue", inacti
 </pre>
 
 #### Listening to Tabs
-Tab switching is automatically given, so there shouldn't necessarily be anything you need to do. If you'd like to do something additional when a user clicks a tab. You can reference your tab object. 
+Tab switching is automatically given, so there shouldn't necessarily be anything you need to do. If you'd like to do something additional when a user clicks a tab, you can reference your tab object. 
 
 ## Text 
 
@@ -634,7 +663,7 @@ A dynamic text object that'll automatically size for you.
 These are a set of functions that were created to help provide functionality to various elements of this module. I opened them up, so if you by chance need any of these functions you can use them. 
 
 #### ios.update(layer, styleArray)
-This was specifically intended for text objects. Because if the html or style of a text object is altered, the width/height of the object would be incorrect. With ios.update, you'll be able to pass your changes in while also resizing the text layer.
+This was specifically intended for text objects. If the html or style of a text object is altered, the width/height of the object would be incorrect. With ios.update, you'll be able to pass your changes in while also resizing the text layer.
 
 <pre>
 ios.update(headerOne, [text:"Done!"]
@@ -654,7 +683,7 @@ ios.clean("`Hi,&nbsp;how&nbsp;are&nbsp;you?`<br>") #returns "Hi, how are you?"
 </pre>
 
 ####ios.svg(svg path)
-This does a series of things. It'll rewrite the SVG path into points, and it'll provide variables to set the layer's height and width.
+This does a series of things: it'll rewrite the SVG path into points, and it'll provide variables to set the layer's height and width.
 <pre>
 svgObj = ios.svg(svgPath)
 svgObj.svg = # is the new SVG path in points
@@ -672,7 +701,7 @@ print ios.capitalize("welcome to the party") #returns "Welcome to the party"
 </pre>
 
 ####ios.getTime()
-Fetchs the current time and returns a neatly organized time object with some humanization.
+Fetches the current time and returns a neatly organized time object with some humanization.
 
 <pre>
 time = ios.getTime()
@@ -686,13 +715,13 @@ print time.secs # prints "1"
 </pre>
 
 ####ios.timeDelegate(layer, clock24)
-This setup a reoccuring task at the top of every minute to update whatever layer passed to the current time. If clock24 is set to true, it'll return 24-hour clock values, if set to false or omitted, it'll return 12-hour clock values. 
+This sets up a reoccuring task at the top of every minute to update whatever layer passed to the current time. If clock24 is set to true, it'll return 24-hour clock values. If set to false or omitted, it'll return 12-hour clock values. 
 
 ####ios.timeFormatter(timeObj, clock24)
-This will create a time string for screen display. It'll return a hours + minutes string based on the clock24 object. 
+This will create a time string for screen display. It'll return a hours-minutes string based on the clock24 object. 
 
 #### ios.color(colorString)
-This changes the color words to be set to iOS default colors in place of web color defaults. If it's a hexcode, it'll set the hex. If invalid, it'll return a grey.
+This changes the color words to be set to iOS default colors in place of web color defaults. If it's a hexcode, it'll set the hexcode. If invalid, it'll return a grey hexcode.
 
 Supports - `red, blue, pink, grey/gray, black, white, orange, green, light blue/light-blue, yellow`
 
