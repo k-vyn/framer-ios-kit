@@ -83,7 +83,7 @@ exports.getDevice = ->
 
 		# iPhone 6s
 		when 750
-			device = "apple-ipad-6s-silver"
+			device = "apple-iphone-6s-silver"
 			Framer.Device.deviceType = "fullscreen"
 
 		# iPhone 6s+
