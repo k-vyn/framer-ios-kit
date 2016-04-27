@@ -228,6 +228,8 @@ You may also want to play with the creation order if you're having issues with r
 ### Real device override
 This module is meant to make prototyping look real, and one of things that prevents this is when you open a prototype that was built for an iPhone 6 on an iPhone 6+. If you do this, you’ll end up seeing a lot of white space. When this module is on, your frame will be overridden by the device in your hand, so the iPhone 6+ will no longer see the iPhone 6 frame. Using Dynamic Layout will ensure that your prototype looks presentable at every size.
 
+For this to work properly, you'll need a full-screen browser. I use & recommend [Frameless](#https://itunes.apple.com/us/app/frameless-full-screen-web/id933580264?mt=8).
+
 <div id='details' />
 ### Device details library
 You’ll now be able to refer to a set of new variables that’ll allow you to get more details on the device.
