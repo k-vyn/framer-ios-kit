@@ -1,193 +1,22 @@
 #iOSKit Module
 #By Kevyn Arnott 
 
+device = require 'Device'
 
-framerDevices = {
+exports.device = device.get()
 
-# Fullscreen
-"fullscreen" : { height: window.innerHeight, width: window.innerWidth,	scale:1, mobile:false, platform:"web"}
-
-# iPhones
-
-## 5S
-"apple-iphone-5s-space-gray": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5s-silver": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5s-gold": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-
-## 5c
-"apple-iphone-5c-green": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5c-blue": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5c-red": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5c-white": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5c-yellow": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-5c-pink": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
-
-## 6s
-"apple-iphone-6s-space-gray" : { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-6s-silver": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-6s-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-"apple-iphone-6s-rose-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
-
-## 6s plus
-"apple-iphone-6s-plus-gold": { height: 2208, width: 1242, scale: 3, mobile:true, platform:"iOS"}
-"apple-iphone-6s-plus-silver": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"apple-iphone-6s-plus-space-gray": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-"apple-iphone-6s-plus-rose-gold": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
-
-# iPads
-
-## Air 
-"apple-ipad-air-2-gold": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-"apple-ipad-air-2-silver": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-"apple-ipad-air-2-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-
-## Mini
-"apple-ipad-mini-4-gold": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-"apple-ipad-mini-4-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
-"apple-ipad-mini-4-silver":{ height: 2048, width: 1536, scale: 2, mobile:true, platform:"iOS"}
-
-## Pro
-"apple-ipad-pro-gold": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
-"apple-ipad-pro-silver": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
-"apple-ipad-pro-space-gray" : { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
-}
-
-## These variables will be populated with details from the device upon running. 
-exports.device = 0
-exports.name = 0
-exports.scale = 0
-exports.height = 0
-exports.width = 0
-exports.mobile = 0
-exports.platform = 0
-exports.orientation = 0
-
-screen = {}
-
-
-
-# getDevice will populate device variables, and it'll override the frame if the device is different. 
-exports.getDevice = ->
-
-	# Loads the initial frame
-	device = Framer.Device.deviceType
-
-	### This switch looks at the innerWidth to determine if the prototype is being opened on a device. 
-	If so, it'll override the device, and it'll adjust the view to fullscreen.###
-
-	switch innerWidth
-		# iPhone 5c/5s/SE
-		when 640
-			device = "apple-iphone-5s-silver"
-			Framer.Device.deviceType = "fullscreen"
-
-		# iPhone 6s
-		when 750
-			device = "apple-iphone-6s-silver"
-			Framer.Device.deviceType = "fullscreen"
-
-		# iPhone 6s+
-		when 1242 
-			if innerHeight == 2208
-				device = "apple-iphone-6s-plus-silver"
-				Framer.Device.deviceType = "fullscreen"
-
-		# iPad in portrait
-		when 1536 
-			if innerHeight == 2048
-				device = "apple-ipad-air-2-silver"
-				Framer.Device.deviceType = "fullscreen"
-
-		# iPad
-		when 2048
-
-			# iPad Pro in portrait
-			if innerHeight == 2732
-				device = "apple-ipad-pro-silver"
-
-			# iPad in landsccape
-			if innerHeight == 1536
-				device = "apple-ipad-air-2-silver"
-			Framer.Device.deviceType = "fullscreen"
-
-		# iPad Pro
-		when 2732
-			if innerHeight == 2048
-				device = "apple-ipad-pro-silver"
-				Framer.Device.deviceType = "fullscreen"
-
-	exports.scale = framerDevices[device].scale
-
-	if device == "fullscreen"
-		exports.width = window.innerWidth
-		exports.height = window.innerHeight
-	else
-		exports.width = framerDevices[device].width
-		exports.height = framerDevices[device].height
-		if window.innerWidth == 1242 || window.innerWidth == 2208
-			exports.width = window.innerWidth
-			exports.height = window.innerHeight
-			exports.scale = 3
-	exports.mobile = framerDevices[device].mobile
-	exports.platform = framerDevices[device].platform
-	exports.orientation =  Framer.Device.orientation
-
-	# Device String Scrubber
-	device = device.replace("apple-", "")
-	device = device.replace("-gold", "")
-	device = device.replace("-green", "")
-	device = device.replace("-blue", "")
-	device = device.replace("-red", "")
-	device = device.replace("-white", "")
-	device = device.replace("-yellow", "")
-	device = device.replace("-pink", "")
-	device = device.replace("-space-grey", "")
-	device = device.replace("-rose", "")
-	device = device.replace("5s", "5")
-	device = device.replace("5c", "5")
-	device = device.replace("-mini", "")
-	device = device.replace("-air", "")
-	device = device.replace("-2", "")
-	device = device.replace("-4", "")
-	exports.device = device.replace("-silver", "")
-	
-	# exports.device becomes either ipad, ipad-pro, iphone-5, iphone-6s, iphone-6s-plus
-
-	screen = {
-		width:exports.width
-		height:exports.height
-	}
-
-exports.orient = () ->
-	if exports.orientation == -90
-		tempHeight = exports.height
-		tempWidth = exports.width
-		exports.height = tempWidth
-		exports.width = tempHeight
-
-exports.getDevice()
-exports.orient()
-
-window.addEventListener("resize", onResize)
-window.addEventListener("orientationchange" , onResize)
-
-# Listen to window reize
-
-onResize = () ->
-	exports.getDevice()
-	exports.layout()
 
 # Supporting Functions
 
 ## Converts px to pt
 exports.pt = (px) ->
-	pt = px/exports.scale
+	pt = px/exports.device.scale
 	pt = Math.round(pt)
 	return pt
 
 ## Converts pt to px
 exports.px = (pt) ->
-	px = pt * exports.scale
+	px = pt * exports.device.scale
 	px = Math.round(px)
 	return px
 
@@ -737,8 +566,8 @@ exports.animateLayout = (array) ->
 				layer.superFrame.height = layer.superLayer.height
 				layer.superFrame.width = layer.superLayer.width
 			else
-				layer.superFrame.height = exports.height
-				layer.superFrame.width = exports.width
+				layer.superFrame.height = exports.device.height
+				layer.superFrame.width = exports.device.width
 			
 			if layer.constraints.leading != undefined && layer.constraints.trailing != undefined
 				layer.constraints.autoWidth = {}	
@@ -1027,13 +856,13 @@ layoutChange = (layer, type) ->
 		if type == "top" || type == "leading"
 			# Handle Top & Leading
 			if layer.constraints[type] == parseInt(layer.constraints[type], 10)
-				layer[prop] = layer.constraints[type] * exports.scale
+				layer[prop] = layer.constraints[type] * exports.device.scale
 			else 
 				if layer.constraints[type].length == undefined
 					layer[prop] = layer.constraints[type][objProp]
 				if layer.constraints[type].length == 1
 					if layer.constraints[type][0] == parseInt(layer.constraints[type][0], 10)
-						layer[prop] = layer.constraints[type][0] * exports.scale
+						layer[prop] = layer.constraints[type][0] * exports.device.scale
 					else
 						layer[prop] = layer.constraints[type][0][objProp]
 				if layer.constraints[type].length > 1 
@@ -1042,11 +871,11 @@ layoutChange = (layer, type) ->
 							@.objInt = object
 						else 
 							@.objLayer = object
-					layer[prop] = (@.objInt * exports.scale) + @.objLayer[objProp]
+					layer[prop] = (@.objInt * exports.device.scale) + @.objLayer[objProp]
 			if layer.constraints[opp] != undefined
 				trait = defaults.constraints[opp]["objProp"]
 				if layer.constraints[opp] == parseInt(layer.constraints[opp], 10)
-					layer[trait] = @[superTrait] - (layer[prop] + (exports.scale * layer.constraints[opp]))
+					layer[trait] = @[superTrait] - (layer[prop] + (exports.device.scale * layer.constraints[opp]))
 				else
 					if layer.constraints[opp].length == undefined
 						layer[trait] = layer[prop] - layer.constraints[opp][prop]
@@ -1071,7 +900,7 @@ layoutChange = (layer, type) ->
 				## No opposite
 				if layer.constraints[type] == parseInt(layer.constraints[type], 10)
 					## Only Integer
-					layer[prop] = @[superTrait] - (layer.constraints[type] * exports.scale)
+					layer[prop] = @[superTrait] - (layer.constraints[type] * exports.device.scale)
 				else 
 					if layer.constraints[type].length == undefined
 						#Entered Layer
@@ -1083,7 +912,7 @@ layoutChange = (layer, type) ->
 						#Array of One
 						if layer.constraints[type][0] == parseInt(layer.constraints[type][0], 10)
 							#Int
-							layer[prop] = @[objProp] - (layer.constraints[type][0] * exports.scale)
+							layer[prop] = @[objProp] - (layer.constraints[type][0] * exports.device.scale)
 						else 
 							#Object
 							if exports.sameParent(layer, layer.constraints[type][0])
@@ -1097,7 +926,7 @@ layoutChange = (layer, type) ->
 								@.objInt = object
 							else
 								@.objLayer = object
-							layer[prop] = @.objLayer[objProp2] - exports.scale * @.objInt
+							layer[prop] = @.objLayer[objProp2] - exports.device.scale * @.objInt
 #Text Layers
 exports.styles = {}
 
@@ -1261,7 +1090,7 @@ listenToKeys = (field, keyboard) ->
 			if e.keyCode == 27
 				e.preventDefault()
 				keyboard.animate
-					properties:(y:exports.height)
+					properties:(y:exports.device.height)
 					time:.25
 					curve:"ease-in-out"
 				field.active = false
@@ -1640,7 +1469,7 @@ exports.Banner = (array) ->
 
 
 	# Buffer that sits above the banner
-	bannerBuffer = new Layer maxY:0, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.width, maxY:banner.y, height:exports.height
+	bannerBuffer = new Layer maxY:0, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.device.width, maxY:banner.y, height:exports.device.height
 	exports.bgBlur(bannerBuffer)
 
 	# Animate-in
@@ -1854,7 +1683,7 @@ exports.Field = (array) ->
 			# if handler.offsetX < field.x || handler.offsetX > field.maxX || handler.offsetY < field.y || handler.offsetY > field.maxY
 			# 	field.active = false
 			field.keyboard.animate
-				properties:(y:exports.height)
+				properties:(y:exports.device.height)
 				time:.4
 				curve:"ease-in-out"
 			Utils.delay .5, ->
@@ -1866,7 +1695,7 @@ exports.Field = (array) ->
 		if exports.device == "ipad"
 			field.keyboard.keys.dismiss.on Events.TouchEnd, ->
 				field.keyboard.animate
-					properties:(y:exports.height)
+					properties:(y:exports.device.height)
 					time:.4
 					curve:"ease-in-out"
 				Utils.delay .5, ->
@@ -2255,13 +2084,13 @@ exports.Keyboard = (array) ->
 
 	#This will deterine if it starts on the bottom or pops up from the bottom 
 	if setup.animated
-		board.y = exports.height
+		board.y = exports.device.height
 		board.animate 
-			properties:(maxY: exports.height)
+			properties:(maxY: exports.device.height)
 			time:.25
 			curve:"ease-in-out"
 	else
-		board.maxY = exports.height
+		board.maxY = exports.device.height
 
 	#Letters to be made
 	lettersArray = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v",  "b", "n", "m"]
@@ -2286,10 +2115,10 @@ exports.Keyboard = (array) ->
 	#Holds the keys that we make. This will allows us to quickly iterate through them. 
 	keysArray = []
 
-	keyPopUp = new Layer width:@keyWidth, height:@keyHeight, x:@.x-16*exports.scale, backgroundColor:"transparent", superLayer:board, name:"key pop up"
+	keyPopUp = new Layer width:@keyWidth, height:@keyHeight, x:@.x-16*exports.device.scale, backgroundColor:"transparent", superLayer:board, name:"key pop up"
 	box = new Layer borderRadius:exports.px(10), superLayer:keyPopUp, backgroundColor:"transparent", color:"black", name:"letter"
 	box.style = {
-		"font-size" : 39 * exports.scale + "px"
+		"font-size" : 39 * exports.device.scale + "px"
 		"font-weight" : 300
 		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 		'text-align' : 'center'
@@ -2327,11 +2156,11 @@ exports.Keyboard = (array) ->
 	board.keys = {}
 	for letter in lettersArray
 		index = lettersArray.indexOf(letter) 
-		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.scale, backgroundColor:"white", color:"black", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.key.width, height:boardSpecs.key.height
+		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.device.scale, backgroundColor:"white", color:"black", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.key.width, height:boardSpecs.key.height
 		board.keys[letter] = key
 		keyPopUp.bringToFront()
 		box.bringToFront()
-		if exports.scale == 2
+		if exports.device.scale == 2
 			keyPopUp.constraints = (width:65, height:122)
 			path.constraints = (width:65, height: 122)
 			path.y = 10
@@ -2344,7 +2173,7 @@ exports.Keyboard = (array) ->
 			box.centerX()
 			box.y = exports.px(28)
 
-		if exports.scale == 3
+		if exports.device.scale == 3
 			keyPopUp.constraints = (width:68, height:122)
 			@keyHeight = exports.px(122)
 			@keyWidth = exports.px(65)
@@ -2358,14 +2187,14 @@ exports.Keyboard = (array) ->
 			box.centerX()
 			box.y = exports.px(28)
 
-		if exports.width == 640
+		if exports.device.width == 640
 			key.constraints = (width:26, height:39)
 
 		keyPopUp.visible = false
 
 		exports.layout()
 		key.style = {
-			"font-size" : 25 * exports.scale + "px"
+			"font-size" : 25 * exports.device.scale + "px"
 			"font-weight" : 300
 			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 			'text-align' : 'center'
@@ -3194,7 +3023,7 @@ exports.Sheet = (array) ->
 		description.constraints = 
 			top:21
 			align:"horizontal"
-			width:exports.pt(exports.width) - 100
+			width:exports.pt(exports.device.width) - 100
 		exports.layout()
 		descriptionBuffer = exports.pt(description.height) + 42
 		divider = new Layer superLayer:actions, backgroundColor:"#D6E3E7"
@@ -3237,7 +3066,7 @@ exports.Sheet = (array) ->
 				properties:(backgroundColor:"transparent")
 				time:.5
 			sheets.animate 
-				properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
+				properties: (maxY:exports.device.height+exports.px((setup.actions.length + 3) * 58))
 				time:.3
 			overlay.animate
 				properties: (opacity:0)
@@ -3248,17 +3077,17 @@ exports.Sheet = (array) ->
 
 	if setup.animated == true
 		overlay.opacity = 0 
-		sheets.maxY = exports.height + exports.px((setup.actions.length + 3) * 58)
+		sheets.maxY = exports.device.height + exports.px((setup.actions.length + 3) * 58)
 		overlay.animate
 			properties:(opacity:1)
 			time:.3
 		sheets.animate
-			properties:(maxY:exports.height)
+			properties:(maxY:exports.device.height)
 			time:.3
 
 	overlay.on Events.TouchEnd, ->
 		sheets.animate 
-			properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
+			properties: (maxY:exports.device.height+exports.px((setup.actions.length + 3) * 58))
 			time:.3
 		overlay.animate
 			properties: (opacity:0)
@@ -3268,7 +3097,7 @@ exports.Sheet = (array) ->
 
 	exitButton.on Events.TouchEnd, ->
 		sheets.animate 
-			properties: (maxY:exports.height+exports.px((setup.actions.length + 3) * 58))
+			properties: (maxY:exports.device.height+exports.px((setup.actions.length + 3) * 58))
 			time:.3
 		overlay.animate
 			properties: (opacity:0)
