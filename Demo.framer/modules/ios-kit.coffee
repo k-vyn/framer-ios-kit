@@ -1,24 +1,14 @@
 #iOSKit Module
 #By Kevyn Arnott 
 
-device = require 'Device'
+device = require 'ios-device'
+exports.layout = layout = require 'ios-layout'
+exports.utils = utils = require 'ios-utils'
 
 exports.device = device.get()
 
 
 # Supporting Functions
-
-## Converts px to pt
-exports.pt = (px) ->
-	pt = px/exports.device.scale
-	pt = Math.round(pt)
-	return pt
-
-## Converts pt to px
-exports.px = (pt) ->
-	px = pt * exports.device.scale
-	px = Math.round(px)
-	return px
 
 # Cleans a string of <br> and &nbsp;
 exports.clean = (string) ->
@@ -37,14 +27,14 @@ exports.svg = (svg) ->
 	wStartIndex = string.search("=") + 2
 	wEndIndex =  string.search("px")
 	width = string.slice(wStartIndex, wEndIndex)
-	newWidth = exports.px(width)
+	newWidth = utils.px(width)
 
 	# Find Height
 	heightString = string.slice(wEndIndex + 4, string.length)
 	hStartIndex = heightString.search("=")+ 2
 	hEndIndex = heightString.search("px") 
 	height = heightString.slice(hStartIndex, hEndIndex)
-	newHeight = exports.px(height)
+	newHeight = utils.px(height)
 
 	#Create new string
 	newString = string.replace(width, newWidth)
@@ -65,7 +55,7 @@ exports.changeFill = (layer, color) ->
 	fillString = layer.html.slice(startIndex, layer.html.length)
 	endIndex = fillString.search("\">")
 	string = fillString.slice(0, endIndex)
-	newString = "fill=\"" + exports.color(color).toHexString()
+	newString = "fill=\"" + utils.color(color).toHexString()
 	layer.html = layer.html.replace(string, newString)
 
 exports.capitalize = (string) ->
@@ -91,62 +81,9 @@ exports.getTime = ->
 		secs:secs
 	}
 
-## iOS Color – This will store all of the default iOS colors intead of the default CSS colors. *This is only up here because I refer to it in the defaults.*
-exports.color = (colorString) ->
-	color = ""
-	if typeof colorString == "string"
-		colorString = colorString.toLowerCase()
-	switch colorString
-		when "red"
-			color = new Color("#FE3824")
-		when "blue"
-			color = new Color("#0076FF")
-		when "pink"
-			color = new Color("#FE2851")
-		when "grey"
-			color = new Color("#929292")
-		when "gray"
-			color = new Color("#929292")
-		when "black"
-			color = new Color("#030303")
-		when "white"
-			color = new Color("#EFEFF4")
-		when "orange"
-			color = new Color("#FF9600")
-		when "green"
-			color = new Color("#44DB5E")
-		when "light blue"
-			color = new Color("#54C7FC")
-		when "light-blue"
-			color = new Color("#54C7FC")
-		when "yellow"
-			color = new Color("#FFCD00")
-		when "light key"
-			color = new Color("#9DA7B3")
-		when "light-key" 
-			color = new Color("#9DA7B3")
-		else 
-			if colorString[0] == "#" || colorString.toHexString()[0] == "#"
-				color = new Color(colorString)
-			else
-				color = new Color("#929292")
-	return color
 
 ## Defaults for everything
 defaults = {
-	animations: {
-		target:undefined
-		constraints: undefined
-		curve : "ease-in-out"
-		curveOptions: undefined
-		time:1
-		delay:0
-		repeat:undefined
-		colorModel:undefined
-		stagger:undefined
-		fadeOut:false
-		fadeIn:false
-	}
 	alert: {
 		title: "Title"
 		message:"Message"
@@ -177,7 +114,7 @@ defaults = {
 		superLayer:undefined
 		constraints:undefined
 	}
-	framerProps :["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThreshold", "animationOptions", "constrained"]
+	framerProps :["name", "width", "height", "superLayer", "opacity", "color", "backgroundColor", "x", "y", "midX", "midY", "maxX", "minX", "visible", "clip", "scrollHorizontal", "scrollVertical", "ignoreEvents", "z", "scaleX", "scaleY", "scaleZ", "scale", "skewX", "skewY", "skew", "originX", "originY", "originZ", "perspective", "perspectiveOriginX", "perspectiveOriginY", "rotationX", "rotationY", "rotationZ", "rotation", "blur", "brightness", "saturate", "hueRotate", "contrast", "invert", "grayscale", "sepia", "shadowX", "shadowY", "shadowBlur", "shadowSpread", "shadowColor", "borderColor", "borderWidth", "force2d", "flat", "backfaceVisible", "name", "matrix", "_matrix2d", "transformMatrix", "matrix3d", "borderRadius", "point", "size", "frame", "html", "image", "scrollX", "scrollY", "_domEventManager", "mouseWheelSpeedMultiplier", "velocityThutilshold", "animationOptions", "constrained"]
 	cssProps : ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
 	styleProps: ["fontFamily", "fontSize", "textAlign", "fontWeight", "lineHeight"]
 	constraintProps : ["height", "width"]
@@ -387,7 +324,7 @@ error = (context, code) ->
 
 	## Error codes from layoutAlign 
 	if code == 20
-		print "Error #{context} requires a layer"
+		print "Error #{context} requiutils a layer"
 	if code == 21
 		print "Error #{context} cannot refer to itself"
 
@@ -469,296 +406,91 @@ exports.sameParent = (layer1, layer2) ->
 # 	if layer.constraints.leading
 # 		#If it's a number
 # 		if layer.constraints.leading == parseInt(layer.constraints.leading, 10)	
-# 			layer.constraints.leading = exports.pt(layer.x)
+# 			layer.constraints.leading = utils.pt(layer.x)
 # 		else
 # 			#If it's a layer
 # 			if layer.constraints.leading.length == undefined
-# 				layer.constraints.leading = exports.pt(layer.x)
+# 				layer.constraints.leading = utils.pt(layer.x)
 # 			else
 # 				#If it's a relationship
-# 				layer.constraints.leading = [layer.constraints.leading[0], exports.pt(layer.x - layer.constraints.leading[0].maxX)]
+# 				layer.constraints.leading = [layer.constraints.leading[0], utils.pt(layer.x - layer.constraints.leading[0].maxX)]
 
 # 	if layer.constraints.trailing
 # 		#If it's a number
 # 		if layer.constraints.trailing == parseInt(layer.constraints.trailing, 10)	
-# 			layer.constraints.trailing = exports.pt(layer.maxX)
+# 			layer.constraints.trailing = utils.pt(layer.maxX)
 # 		else
 # 			#If it's a layer
 # 			if layer.constraints.trailing.length == undefined
-# 				layer.constraints.trailing = exports.pt(layer.maxX)
+# 				layer.constraints.trailing = utils.pt(layer.maxX)
 # 			else
 # 				#If it's a relationship
-# 				layer.constraints.trailing = [layer.constraints.trailing[0], exports.pt(layer.constraints.trailing[0].x - layer.maxX)]
+# 				layer.constraints.trailing = [layer.constraints.trailing[0], utils.pt(layer.constraints.trailing[0].x - layer.maxX)]
 
 # 	if layer.constraints.top
 # 		#If it's a number
 # 		if layer.constraints.top == parseInt(layer.constraints.top, 10)	
-# 			layer.constraints.top = exports.pt(layer.y)
+# 			layer.constraints.top = utils.pt(layer.y)
 # 		else
 # 			#If it's a layer
 # 			if layer.constraints.top.length == undefined
-# 				layer.constraints.top = exports.pt(layer.y)
+# 				layer.constraints.top = utils.pt(layer.y)
 # 			else
 # 				#If it's a relationship
-# 				layer.constraints.top = [layer.constraints.top[0], exports.pt(layer.y - layer.constraints.top[0].maxY)]
+# 				layer.constraints.top = [layer.constraints.top[0], utils.pt(layer.y - layer.constraints.top[0].maxY)]
 
 # 	if layer.constraints.bottom
 # 		#If it's a number
 # 		if layer.constraints.bottom == parseInt(layer.constraints.bottom, 10)	
-# 			layer.constraints.bottom = exports.pt(layer.maxY)
+# 			layer.constraints.bottom = utils.pt(layer.maxY)
 # 		else
 # 			#If it's a layer
 # 			if layer.constraints.bottom.length == undefined
-# 				layer.constraints.bottom = exports.pt(layer.maxY)
+# 				layer.constraints.bottom = utils.pt(layer.maxY)
 # 			else
 # 				#If it's a relationship
-# 				layer.constraints.bottom = [layer.constraints.bottom[0], exports.pt(layer.constraints.bottom[0].y - layer.maxY)]
+# 				layer.constraints.bottom = [layer.constraints.bottom[0], utils.pt(layer.constraints.bottom[0].y - layer.maxY)]
 
 # 	if layer.constraints.align == "center"
 # 		layer.constraints.align = undefined
-# 		layer.constraints.leading = exports.pt(layer.x)
-# 		layer.constraints.top = exports.pt(layer.y)
+# 		layer.constraints.leading = utils.pt(layer.x)
+# 		layer.constraints.top = utils.pt(layer.y)
 
 # 	if layer.constraints.align == "horizontal"
 # 		layer.constraints.align = undefined
-# 		layer.constraints.leading = exports.pt(layer.x)
+# 		layer.constraints.leading = utils.pt(layer.x)
 
 # 	if layer.constraints.align == "vertical"
 # 		layer.constraints.align = undefined
-# 		layer.constraints.top = exports.pt(layer.y)
+# 		layer.constraints.top = utils.pt(layer.y)
 
 # 	if layer.constraints.width
-# 		layer.constraints.width = exports.pt(layer.width)
+# 		layer.constraints.width = utils.pt(layer.width)
 # 	if layer.constraints.height
-# 		layer.constraints.width = exports.pt(layer.height)
+# 		layer.constraints.width = utils.pt(layer.height)
  
-exports.animateLayout = (array) ->
-	setup = {}
-	animatedLayers = []
-	if array
-		for i in Object.keys(defaults.animations)
-			if array[i]
-				setup[i] = array[i]
-			else
-				setup[i] = defaults.animations[i]
-
-	if setup.target 
-		if setup.target.length 
-			animatedLayers = setup.target
-		else
-			animatedLayers.push setup.target
-	else
-		animatedLayers = Framer.CurrentContext.layers
-
-	if setup.target
-		if setup.constraints
-			for newConstraint in Object.keys(setup.constraints)
-				setup.target.constraints[newConstraint] = setup.constraints[newConstraint]
-
-	#Translate new constraints
-	for layer, index in animatedLayers
-		if layer.constraints
-			layer.end = {}
-			props = {}
-			layer.superFrame = {}
-
-			if layer.superLayer
-				layer.superFrame.height = layer.superLayer.height
-				layer.superFrame.width = layer.superLayer.width
-			else
-				layer.superFrame.height = exports.device.height
-				layer.superFrame.width = exports.device.width
-			
-			if layer.constraints.leading != undefined && layer.constraints.trailing != undefined
-				layer.constraints.autoWidth = {}	
-
-			if layer.constraints.top != undefined && layer.constraints.bottom != undefined
-				layer.constraints.autoHeight = {}
-
-			# Size constraints
-			if layer.constraints.width != undefined
-				props.width = exports.px(layer.constraints.width)
-			else 
-				props.width = layer.width
-
-			if layer.constraints.height != undefined
-				props.height = exports.px(layer.constraints.height)
-			else
-				props.height = layer.height
-
-			# Positioning constraints
-			if layer.constraints.leading != undefined
-				#If it's a number`
-				if layer.constraints.leading == parseInt(layer.constraints.leading, 10)	
-					props.x = exports.px(layer.constraints.leading)
-				else
-					#If the layer referenced hasn't been set
-					if layer.constraints.leading[0].end == undefined
-							exports.animateLayout
-								layer:layer.constraints.leading[0]
-					#If it's a layer
-					if layer.constraints.leading.length == undefined
-						props.x = layer.constraints.leading.end.x + layer.constraints.leading.end.width
-					#If it's a relationship
-					else
-						props.x = layer.constraints.leading[0].end.x + layer.constraints.leading[0].end.width + exports.px(layer.constraints.leading[1])
-
-			# Opposing constraints handler
-			if layer.constraints.autoWidth != undefined
-				layer.constraints.autoWidth.startX = props.x
-
-			if layer.constraints.trailing != undefined
-				#If it's a number
-				if layer.constraints.trailing == parseInt(layer.constraints.trailing, 10)	
-					props.x = layer.superFrame.width - exports.px(layer.constraints.trailing) - props.width
-				else
-					#If the layer referenced hasn't been set
-					if layer.constraints.trailing[0].end == undefined
-							exports.animateLayout
-								layer:layer.constraints.trailing[0]
-					#If it's a layer
-					if layer.constraints.trailing.length == undefined
-						props.x = layer.constraints.trailing.end.x - props.width
-					#If it's a relationship
-					else
-						props.x = layer.constraints.trailing[0].end.x - exports.px(layer.constraints.trailing[1]) - props.width
-
-			# Opposing constraints handler
-			if layer.constraints.autoWidth != undefined
-				layer.constraints.autoWidth.endX = props.x
-
-				##perform autosize
-				props.x = layer.constraints.autoWidth.startX
-				props.width = layer.constraints.autoWidth.endX - layer.constraints.autoWidth.startX + props.width
-
-			if layer.constraints.top != undefined
-				#If it's a number
-				if layer.constraints.top == parseInt(layer.constraints.top, 10)	
-					props.y = exports.px(layer.constraints.top)
-				else
-					#If it's a layer
-					if layer.constraints.top.length == undefined
-						props.y = layer.constraints.top.end.y + layer.constraints.top.end.height
-					#If it's a relationship
-					else
-						props.y = layer.constraints.top[0].end.y + layer.constraints.top[0].end.height + exports.px(layer.constraints.top[1])
-
-			# Opposing constraints handler
-			if layer.constraints.autoHeight != undefined
-				layer.constraints.autoHeight.startY = props.y
 
 
-			if layer.constraints.bottom != undefined
-				#If it's a number
-				if layer.constraints.bottom == parseInt(layer.constraints.bottom, 10)	
-					props.y = layer.superFrame.height - exports.px(layer.constraints.bottom) - props.height
+#Refutilshes Layer or All Layers
+# exports.layout = (layer) ->
+# 	if layer == undefined
+# 		@.array = Framer.CurrentContext.layers
+# 	else 
+# 		@.array = [layer]
+# 	for layer in @.array
+# 		if layer.constraints
+# 			for p in defaults.constraintProps
+# 				layoutSize(layer, p)
+# 			for c in defaults.constraintTypes
+# 				if layer.constraints[c] != undefined
+# 					layoutChange(layer, c)
+# 			for a in defaults.constraintAligns
+# 				if layer.constraints[a]
+# 					layoutAlign(layer, a)
 
-				else
-					#If the layer referenced hasn't been set
-					if layer.constraints.bottom[0].end == undefined
-							exports.animateLayout
-								layer:layer.constraints.bottom[0]
-					#If it's a layer
-					if layer.constraints.bottom.length == undefined
-						props.y = layer.constraints.bottom.end.y - props.height
-					#If it's a relationship
-					else 
-						props.y = layer.constraints.bottom[0].end.y -  exports.px(layer.constraints.bottom[1])
-
-			# Opposing constraints handler
-			if layer.constraints.autoHeight != undefined
-				layer.constraints.autoHeight.endY = props.y
-				## perform autosize
-				props.height = layer.constraints.autoHeight.endY - layer.constraints.autoHeight.startY 
-				props.y = layer.constraints.autoHeight.startY
-
-
-			# Alignment constraints
-			if layer.constraints.align != undefined
-				#Set the centering frame
-				if layer.constraints.align == "horizontal"
-					props.x = layer.superFrame.width / 2 - props.width / 2 
-
-				if layer.constraints.align == "vertical"
-					props.y = layer.superFrame.height / 2 - props.height / 2 
-
-				if layer.constraints.align == "center"
-					props.x = layer.superFrame.width / 2 - props.width / 2 
-					props.y = layer.superFrame.height / 2 - props.height / 2 
-
-
-			# Centering constraints
-			if layer.constraints.horizontalCenter != undefined
-				props.x = layer.constraints.horizontalCenter.end.x + (layer.constraints.horizontalCenter.end.width - props.width) / 2
-
-			if layer.constraints.verticalCenter != undefined
-				props.y = layer.constraints.verticalCenter.end.y + (layer.constraints.verticalCenter.end.height - props.height) / 2
-
-			if layer.constraints.center != undefined
-				props.x = layer.constraints.center.end.x + (layer.constraints.center.end.width - props.width) / 2
-				props.y = layer.constraints.center.end.y + (layer.constraints.center.end.height - props.height) / 2
-
-			# Aligning constraints
-			if layer.constraints.leadingEdges != undefined
-				props.x = layer.constraints.leadingEdges.end.x 
-
-			if layer.constraints.trailingEdges != undefined
-				props.x = layer.constraints.trailingEdges.end.x - props.width + layer.constraints.trailingEdges.end.width
-
-
-			if layer.constraints.topEdges != undefined
-				props.y = layer.constraints.topEdges.end.y
-			
-			if layer.constraints.bottomEdges != undefined
-				props.y = layer.constraints.bottomEdges.end.y - props.height + layer.constraints.bottomEdges.end.height 
-
-			#Timing
-			delay = setup.delay
-			if setup.stagger
-				stag = setup.stagger
-				delay = ((index) * stag)
-
-			if setup.fadeOut
-				# if typeof == "boolean"
-				# 	props.opacity = 0
-				if layer == setup.fadeOut
-					props.opacity = 0
-
-			if setup.fadeIn
-				props.opacity = 1
-
-
-			layer.animate
-				properties:props
-				time:setup.time
-				delay:delay
-				curve:setup.curve
-				repeat:setup.repeat
-				colorModel:setup.colorModel
-				curveOptions:setup.curveOptions
-
-			layer.end = props
-
-#Refreshes Layer or All Layers
-exports.layout = (layer) ->
-	if layer == undefined
-		@.array = Framer.CurrentContext.layers
-	else 
-		@.array = [layer]
-	for layer in @.array
-		if layer.constraints
-			for p in defaults.constraintProps
-				layoutSize(layer, p)
-			for c in defaults.constraintTypes
-				if layer.constraints[c] != undefined
-					layoutChange(layer, c)
-			for a in defaults.constraintAligns
-				if layer.constraints[a]
-					layoutAlign(layer, a)
-
-			#Updates the constraints if the layer is manipulated through other means
-			if layer.constraintListener == undefined
-				layer.constraintListener = true
+# 			#Updates the constraints if the layer is manipulated through other means
+# 			if layer.constraintListener == undefined
+# 				layer.constraintListener = true
 
 #Align constraints
 layoutAlign = (layer, type) ->
@@ -780,23 +512,23 @@ layoutAlign = (layer, type) ->
 		if @type == "horizontalCenter" || @type == "horizontal"
 			deltaMove = (@layer.width - layer.width) / 2
 			layer.x = @layer.x + deltaMove
-			layer.constraints["leading"] = exports.pt(layer.x)
+			layer.constraints["leading"] = utils.pt(layer.x)
 		if @type == "verticalCenter" || @type == "vertical"  
 			deltaMove = (@layer.height - layer.height) / 2
 			layer.y = @layer.y + deltaMove
-			layer.constraints["top"] = exports.pt(layer.y)
+			layer.constraints["top"] = utils.pt(layer.y)
 		if @type == "leadingEdges" || @type == "leading"
 			layer.x = @layer.x
-			layer.constraints["leading"] = exports.pt(layer.x)
+			layer.constraints["leading"] = utils.pt(layer.x)
 		if @type == "trailingEdges" || @type == "trailing"
 			layer.maxX = @layer.maxX
-			layer.constraints["trailing"] = exports.pt(@superLayer.width - layer.maxX)
+			layer.constraints["trailing"] = utils.pt(@superLayer.width - layer.maxX)
 		if @type == "topEdges" || @type == "top"
 			layer.y = @layer.y
-			layer.constraints["top"] = exports.pt(layer.y)
+			layer.constraints["top"] = utils.pt(layer.y)
 		if @type == "bottomEdges" || @type == "bottom"
 			layer.maxY = @layer.maxY
-			layer.constraints["bottom"] = exports.pt(@superLayer.height - layer.maxY)
+			layer.constraints["bottom"] = utils.pt(@superLayer.height - layer.maxY)
 	if type == "horizontalCenter" || type == "horizontal"
 		deltaMove = (declaredConstraint.width - layer.width) / 2
 		layer.x = declaredConstraint.x + deltaMove
@@ -805,16 +537,16 @@ layoutAlign = (layer, type) ->
 		layer.y = declaredConstraint.y + deltaMove
 	if type == "leadingEdges" 
 		layer.x = declaredConstraint.x
-		layer.constraints["leading"] = exports.pt(declaredConstraint.x)
+		layer.constraints["leading"] = utils.pt(declaredConstraint.x)
 	if type == "trailingEdges"
 		layer.maxX = declaredConstraint.maxX
-		layer.constraints["trailing"] = exports.pt(@superLayer.height - layer.maxX)
+		layer.constraints["trailing"] = utils.pt(@superLayer.height - layer.maxX)
 	if type == "topEdges"
 		layer.y = declaredConstraint.y
-		layer.constraints["top"] = exports.pt(layer.y)
+		layer.constraints["top"] = utils.pt(layer.y)
 	if type == "bottomEdges"
 		layer.maxY = declaredConstraint.maxY
-		layer.constraints["bottom"] = exports.pt(@superLayer.height - layer.maxY)
+		layer.constraints["bottom"] = utils.pt(@superLayer.height - layer.maxY)
 	if type == "align"
 		if declaredConstraint == "horizontal"
 			layer.centerX()
@@ -830,13 +562,13 @@ layoutAlign = (layer, type) ->
 #Size Constraints
 layoutSize = (layer, type) ->
 	if layer.constraints[type]
-		layer[type] = exports.px(layer.constraints[type])
+		layer[type] = utils.px(layer.constraints[type])
 		if layer.type == "text"
 			textFrame = textAutoSize(layer)
 			layer.width = textFrame.width
 			layer.height = textFrame.height
 
-#Move & Resizes Layers
+#Move & utilsizes Layers
 layoutChange = (layer, type) ->
 	if layer.constraints[type] != undefined 
 		prop = defaults.constraints[type].prop
@@ -901,6 +633,8 @@ layoutChange = (layer, type) ->
 				if layer.constraints[type] == parseInt(layer.constraints[type], 10)
 					## Only Integer
 					layer[prop] = @[superTrait] - (layer.constraints[type] * exports.device.scale)
+					print @
+					print superTrait + " " + @[superTrait]
 				else 
 					if layer.constraints[type].length == undefined
 						#Entered Layer
@@ -931,7 +665,7 @@ layoutChange = (layer, type) ->
 exports.styles = {}
 
 exports.bgBlur = (layer) ->
-	layer.style["-webkit-backdrop-filter"] = "blur(#{exports.px(5)}px)"
+	layer.style["-webkit-backdrop-filter"] = "blur(#{utils.px(5)}px)"
 	return layer 
 
 textAutoSize = (textLayer) ->
@@ -939,9 +673,9 @@ textAutoSize = (textLayer) ->
 	constraints = {}
 	if textLayer.constraints 
 		if textLayer.constraints.height
-			constraints.height = exports.px(textLayer.constraints.height)
+			constraints.height = utils.px(textLayer.constraints.height)
 		if textLayer.constraints.width
-			constraints.width = exports.px(textLayer.constraints.width)
+			constraints.width = utils.px(textLayer.constraints.width)
 	styles =
 		fontSize: textLayer.style["font-size"]
 		fontFamily: textLayer.style["font-family"]
@@ -957,7 +691,7 @@ textAutoSize = (textLayer) ->
 
 listenToKeys = (field, keyboard) ->
 
-	keypress = (key) ->
+	keyputilss = (key) ->
 		originalColor = key.backgroundColor
 		switch key.name
 			when "shift"
@@ -968,7 +702,7 @@ listenToKeys = (field, keyboard) ->
 				key.backgroundColor = "white"
 				key.icon.states.switchInstant("on")
 			when "space"
-				key.backgroundColor = exports.color("light-key")
+				key.backgroundColor = utils.color("light-key")
 			else
 				if exports.device != "ipad"
 					keyboard.keyPopUp.visible = true	
@@ -980,7 +714,7 @@ listenToKeys = (field, keyboard) ->
 					keyboard.keyPopUp.midX = key.midX
 				else
 					key.animate
-						properties:(backgroundColor:exports.color("light-key"))
+						properties:(backgroundColor:utils.color("light-key"))
 						time:.2
 
 	isCommand = false
@@ -1098,7 +832,7 @@ listenToKeys = (field, keyboard) ->
 			if e.keyCode == 16
 				isShift = true
 				if keyboard
-					keypress(keyboard.keys.shift)
+					keyputilss(keyboard.keys.shift)
 					for k in keyboard.keysArray
 						k.style["text-transform"] = "uppercase"
 			if allSelected == true
@@ -1114,7 +848,7 @@ listenToKeys = (field, keyboard) ->
 			if e.keyCode == 8
 				e.preventDefault()
 				if keyboard
-					keypress(keyboard.keys.delete)
+					keyputilss(keyboard.keys.delete)
 				if allSelected == true
 					exports.update(field.text, [text:""])
 					field.text.backgroundColor ="transparent"
@@ -1136,12 +870,12 @@ listenToKeys = (field, keyboard) ->
 	document.addEventListener 'keyup', (e) ->
 		if field.active
 			if e.keyCode == 13 && keyboard
-				keyboard.keys.return.backgroundColor = exports.color("light-key")
+				keyboard.keys.return.backgroundColor = utils.color("light-key")
 			if e.keyCode == 32 && keyboard
 				keyboard.keys.space.backgroundColor = "White"
 			if e.keyCode == 8 && keyboard
 				keyboard.keys.delete.animate
-					properties:(backgroundColor:exports.color("light-key"))
+					properties:(backgroundColor:utils.color("light-key"))
 					time:.1
 				keyboard.keys.delete.icon.states.switch("off")
 			if e.keyCode == 91
@@ -1152,7 +886,7 @@ listenToKeys = (field, keyboard) ->
 					for k in keyboard.keysArray
 						k.style["text-transform"] = "lowercase"
 					keyboard.keys.shift.animate
-						properties:(backgroundColor:exports.color("light-key"))
+						properties:(backgroundColor:utils.color("light-key"))
 						time:.2
 					keyboard.keys.shift.icon.states.next()
 			if e.keyCode >= 65 && e.keyCode <= 90
@@ -1165,7 +899,7 @@ listenToKeys = (field, keyboard) ->
 						time:.2
 
 
-	document.addEventListener 'keypress', (e) ->
+	document.addEventListener 'keyputilss', (e) ->
 		if field.active 
 			char = codes[e.keyCode]
 			if keyboard
@@ -1181,11 +915,11 @@ listenToKeys = (field, keyboard) ->
 					char2 = char.toLowerCase()
 					if keyboard
 						key = keyboard.keys[char2]
-						keypress(key)
+						keyputilss(key)
 
 				if e.keyCode >= 97 && e.keyCode <= 122 || e.keyCode == 32		
 					if keyboard
-						keypress(key)
+						keyputilss(key)
 
 				if e.keyCode > 31
 					newText = field.text.html + char
@@ -1204,7 +938,7 @@ exports.update = (layer, array) ->
 			if key == "fontWeight"
 				layer.style[key] = value
 			if key == "color"
-				layer.color = exports.color(value)
+				layer.color = utils.color(value)
 
 		textFrame = textAutoSize(layer)
 		layer.width = textFrame.width
@@ -1246,7 +980,7 @@ exports.Alert = (array) ->
 		trailing:0
 		top:0
 		bottom:0
-	modal = new Layer backgroundColor:"white", superLayer:alert, borderRadius:exports.px(10), name:"modal", x:92, y:537
+	modal = new Layer backgroundColor:"white", superLayer:alert, borderRadius:utils.px(10), name:"modal", x:92, y:537
 	modal.constraints =
 		align:"center"
 		width:280
@@ -1270,32 +1004,32 @@ exports.Alert = (array) ->
 	exports.layout()
 	
 	#Title + Message + 1 set of actions
-	modal.constraints["height"] = 20 + exports.pt(title.height) + 10 + exports.pt(message.height) + 24 + 44
+	modal.constraints["height"] = 20 + utils.pt(title.height) + 10 + utils.pt(message.height) + 24 + 44
 
 	actions = []
 	switch setup.actions.length
 		when 1
 			actLabel = exports.capitalize(setup.actions[0])
-			action = new Layer superLayer:modal, backgroundColor:"transparent", name:setup.actions[0], borderRadius:exports.px(10)
+			action = new Layer superLayer:modal, backgroundColor:"transparent", name:setup.actions[0], borderRadius:utils.px(10)
 			action.constraints = 
 				leading:0
 				trailing:0
 				bottom:0
 				height:44
-			action.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action, text:actLabel, name:"label"
+			action.label = new exports.Text style:"alertAction", color:utils.color("blue"), superLayer:action, text:actLabel, name:"label"
 			action.label.constraints = 
 				align:"horizontal"
 				bottom:16
 			actions.push action
 		when 2
 			actLabel = exports.capitalize(setup.actions[0])
-			action = new Layer superLayer:modal, name:setup.actions[0], borderRadius:exports.px(10), backgroundColor:"white"
+			action = new Layer superLayer:modal, name:setup.actions[0], borderRadius:utils.px(10), backgroundColor:"white"
 			action.constraints = 
 				leading:0
-				trailing:exports.pt(modal.width/2)
+				trailing:utils.pt(modal.width/2)
 				bottom:0
 				height:44
-			action.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action, text:actLabel, name:"label"
+			action.label = new exports.Text style:"alertAction", color:utils.color("blue"), superLayer:action, text:actLabel, name:"label"
 			action.label.constraints = 
 				align:"horizontal"
 				bottom:16
@@ -1309,13 +1043,13 @@ exports.Alert = (array) ->
 				align:"horizontal"
 
 			actLabel2 = exports.capitalize(setup.actions[1])
-			action2 = new Layer superLayer:modal, name:setup.actions[1], borderRadius:exports.px(10), backgroundColor:"white"
+			action2 = new Layer superLayer:modal, name:setup.actions[1], borderRadius:utils.px(10), backgroundColor:"white"
 			action2.constraints = 
-				leading:exports.pt(modal.width/2)
+				leading:utils.pt(modal.width/2)
 				trailing:0
 				bottom:0
 				height:44
-			action2.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action2, text:actLabel2, name:"label"
+			action2.label = new exports.Text style:"alertAction", color:utils.color("blue"), superLayer:action2, text:actLabel2, name:"label"
 			action2.label.constraints = 
 				align:"horizontal"
 				bottom:16
@@ -1323,7 +1057,7 @@ exports.Alert = (array) ->
 		else
 			for act, index in setup.actions
 				actLabel = exports.capitalize(act)
-				action = new Layer superLayer:modal, name:act, borderRadius:exports.px(10), backgroundColor:"white"
+				action = new Layer superLayer:modal, name:act, borderRadius:utils.px(10), backgroundColor:"white"
 				action.constraints = 
 					leading:0
 					trailing:0
@@ -1335,7 +1069,7 @@ exports.Alert = (array) ->
 					trailing:0
 					height:1
 					bottom:0 + ((setup.actions.length - index) * 44)
-				action.label = new exports.Text style:"alertAction", color:exports.color("blue"), superLayer:action, text:actLabel, name:"label"
+				action.label = new exports.Text style:"alertAction", color:utils.color("blue"), superLayer:action, text:actLabel, name:"label"
 				action.label.constraints = 
 					align:"horizontal"
 					bottom:14
@@ -1350,9 +1084,9 @@ exports.Alert = (array) ->
 		specialChar(act)
 		
 		if setup.actions[index].indexOf("-r") == 0
-			act.origColor = exports.color("red")
+			act.origColor = utils.color("red")
 		else
-			act.origColor = exports.color("blue")
+			act.origColor = utils.color("blue")
 
 		#Add Touch Events
 		act.on Events.TouchStart, ->
@@ -1417,7 +1151,7 @@ exports.Banner = (array) ->
 	else
 		banner.addSubLayer(setup.icon)
 
-	setup.icon.borderRadius = exports.px(4.5)
+	setup.icon.borderRadius = utils.px(4.5)
 	setup.icon.name = "icon"
 	setup.icon.constraints =
 		height:20
@@ -1440,7 +1174,7 @@ exports.Banner = (array) ->
 		leading:[title, 5]
 		bottomEdges: title
 
-	if exports.device == "ipad" || exports.device == "ipad-pro"
+	if exports.device.name == "ipad" || exports.device.name == "ipad-pro"
 		time.constraints =
 			bottomEdges: title
 			trailing: @leadingIcon
@@ -1459,7 +1193,7 @@ exports.Banner = (array) ->
 	    tension: 250
 
 	banner.on Events.DragEnd, ->
-		if banner.maxY < exports.px(68)
+		if banner.maxY < utils.px(68)
 			banner.animate
 				properties:(maxY:0)
 				time:.15
@@ -1467,7 +1201,7 @@ exports.Banner = (array) ->
 			Utils.delay .25, ->
 				banner.destroy()
 
-
+	print exports.width.buffer
 	# Buffer that sits above the banner
 	bannerBuffer = new Layer maxY:0, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.device.width, maxY:banner.y, height:exports.device.height
 	exports.bgBlur(bannerBuffer)
@@ -1520,7 +1254,7 @@ exports.Button = (array) ->
 				button.constraints.trailing = 10
 			if button.constraints.height == undefined
 				button.constraints.height = 57
-			button.borderRadius = exports.px(12.5)
+			button.borderRadius = utils.px(12.5)
 			backgroundColor = ""
 			switch setup.style
 				when "light"
@@ -1571,7 +1305,7 @@ exports.Button = (array) ->
 		when "small"
 			@fontSize = 16
 			@top = 4
-			button.borderRadius = exports.px(2.5)
+			button.borderRadius = utils.px(2.5)
 			switch setup.style
 				when "light"
 					color = "#007AFF"
@@ -1580,7 +1314,7 @@ exports.Button = (array) ->
 					color = setup.color
 					button.borderColor = setup.color
 			button.backgroundColor = "transparent"
-			button.borderWidth = exports.px(1)
+			button.borderWidth = utils.px(1)
 
 
 		else
@@ -1603,7 +1337,7 @@ exports.Button = (array) ->
 		align:"center"
 	switch setup.buttonType 
 		when "small"
-			button.props = (width:textLayer.width + exports.px(60), height: textLayer.height + exports.px(10))
+			button.props = (width:textLayer.width + utils.px(60), height: textLayer.height + utils.px(10))
 			button.on Events.TouchStart, ->
 				button.animate
 					properties:(backgroundColor:color)
@@ -1626,7 +1360,7 @@ exports.Button = (array) ->
 
 exports.Field = (array) ->
 	setup = setupComponent("field", array)
-	field = new Layer borderRadius:exports.px(setup.borderRadius), backgroundColor:setup.backgroundColor, width:exports.px(setup.width), height:exports.px(setup.height)
+	field = new Layer borderRadius:utils.px(setup.borderRadius), backgroundColor:setup.backgroundColor, width:utils.px(setup.width), height:utils.px(setup.height)
 	if setup.constraints
 		field.constraints = 
 			setup.constraints
@@ -1643,7 +1377,7 @@ exports.Field = (array) ->
 
 
 
-	##Handle keypress
+	##Handle keyputilss
 	text.on "change:html", ->
 		if text.html == ""
 			field.cursor.constraints = {align:"vertical", leading:8}
@@ -1713,7 +1447,7 @@ exports.Field = (array) ->
 
 		if field.cursor == undefined
 			listenToKeys(field, keyboard)
-			cursor = new Layer width:exports.px(setup.cursor.width), height:exports.px(setup.cursor.height), superLayer:field, name:"cursor", backgroundColor:exports.color("blue"), borderRadius:exports.px(1)
+			cursor = new Layer width:utils.px(setup.cursor.width), height:utils.px(setup.cursor.height), superLayer:field, name:"cursor", backgroundColor:utils.color("blue"), borderRadius:utils.px(1)
 			field.cursor = cursor
 			cursor.constraints = 
 				setup.cursor.constraints
@@ -1761,11 +1495,11 @@ exports.StatusBar = (array) ->
 		@color = "black"
 	for layer in Framer.CurrentContext.layers
 		if layer.type == "lockScreen"
-			@isLockScreenPresent = true
-	if @isLockScreenPresent
-		gripper = new Layer superLayer:statusBar, width:exports.px(37), height:exports.px(5), name:"gripper", backgroundColor:"transparent", opacity:.5, name:"gripper"
+			@isLockScreenPutilsent = true
+	if @isLockScreenPutilsent
+		gripper = new Layer superLayer:statusBar, width:utils.px(37), height:utils.px(5), name:"gripper", backgroundColor:"transparent", opacity:.5, name:"gripper"
 		gripper.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(37)}px' height='#{exports.px(5)}px' viewBox='0 0 37 5' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			<svg width='#{utils.px(37)}px' height='#{utils.px(5)}px' viewBox='0 0 37 5' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 				<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
 				<title>Gripper</title>
 				<desc>Created with Sketch.</desc>
@@ -1800,7 +1534,7 @@ exports.StatusBar = (array) ->
 			top:3
 	else
 		for i in [0...setup.signal]
-			dot = new Layer height:exports.px(5.5), width:exports.px(5.5), backgroundColor:"black", superLayer:statusBar, borderRadius:exports.px(5.5)/2, backgroundColor:@color, name:"signal[#{i}]"
+			dot = new Layer height:utils.px(5.5), width:utils.px(5.5), backgroundColor:"black", superLayer:statusBar, borderRadius:utils.px(5.5)/2, backgroundColor:@color, name:"signal[#{i}]"
 			if i == 0
 				dot.constraints =
 					leading:7
@@ -1814,8 +1548,8 @@ exports.StatusBar = (array) ->
 		if setup.signal < 5
 			nonDots = 5 - setup.signal
 			for i in [0...nonDots]
-				nonDot = new Layer height:exports.px(5.5), width:exports.px(5.5), superLayer:statusBar, borderRadius:exports.px(5.5)/2, backgroundColor:"transparent", name:"signal[#{signal.length}]"
-				nonDot.style.border = "#{exports.px(1)}px solid #{@color}"
+				nonDot = new Layer height:utils.px(5.5), width:utils.px(5.5), superLayer:statusBar, borderRadius:utils.px(5.5)/2, backgroundColor:"transparent", name:"signal[#{signal.length}]"
+				nonDot.style.border = "#{utils.px(1)}px solid #{@color}"
 				nonDot.constraints =
 					leading:[signal[signal.length - 1], 1]
 					top:7
@@ -1832,9 +1566,9 @@ exports.StatusBar = (array) ->
 				leading:[carrier, 5]
 				top:3
 		if setup.carrier == "" || setup.carrier == "wifi"
-			network = new Layer width:exports.px(14), height:exports.px(10), superLayer:statusBar, backgroundColor:"transparent", name:"network"
+			network = new Layer width:utils.px(14), height:utils.px(10), superLayer:statusBar, backgroundColor:"transparent", name:"network"
 			network.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-				<svg width='#{exports.px(14)}px' height='#{exports.px(10)}px' viewBox='0 0 14 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+				<svg width='#{utils.px(14)}px' height='#{utils.px(10)}px' viewBox='0 0 14 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 					<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
 					<title>Wi-Fi</title>
 					<desc>Created with Sketch.</desc>
@@ -1848,10 +1582,10 @@ exports.StatusBar = (array) ->
 			network.constraints = 
 				leading:[signal[signal.length - 1], 7]
 				top:@topConstraint
-	batteryIcon = new Layer width:exports.px(25), height:exports.px(10), superLayer:statusBar, backgroundColor:"transparent", name:"batteryIcon"
+	batteryIcon = new Layer width:utils.px(25), height:utils.px(10), superLayer:statusBar, backgroundColor:"transparent", name:"batteryIcon"
 	if setup.battery > 70 
 		batteryIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(25)}px' height='#{exports.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			<svg width='#{utils.px(25)}px' height='#{utils.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 				<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
 				<title>Battery</title>
 				<desc>Created with Sketch.</desc>
@@ -1864,7 +1598,7 @@ exports.StatusBar = (array) ->
 			</svg>"
 	if setup.battery <= 70 && setup.battery > 20
 		batteryIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(25)}px' height='#{exports.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			<svg width='#{utils.px(25)}px' height='#{utils.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 				<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
 				<title>Battery</title>
 				<desc>Created with Sketch.</desc>
@@ -1877,7 +1611,7 @@ exports.StatusBar = (array) ->
 			</svg>"
 	if setup.battery <= 20
 		batteryIcon.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(25)}px' height='#{exports.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			<svg width='#{utils.px(25)}px' height='#{utils.px(10)}px' viewBox='0 0 25 10' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 				<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
 				<title>Battery</title>
 				<desc>Created with Sketch.</desc>
@@ -1896,9 +1630,9 @@ exports.StatusBar = (array) ->
 	batteryIcon.constraints =
 		trailing : 7
 		top:@batteryIcon
-	bluetooth = new Layer width:exports.px(8), height:exports.px(15), superLayer:statusBar, opacity:.5, backgroundColor:"transparent", name:"bluetooth"
+	bluetooth = new Layer width:utils.px(8), height:utils.px(15), superLayer:statusBar, opacity:.5, backgroundColor:"transparent", name:"bluetooth"
 	bluetooth.html = "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-		<svg width='#{exports.px(7)}px' height='#{exports.px(13)}px' viewBox='0 0 8 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+		<svg width='#{utils.px(7)}px' height='#{utils.px(13)}px' viewBox='0 0 8 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 			<!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
 			<title>Bluetooth</title>
 			<desc>Created with Sketch.</desc>
@@ -1937,141 +1671,141 @@ exports.Keyboard = (array) ->
 		when "iphone-5"
 			boardSpecs.height = 215
 			boardSpecs.key = {
-				width:exports.px(26)
-				height:exports.px(39)
+				width:utils.px(26)
+				height:utils.px(39)
 			}
-			boardSpecs.expandedKey = exports.px(39)
-			boardSpecs.expandedSpacer = exports.px(12)
+			boardSpecs.expandedKey = utils.px(39)
+			boardSpecs.expandedSpacer = utils.px(12)
 
 			boardSpecs.padding = {}
-			boardSpecs.padding.row1 = exports.px(3)
-			boardSpecs.padding.row2 = exports.px(19)
-			boardSpecs.padding.row3 = exports.px(54)
+			boardSpecs.padding.row1 = utils.px(3)
+			boardSpecs.padding.row2 = utils.px(19)
+			boardSpecs.padding.row3 = utils.px(54)
 
 
 			boardSpecs.marginTop = {}
-			boardSpecs.marginTop.row1 = exports.px(11)
-			boardSpecs.marginTop.row2 = exports.px(26)
-			boardSpecs.marginTop.row3 = exports.px(41)
-			boardSpecs.marginTop.row4 = exports.px(55)
+			boardSpecs.marginTop.row1 = utils.px(11)
+			boardSpecs.marginTop.row2 = utils.px(26)
+			boardSpecs.marginTop.row3 = utils.px(41)
+			boardSpecs.marginTop.row4 = utils.px(55)
 
-			boardSpecs.shiftIcon = {x:exports.px(9), y:exports.px(2)}
-			boardSpecs.deleteIcon = {x:exports.px(7), y:exports.px(10)}
-			boardSpecs.emojiIcon = {x:exports.px(8), y:exports.px(9)}
+			boardSpecs.shiftIcon = {x:utils.px(9), y:utils.px(2)}
+			boardSpecs.deleteIcon = {x:utils.px(7), y:utils.px(10)}
+			boardSpecs.emojiIcon = {x:utils.px(8), y:utils.px(9)}
 
-			boardSpecs.sideKey = exports.px(36.5)
-			boardSpecs.sideKeyRadius = exports.px(4)
-			boardSpecs.sideKeyBottom = exports.px(58)
+			boardSpecs.sideKey = utils.px(36.5)
+			boardSpecs.sideKeyRadius = utils.px(4)
+			boardSpecs.sideKeyBottom = utils.px(58)
 
 			boardSpecs.iPadDeleteOffset = 0
 			boardSpecs.bottomRow = 8
-			boardSpecs.returnKey = exports.px(74)
+			boardSpecs.returnKey = utils.px(74)
 
-			boardSpecs.spacer = exports.px(6)
+			boardSpecs.spacer = utils.px(6)
 
 		when "iphone-6s"
 			boardSpecs.height = 216
 			boardSpecs.key = {
-				width:exports.px(31.5)
-				height:exports.px(42)
+				width:utils.px(31.5)
+				height:utils.px(42)
 			}
 
-			boardSpecs.expandedKey = exports.px(46.5)
-			boardSpecs.expandedSpacer = exports.px(14)
+			boardSpecs.expandedKey = utils.px(46.5)
+			boardSpecs.expandedSpacer = utils.px(14)
 
 			boardSpecs.padding = {}
-			boardSpecs.padding.row1 = exports.px(3)
-			boardSpecs.padding.row2 = exports.px(22)
-			boardSpecs.padding.row3 = exports.px(59)
+			boardSpecs.padding.row1 = utils.px(3)
+			boardSpecs.padding.row2 = utils.px(22)
+			boardSpecs.padding.row3 = utils.px(59)
 
 
 			boardSpecs.marginTop = {}
-			boardSpecs.marginTop.row1 = exports.px(10)
-			boardSpecs.marginTop.row2 = exports.px(22)
-			boardSpecs.marginTop.row3 = exports.px(34)
-			boardSpecs.marginTop.row4 = exports.px(44)
+			boardSpecs.marginTop.row1 = utils.px(10)
+			boardSpecs.marginTop.row2 = utils.px(22)
+			boardSpecs.marginTop.row3 = utils.px(34)
+			boardSpecs.marginTop.row4 = utils.px(44)
 
-			boardSpecs.shiftIcon = {x:exports.px(11), y:exports.px(2)}
-			boardSpecs.deleteIcon = {x:exports.px(10), y:exports.px(13)}
-			boardSpecs.emojiIcon = {x:exports.px(11), y:exports.px(11)}
+			boardSpecs.shiftIcon = {x:utils.px(11), y:utils.px(2)}
+			boardSpecs.deleteIcon = {x:utils.px(10), y:utils.px(13)}
+			boardSpecs.emojiIcon = {x:utils.px(11), y:utils.px(11)}
 
-			boardSpecs.returnKey = exports.px(87.5)
+			boardSpecs.returnKey = utils.px(87.5)
 			boardSpecs.bottomRow = 6
 			boardSpecs.iPadDeleteOffset = 0
 
-			boardSpecs.sideKey = exports.px(42)
-			boardSpecs.sideKeyRadius = exports.px(5)
-			boardSpecs.sideKeyBottom = exports.px(56)
+			boardSpecs.sideKey = utils.px(42)
+			boardSpecs.sideKeyRadius = utils.px(5)
+			boardSpecs.sideKeyBottom = utils.px(56)
 
-			boardSpecs.spacer = exports.px(6)
+			boardSpecs.spacer = utils.px(6)
 
 		when "iphone-6s-plus"
 			boardSpecs.height = 226
 			boardSpecs.key = {
-				width:exports.px(35)
-				height:exports.px(45)
+				width:utils.px(35)
+				height:utils.px(45)
 			}
-			boardSpecs.expandedKey = exports.px(50)
-			boardSpecs.expandedSpacer = exports.px(20)
+			boardSpecs.expandedKey = utils.px(50)
+			boardSpecs.expandedSpacer = utils.px(20)
 			boardSpecs.padding = {}
-			boardSpecs.padding.row1 = exports.px(4)
-			boardSpecs.padding.row2 = exports.px(25)
-			boardSpecs.padding.row3 = exports.px(67)
+			boardSpecs.padding.row1 = utils.px(4)
+			boardSpecs.padding.row2 = utils.px(25)
+			boardSpecs.padding.row3 = utils.px(67)
 
 
 			boardSpecs.marginTop = {}
-			boardSpecs.marginTop.row1 = exports.px(8)
-			boardSpecs.marginTop.row2 = exports.px(19)
-			boardSpecs.marginTop.row3 = exports.px(30)
-			boardSpecs.marginTop.row4 = exports.px(41)
+			boardSpecs.marginTop.row1 = utils.px(8)
+			boardSpecs.marginTop.row2 = utils.px(19)
+			boardSpecs.marginTop.row3 = utils.px(30)
+			boardSpecs.marginTop.row4 = utils.px(41)
 
-			boardSpecs.shiftIcon = {x:exports.px(13), y:exports.px(2)}
-			boardSpecs.deleteIcon = {x:exports.px(11), y:exports.px(14)}
-			boardSpecs.emojiIcon = {x:exports.px(13), y:exports.px(13)}
+			boardSpecs.shiftIcon = {x:utils.px(13), y:utils.px(2)}
+			boardSpecs.deleteIcon = {x:utils.px(11), y:utils.px(14)}
+			boardSpecs.emojiIcon = {x:utils.px(13), y:utils.px(13)}
 
 			boardSpecs.bottomRow = 6
 
 			boardSpecs.iPadDeleteOffset = 0
 
-			boardSpecs.returnKey = exports.px(97)
+			boardSpecs.returnKey = utils.px(97)
 
-			boardSpecs.sideKey = exports.px(45)
-			boardSpecs.sideKeyRadius = exports.px(5)
+			boardSpecs.sideKey = utils.px(45)
+			boardSpecs.sideKeyRadius = utils.px(5)
 
-			boardSpecs.spacer = exports.px(6)
+			boardSpecs.spacer = utils.px(6)
 		when "ipad"
 			boardSpecs.height = 268
 			boardSpecs.key = {
-				width:exports.px(56)
-				height:exports.px(56)
+				width:utils.px(56)
+				height:utils.px(56)
 			}
 			boardSpecs.padding = {}
-			boardSpecs.padding.row1 = exports.px(6)
-			boardSpecs.padding.row2 = exports.px(35)
-			boardSpecs.padding.row3 = exports.px(74)
+			boardSpecs.padding.row1 = utils.px(6)
+			boardSpecs.padding.row2 = utils.px(35)
+			boardSpecs.padding.row3 = utils.px(74)
 
 
 			boardSpecs.marginTop = {}
-			boardSpecs.marginTop.row1 = exports.px(10)
-			boardSpecs.marginTop.row2 = exports.px(18)
-			boardSpecs.marginTop.row3 = exports.px(28)
-			boardSpecs.marginTop.row4 = exports.px(40)
+			boardSpecs.marginTop.row1 = utils.px(10)
+			boardSpecs.marginTop.row2 = utils.px(18)
+			boardSpecs.marginTop.row3 = utils.px(28)
+			boardSpecs.marginTop.row4 = utils.px(40)
 
-			boardSpecs.shiftIcon = {x:exports.px(18), y:exports.px(2)}
-			boardSpecs.deleteIcon = {x:exports.px(18), y:exports.px(20)}
-			boardSpecs.emojiIcon = {x:exports.px(18), y:exports.px(18)}
+			boardSpecs.shiftIcon = {x:utils.px(18), y:utils.px(2)}
+			boardSpecs.deleteIcon = {x:utils.px(18), y:utils.px(20)}
+			boardSpecs.emojiIcon = {x:utils.px(18), y:utils.px(18)}
 
 			boardSpecs.bottomRow = 7
 
 			boardSpecs.iPadDeleteOffset = boardSpecs.marginTop.row3 + boardSpecs.key.height * 2 - boardSpecs.marginTop.row1
 
-			boardSpecs.returnKey = exports.px(106)
+			boardSpecs.returnKey = utils.px(106)
 
-			boardSpecs.sideKey = exports.px(56)
-			boardSpecs.sideKey2 = exports.px(76)
-			boardSpecs.sideKeyRadius = exports.px(5)
+			boardSpecs.sideKey = utils.px(56)
+			boardSpecs.sideKey2 = utils.px(76)
+			boardSpecs.sideKeyRadius = utils.px(5)
 
-			boardSpecs.spacer = exports.px(12)
+			boardSpecs.spacer = utils.px(12)
 
 	board = new Layer backgroundColor:"#D1D5DA", name:"keyboard"
 
@@ -2116,7 +1850,7 @@ exports.Keyboard = (array) ->
 	keysArray = []
 
 	keyPopUp = new Layer width:@keyWidth, height:@keyHeight, x:@.x-16*exports.device.scale, backgroundColor:"transparent", superLayer:board, name:"key pop up"
-	box = new Layer borderRadius:exports.px(10), superLayer:keyPopUp, backgroundColor:"transparent", color:"black", name:"letter"
+	box = new Layer borderRadius:utils.px(10), superLayer:keyPopUp, backgroundColor:"transparent", color:"black", name:"letter"
 	box.style = {
 		"font-size" : 39 * exports.device.scale + "px"
 		"font-weight" : 300
@@ -2156,7 +1890,7 @@ exports.Keyboard = (array) ->
 	board.keys = {}
 	for letter in lettersArray
 		index = lettersArray.indexOf(letter) 
-		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.device.scale, backgroundColor:"white", color:"black", shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.key.width, height:boardSpecs.key.height
+		key = new Layer name:letter, superLayer:board, borderRadius:5*exports.device.scale, backgroundColor:"white", color:"black", shadowY:utils.px(1), shadowColor:"#929498", width:boardSpecs.key.width, height:boardSpecs.key.height
 		board.keys[letter] = key
 		keyPopUp.bringToFront()
 		box.bringToFront()
@@ -2164,28 +1898,28 @@ exports.Keyboard = (array) ->
 			keyPopUp.constraints = (width:65, height:122)
 			path.constraints = (width:65, height: 122)
 			path.y = 10
-			@pathWidth = exports.px(65)
-			@pathHeight = exports.px(122)
-			@keyHeight = exports.px(32)
-			@keyWidth = exports.px(44)
+			@pathWidth = utils.px(65)
+			@pathHeight = utils.px(122)
+			@keyHeight = utils.px(32)
+			@keyWidth = utils.px(44)
 			@lineHeight = @keyWidth - 17 + "px"
 			box.constraints = (width:32, height:44)
 			box.centerX()
-			box.y = exports.px(28)
+			box.y = utils.px(28)
 
 		if exports.device.scale == 3
 			keyPopUp.constraints = (width:68, height:122)
-			@keyHeight = exports.px(122)
-			@keyWidth = exports.px(65)
+			@keyHeight = utils.px(122)
+			@keyWidth = utils.px(65)
 			@lineHeight = @keyWidth + "px"
-			@pathWidth = exports.px(68)
-			@pathHeight = exports.px(128)
+			@pathWidth = utils.px(68)
+			@pathHeight = utils.px(128)
 			path.y = 0
 
 
 			box.constraints = (width:35, height:46)
 			box.centerX()
-			box.y = exports.px(28)
+			box.y = utils.px(28)
 
 		if exports.device.width == 640
 			key.constraints = (width:26, height:39)
@@ -2198,13 +1932,13 @@ exports.Keyboard = (array) ->
 			"font-weight" : 300
 			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 			'text-align' : 'center'
-			'line-height' : key.height - exports.px(2) + "px"
+			'line-height' : key.height - utils.px(2) + "px"
 		}
 		if letter == "," || letter == "."
-			extraSymbol = new Layer superLayer:key, width:exports.px(30), height:exports.px(30), backgroundColor:"transparent", y:exports.px(15), color:exports.color("black"), name:"!/?"
+			extraSymbol = new Layer superLayer:key, width:utils.px(30), height:utils.px(30), backgroundColor:"transparent", y:utils.px(15), color:utils.color("black"), name:"!/?"
 			extraSymbol.centerX()
 			extraSymbol.style = {
-				"font-size" : exports.px(24) + "px"
+				"font-size" : utils.px(24) + "px"
 				"font-weight" : 300
 				"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 				'text-align' : 'center'
@@ -2214,7 +1948,7 @@ exports.Keyboard = (array) ->
 			switch letter
 				when "," then extraSymbol.html = "!"
 				when "." then extraSymbol.html = "?"
-			key.style["line-height"] = key.height + exports.px(10) + "px"
+			key.style["line-height"] = key.height + utils.px(10) + "px"
 
 		key.html = letter
 		
@@ -2225,15 +1959,15 @@ exports.Keyboard = (array) ->
 			if exports.device == "ipad"
 				#Handle the extra pixels on the top row
 				if index % 2 != 0
-					key.width = key.width + exports.px(2)
+					key.width = key.width + utils.px(2)
 				else
-					key.width = key.width + exports.px(1)
+					key.width = key.width + utils.px(1)
 			firstRowKeyWidth = firstRowKeyWidth + key.width
 		if index > rowsMap[0].endIndex && index <= rowsMap[1].endIndex
 			rowIndex = index - rowsMap[1].startIndex
 			key.x = rowsMap[1].padding + (rowIndex*boardSpecs.spacer) + (secondRowKeyWidth)
 			key.y = rowsMap[1].marginTop + key.height
-			key.width = key.width + exports.px(1)
+			key.width = key.width + utils.px(1)
 			secondRowKeyWidth = secondRowKeyWidth + key.width
 		if index > rowsMap[1].endIndex
 			rowIndex = index - rowsMap[2].startIndex
@@ -2246,9 +1980,9 @@ exports.Keyboard = (array) ->
 				<desc>Created with Sketch.</desc>
 				<defs>
 					<filter x='-50%' y='-50%' width='200%' height='200%' filterUnits='objectBoundingBox' id='filter-1'>
-						<feOffset dx='0' dy='0' in='SourceAlpha' result='shadowOffsetOuter1'></feOffset>
-						<feGaussianBlur stdDeviation='1.5' in='shadowOffsetOuter1' result='shadowBlurOuter1'></feGaussianBlur>
-						<feColorMatrix values='0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.21 0' in='shadowBlurOuter1' type='matrix' result='shadowMatrixOuter1'></feColorMatrix>
+						<feOffset dx='0' dy='0' in='SourceAlpha' utilsult='shadowOffsetOuter1'></feOffset>
+						<feGaussianBlur stdDeviation='1.5' in='shadowOffsetOuter1' utilsult='shadowBlurOuter1'></feGaussianBlur>
+						<feColorMatrix values='0 0 0 0 0   0 0 0 0 0   0 0 0 0 0  0 0 0 0.21 0' in='shadowBlurOuter1' type='matrix' utilsult='shadowMatrixOuter1'></feColorMatrix>
 						<feMerge>
 							<feMergeNode in='shadowMatrixOuter1'></feMergeNode>
 							<feMergeNode in='SourceGraphic'></feMergeNode>
@@ -2287,18 +2021,18 @@ exports.Keyboard = (array) ->
 		else 
 			#iPad Key Animations
 			key.on Events.TouchStart, ->
-				@.backgroundColor = exports.color("light-key")
+				@.backgroundColor = utils.color("light-key")
 			key.on Events.TouchEnd, ->
 				@.backgroundColor = "white"
 
 		key.on Events.TouchEnd, ->
 			if shiftIcon.states.state == "on"
 				shiftIcon.states.switch("default")
-				shiftKey.backgroundColor = exports.color("light-key")
+				shiftKey.backgroundColor = utils.color("light-key")
 
 				if exports.device == "ipad"
 					shiftIcon2.states.switch("default")
-					shiftKey2.backgroundColor = exports.color("light-key")
+					shiftKey2.backgroundColor = utils.color("light-key")
 
 				for key in keysArray
 					key.style['text-transform'] = 'lowercase'
@@ -2318,9 +2052,9 @@ exports.Keyboard = (array) ->
 
 	## SHIFT KEY
 
-	shiftKey = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius, color:exports.color("black"), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2)
-	shiftKey.constraints = (leading:exports.pt(boardSpecs.padding.row1))
-	shiftIcon = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x, y:boardSpecs.shiftIcon.y
+	shiftKey = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius, color:utils.color("black"), backgroundColor:utils.color("light-key"), shadowY:utils.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2)
+	shiftKey.constraints = (leading:utils.pt(boardSpecs.padding.row1))
+	shiftIcon = new Layer width:utils.px(20), height:utils.px(19), superLayer:shiftKey, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x, y:boardSpecs.shiftIcon.y
 	shiftIcon.html = iconLibrary.shift.off
 
 	shiftIcon.states.add
@@ -2330,7 +2064,7 @@ exports.Keyboard = (array) ->
 	  time: .01
 
 	shiftKey.style = {
-			"font-size" : exports.px(16) + "px"
+			"font-size" : utils.px(16) + "px"
 			"font-weight" : 400
 			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 			'text-align' : 'center'
@@ -2354,9 +2088,9 @@ exports.Keyboard = (array) ->
 						key.style['text-transform'] = 'uppercase'
 					box.style['text-transform'] = 'uppercase'
 				else 
-					shiftKey.backgroundColor = exports.color("light-key")
+					shiftKey.backgroundColor = utils.color("light-key")
 					if exports.device == "ipad"
-						shiftKey2.backgroundColor = exports.color("light-key")
+						shiftKey2.backgroundColor = utils.color("light-key")
 					for key in keysArray
 						key.style["text-transform"] = 'lowercase'
 					box.style["text-transform"] = 'lowercase'
@@ -2387,14 +2121,14 @@ exports.Keyboard = (array) ->
 
 	## DELETE KEY
 
-	deleteKey = new Layer superLayer:board, borderRadius:boardSpecs.sideKeyRadius, backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", name:"delete", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2 - boardSpecs.iPadDeleteOffset)
+	deleteKey = new Layer superLayer:board, borderRadius:boardSpecs.sideKeyRadius, backgroundColor:utils.color("light-key"), shadowY:utils.px(1), shadowColor:"#929498", name:"delete", width:boardSpecs.sideKey, height:boardSpecs.sideKey, y:(boardSpecs.marginTop.row3 + boardSpecs.key.height * 2 - boardSpecs.iPadDeleteOffset)
 
 
-	deleteKey.constraints = (trailing:exports.pt(boardSpecs.spacer)/2)
-	deleteIcon = new Layer superLayer:deleteKey, width:exports.px(24), height:exports.px(18), backgroundColor:"transparent", x:boardSpecs.deleteIcon.x, y:boardSpecs.deleteIcon.y
+	deleteKey.constraints = (trailing:utils.pt(boardSpecs.spacer)/2)
+	deleteIcon = new Layer superLayer:deleteKey, width:utils.px(24), height:utils.px(18), backgroundColor:"transparent", x:boardSpecs.deleteIcon.x, y:boardSpecs.deleteIcon.y
 	
 	if exports.device == "ipad"
-		deleteKey.width = deleteKey.width + exports.px(5)
+		deleteKey.width = deleteKey.width + utils.px(5)
 
 	deleteIcon.states.add 
 		"on": 
@@ -2410,7 +2144,7 @@ exports.Keyboard = (array) ->
 		deleteIcon.states.switchInstant("on")
 
 	deleteKey.on Events.TouchEnd, ->
-		deleteKey.backgroundColor = exports.color("light-key")
+		deleteKey.backgroundColor = utils.color("light-key")
 		deleteIcon.states.switchInstant("off")
 
 		if setup.output
@@ -2434,21 +2168,21 @@ exports.Keyboard = (array) ->
 	## EXTRA KEYS
 
 	if exports.device == "ipad"
-		keyboardKey = new Layer superLayer:board, name:"dismiss", borderRadius:boardSpecs.sideKeyRadius, backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.sideKey
+		keyboardKey = new Layer superLayer:board, name:"dismiss", borderRadius:boardSpecs.sideKeyRadius, backgroundColor:utils.color("light-key"), shadowY:utils.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.sideKey
 		keyboardKey.constraints = {trailingEdges:deleteKey, bottom:boardSpecs.bottomRow}
-		keyboardIcon = new Layer superLayer:keyboardKey, width:exports.px(32.5), height:exports.px(23.5), backgroundColor:"transparent"
+		keyboardIcon = new Layer superLayer:keyboardKey, width:utils.px(32.5), height:utils.px(23.5), backgroundColor:"transparent"
 		keyboardIcon.html = iconLibrary.keyboard
 		keyboardIcon.center()
 
 		board.keys.dismiss = keyboardKey
 
-		shiftKey2 = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius,color:exports.color("black"), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey2, height:boardSpecs.sideKey
+		shiftKey2 = new Layer superLayer:board, name:"shift", borderRadius:boardSpecs.sideKeyRadius,color:utils.color("black"), backgroundColor:utils.color("light-key"), shadowY:utils.px(1), shadowColor:"#929498", width:boardSpecs.sideKey2, height:boardSpecs.sideKey
 		shiftKey2.constraints = (trailingEdges:deleteKey, bottomEdges:shiftKey)
-		shiftIcon2 = new Layer width:exports.px(20), height:exports.px(19), superLayer:shiftKey2, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x+exports.px(10), y:boardSpecs.shiftIcon.y
+		shiftIcon2 = new Layer width:utils.px(20), height:utils.px(19), superLayer:shiftKey2, backgroundColor:"transparent", x:boardSpecs.shiftIcon.x+utils.px(10), y:boardSpecs.shiftIcon.y
 		shiftIcon2.html = iconLibrary.shift.off
 
 		shiftKey2.style = {
-			"font-size" : exports.px(16) + "px"
+			"font-size" : utils.px(16) + "px"
 			"font-weight" : 400
 			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 			'text-align' : 'center'
@@ -2475,8 +2209,8 @@ exports.Keyboard = (array) ->
 							key.style['text-transform'] = 'uppercase'
 						box.style['text-transform'] = 'uppercase'
 					else 
-						shiftKey.backgroundColor = exports.color("light-key")
-						shiftKey2.backgroundColor = exports.color("light-key")
+						shiftKey.backgroundColor = utils.color("light-key")
+						shiftKey2.backgroundColor = utils.color("light-key")
 						for key in keysArray
 							key.style["text-transform"] = 'lowercase'
 						box.style["text-transform"] = 'lowercase'
@@ -2503,10 +2237,10 @@ exports.Keyboard = (array) ->
 					board.keyboardState = 2
 
 
-		numKey2 = new Layer superLayer:board, name:"num", borderRadius:boardSpecs.sideKeyRadius, color:exports.color("black"), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey2, height:boardSpecs.key.height
+		numKey2 = new Layer superLayer:board, name:"num", borderRadius:boardSpecs.sideKeyRadius, color:utils.color("black"), backgroundColor:utils.color("light-key"), shadowY:utils.px(1), shadowColor:"#929498", width:boardSpecs.sideKey2, height:boardSpecs.key.height
 		numKey2.html = ".?123"
 		numKey2.style = {
-			"font-size" : exports.px(16) + "px"
+			"font-size" : utils.px(16) + "px"
 			"font-weight" : 400
 			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 			'text-align' : 'center'
@@ -2523,7 +2257,7 @@ exports.Keyboard = (array) ->
 						if index < 27
 							if secondArray[index] == "undo"
 								key.width = key.width * 2 + boardSpecs.spacer
-								key.style["font-size"] = exports.px(17) + "px"
+								key.style["font-size"] = utils.px(17) + "px"
 								key.style["font-weight"] = 400
 							if secondArray[index] == "hide"
 								key.visible = false
@@ -2548,7 +2282,7 @@ exports.Keyboard = (array) ->
 					for key, index in keysArray
 						if key.html == "undo" || "redo"
 							key.width = boardSpecs.key.width
-							key.style["font-size"] = exports.px(25) + "px"
+							key.style["font-size"] = utils.px(25) + "px"
 							key.style["font-weight"] = 300
 						key.visible = true
 						key.name = lettersArray[index]
@@ -2565,16 +2299,16 @@ exports.Keyboard = (array) ->
 					board.keyboardState = 1
 
 
-	## NUM KEY top:exports.pt(boardSpecs.marginTop.row4 + boardSpecs.key.height*3)
+	## NUM KEY top:utils.pt(boardSpecs.marginTop.row4 + boardSpecs.key.height*3)
 
-	numKey = new Layer superLayer:board, name:"num", borderRadius:exports.px(5), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", color:"black", width:boardSpecs.sideKey, height:boardSpecs.key.height
+	numKey = new Layer superLayer:board, name:"num", borderRadius:utils.px(5), backgroundColor:utils.color("light-key"), shadowY:utils.px(1), shadowColor:"#929498", color:"black", width:boardSpecs.sideKey, height:boardSpecs.key.height
 	numKey.constraints = (bottom:boardSpecs.bottomRow, leadingEdges:shiftKey)
 	if exports.device != "ipad" && exports.device != "ipad-pro"
 		numKey.html = "123"
 	else 
 		numKey.html = ".?123"
 	numKey.style = {
-		"font-size" : exports.px(16) + "px"
+		"font-size" : utils.px(16) + "px"
 		"font-weight" : 400
 		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 		'text-align' : 'center'
@@ -2591,7 +2325,7 @@ exports.Keyboard = (array) ->
 							if index < 27
 								if secondArray[index] == "undo"
 									key.width = key.width * 2 + boardSpecs.spacer
-									key.style["font-size"] = exports.px(17) + "px"
+									key.style["font-size"] = utils.px(17) + "px"
 									key.style["font-weight"] = 400
 								if secondArray[index] == "hide"
 									key.visible = false
@@ -2619,12 +2353,12 @@ exports.Keyboard = (array) ->
 								rowIndex++
 								secondRowKeyWidth = secondRowKeyWidth + boardSpecs.key.width
 							if index == 20
-								key.constraints = {leading:[shiftKey, exports.pt(boardSpecs.expandedSpacer)]}
+								key.constraints = {leading:[shiftKey, utils.pt(boardSpecs.expandedSpacer)]}
 								exports.layout()
 							if index > 19
 								key.width = boardSpecs.expandedKey
 							if index > 20
-								key.constraints = {leading:[keysArray[index - 1], exports.pt(boardSpecs.spacer)]}
+								key.constraints = {leading:[keysArray[index - 1], utils.pt(boardSpecs.spacer)]}
 								exports.layout()
 							if index > 24
 								key.visible = false
@@ -2658,7 +2392,7 @@ exports.Keyboard = (array) ->
 				for key, index in keysArray
 					if key.html == "undo" || "redo"
 						key.width = boardSpecs.key.width
-						key.style["font-size"] = exports.px(25) + "px"
+						key.style["font-size"] = utils.px(25) + "px"
 						key.style["font-weight"] = 300
 					key.visible = true
 					key.name = lettersArray[index]
@@ -2679,25 +2413,25 @@ exports.Keyboard = (array) ->
 
 	## EMOJI KEY
 
-	emojiKey = new Layer superLayer:board, name:"emoji", borderRadius:exports.px(5), backgroundColor:exports.color("light-key"), shadowY:exports.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.key.height
+	emojiKey = new Layer superLayer:board, name:"emoji", borderRadius:utils.px(5), backgroundColor:utils.color("light-key"), shadowY:utils.px(1), shadowColor:"#929498", width:boardSpecs.sideKey, height:boardSpecs.key.height
 	emojiKey.constraints = (bottomEdges:numKey, leading:[numKey, 6])
-	emojiIcon = new Layer width:exports.px(20), height:exports.px(19), superLayer:emojiKey, backgroundColor:"transparent", x:boardSpecs.emojiIcon.x, y:boardSpecs.emojiIcon.y
+	emojiIcon = new Layer width:utils.px(20), height:utils.px(19), superLayer:emojiKey, backgroundColor:"transparent", x:boardSpecs.emojiIcon.x, y:boardSpecs.emojiIcon.y
 	emojiIcon.html = iconLibrary.emoji
 
 
 
 	## RETURN KEY
 
-	returnKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:exports.color(setup.returnColor), shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"return", width:boardSpecs.returnKey, height:boardSpecs.key.height
+	returnKey = new Layer superLayer:board, borderRadius:utils.px(5), backgroundColor:utils.color(setup.returnColor), shadowY:utils.px(1), shadowColor:"#929498", color:"black", name:"return", width:boardSpecs.returnKey, height:boardSpecs.key.height
 	if setup.returnColor != "light-key"
-		returnKey.color = exports.setTextColor(exports.color(setup.returnColor))
+		returnKey.color = exports.setTextColor(utils.color(setup.returnColor))
 	if exports.device == "ipad"
-		returnKey.constraints = (trailingEdges:deleteKey, top:exports.pt(boardSpecs.marginTop.row2 + boardSpecs.key.height) )
+		returnKey.constraints = (trailingEdges:deleteKey, top:utils.pt(boardSpecs.marginTop.row2 + boardSpecs.key.height) )
 	else
-		returnKey.constraints = (trailing:exports.pt(boardSpecs.spacer)/2, bottomEdges:numKey)
+		returnKey.constraints = (trailing:utils.pt(boardSpecs.spacer)/2, bottomEdges:numKey)
 	returnKey.html = setup.returnText
 	returnKey.style = {
-		"font-size" : exports.px(16) + "px"
+		"font-size" : utils.px(16) + "px"
 		"font-weight" : 400
 		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 		'text-align' : 'center'
@@ -2709,9 +2443,9 @@ exports.Keyboard = (array) ->
 	storedTextColor = returnKey.color
 	returnKey.on Events.TouchStart, ->
 		returnKey.backgroundColor = "white"
-		returnKey.color = exports.color("black")
+		returnKey.color = utils.color("black")
 	returnKey.on Events.TouchEnd, ->
-		returnKey.backgroundColor = exports.color(setup.returnColor)
+		returnKey.backgroundColor = utils.color(setup.returnColor)
 		returnKey.color = storedTextColor
 
 	board.keys.return = returnKey
@@ -2719,13 +2453,13 @@ exports.Keyboard = (array) ->
 
 	## SPACE KEY
 
-	spaceKey = new Layer superLayer:board, borderRadius:exports.px(5), backgroundColor:"white", shadowY:exports.px(1), shadowColor:"#929498", color:"black", name:"space", height:boardSpecs.key.height
+	spaceKey = new Layer superLayer:board, borderRadius:utils.px(5), backgroundColor:"white", shadowY:utils.px(1), shadowColor:"#929498", color:"black", name:"space", height:boardSpecs.key.height
 	
 	if exports.device != "ipad"
-		spaceKey.constraints = (bottomEdges:numKey, leading:[emojiKey, exports.pt(boardSpecs.spacer)], trailing:[returnKey, boardSpecs.spacer])
+		spaceKey.constraints = (bottomEdges:numKey, leading:[emojiKey, utils.pt(boardSpecs.spacer)], trailing:[returnKey, boardSpecs.spacer])
 		spaceKey.html = "space"
 		spaceKey.style = {
-			"font-size" : exports.px(16) + "px"
+			"font-size" : utils.px(16) + "px"
 			"font-weight" : 400
 			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 			'text-align' : 'center'
@@ -2733,14 +2467,14 @@ exports.Keyboard = (array) ->
 
 		}
 	else
-		spaceKey.constraints = (bottomEdges:numKey, leading:[emojiKey, exports.pt(boardSpecs.spacer)], trailing:[numKey2, boardSpecs.spacer])
+		spaceKey.constraints = (bottomEdges:numKey, leading:[emojiKey, utils.pt(boardSpecs.spacer)], trailing:[numKey2, boardSpecs.spacer])
 	board.keys["&nbsp;"] = spaceKey
 	board.keys.space = spaceKey
 	exports.layout()
 
 
 	spaceKey.on Events.TouchStart, ->
-		spaceKey.backgroundColor = exports.color("light-key")
+		spaceKey.backgroundColor = utils.color("light-key")
 
 	spaceKey.on Events.TouchEnd, ->
 		spaceKey.backgroundColor = "white"
@@ -2780,12 +2514,12 @@ exports.Keyboard = (array) ->
 	# emojiKey.on Events.TouchStart, ->
 	# 	emojiKey.backgroundColor = "white"
 	# 	emojiBG = new Layer backgroundColor:"#ECEEF1"
-	# 	box = exports.px(30)
+	# 	box = utils.px(30)
 	# 	emojiBG.constraints = (trailing:1, leading:1, bottom:1, height:258)
 	# 	exports.layout()
-	# 	emojiGalley = new ScrollComponent superLayer:emojiBG, width:emojiBG.width, height:emojiBG.height - exports.px(40)
+	# 	emojiGalley = new ScrollComponent superLayer:emojiBG, width:emojiBG.width, height:emojiBG.height - utils.px(40)
 	# 	emojiGalley.speedY = 0 
-	# 	emojiSpacer = exports.px(6)
+	# 	emojiSpacer = utils.px(6)
 	# 	emojiPicker = new Layer backgroundColor:"transparent", name:"emoji picker", superLayer:emojiBG
 	# 	emojiPicker.constraints = 
 	# 		leading:1
@@ -2795,7 +2529,7 @@ exports.Keyboard = (array) ->
 	# 	ABC = new Layer backgroundColor:"transparent", superLayer:emojiPicker
 	# 	ABC.html = "ABC"
 	# 	ABC.style = {
-	# 		"font-size" : exports.px(15) + "px"
+	# 		"font-size" : utils.px(15) + "px"
 	# 		"font-weight" : 500
 	# 		"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
 	# 		"color" : "#4F555D"
@@ -2889,10 +2623,10 @@ exports.Keyboard = (array) ->
 	# 		col = Math.floor(index/5)
 	# 		if row > 4
 	# 			row = 0 
-	# 		emoji = new Layer x:col*box + (emojiSpacer * col) + exports.px(3), y:row*box + (emojiSpacer * row) + exports.px(40), superLayer:emojiGalley.content, width:box, height:box, name:decodeURIComponent(em), backgroundColor:"transparent"
+	# 		emoji = new Layer x:col*box + (emojiSpacer * col) + utils.px(3), y:row*box + (emojiSpacer * row) + utils.px(40), superLayer:emojiGalley.content, width:box, height:box, name:decodeURIComponent(em), backgroundColor:"transparent"
 	# 		emoji.html = decodeURIComponent(em)
 	# 		emoji.style = {
-	# 			"font-size" : exports.px(26) + "px"
+	# 			"font-size" : utils.px(26) + "px"
 	# 			"line-height" : box + "px"
 	# 			"text-align" : "center"
 	# 		}
@@ -2970,21 +2704,21 @@ exports.Keyboard = (array) ->
 
 	# 	for sec in emojiSections
 	# 		index = emojiSections.indexOf(sec)
-	# 		title = new Layer superLayer:emojiGalley.content, backgroundColor:"transparent", x:index*5000 + exports.px(8), height:80, width:800
+	# 		title = new Layer superLayer:emojiGalley.content, backgroundColor:"transparent", x:index*5000 + utils.px(8), height:80, width:800
 	# 		title.html = sec
 	# 		title.style = {
-	# 			"font-size" : exports.px(12) + "px"
+	# 			"font-size" : utils.px(12) + "px"
 	# 			"font-weight" : 600
 	# 			"font-family" : '-apple-system, Helvetica, Arial, sans-serif'
-	# 			'line-height' : exports.px(42) + "px"
-	# 			'letter-spacing' : exports.px(0.7) + "px"
+	# 			'line-height' : utils.px(42) + "px"
+	# 			'letter-spacing' : utils.px(0.7) + "px"
 	# 			'color' : "#A5A6A9"
 	# 			'text-transform' : 'uppercase'
 	# 		}
 
 
 	# emojiKey.on Events.TouchEnd, ->
-	# 	emojiKey.backgroundColor = exports.color("light-key")
+	# 	emojiKey.backgroundColor = utils.color("light-key")
 
 
 
@@ -3015,7 +2749,7 @@ exports.Sheet = (array) ->
 		bottom:10
 		align:"horizontal"
 
-	actions = new Layer superLayer:sheets, borderRadius:exports.px(12.5), backgroundColor:"rgba(255,255,255, .85)"
+	actions = new Layer superLayer:sheets, borderRadius:utils.px(12.5), backgroundColor:"rgba(255,255,255, .85)"
 
 	descriptionBuffer = 0
 	if setup.description
@@ -3023,9 +2757,9 @@ exports.Sheet = (array) ->
 		description.constraints = 
 			top:21
 			align:"horizontal"
-			width:exports.pt(exports.device.width) - 100
+			width:utils.pt(exports.device.width) - 100
 		exports.layout()
-		descriptionBuffer = exports.pt(description.height) + 42
+		descriptionBuffer = utils.pt(description.height) + 42
 		divider = new Layer superLayer:actions, backgroundColor:"#D6E3E7"
 		divider.constraints =
 			height:1
@@ -3041,7 +2775,7 @@ exports.Sheet = (array) ->
 	exports.layout()
 	acts = {}
 	for act, index in setup.actions
-		o = new Layer superLayer:actions, width:actions.width, backgroundColor:"transparent", borderRadius:exports.px(12.5)
+		o = new Layer superLayer:actions, width:actions.width, backgroundColor:"transparent", borderRadius:utils.px(12.5)
 		o.constraints = 
 			top:index * 58 + descriptionBuffer
 			height:58
@@ -3066,7 +2800,7 @@ exports.Sheet = (array) ->
 				properties:(backgroundColor:"transparent")
 				time:.5
 			sheets.animate 
-				properties: (maxY:exports.device.height+exports.px((setup.actions.length + 3) * 58))
+				properties: (maxY:exports.device.height+utils.px((setup.actions.length + 3) * 58))
 				time:.3
 			overlay.animate
 				properties: (opacity:0)
@@ -3077,7 +2811,7 @@ exports.Sheet = (array) ->
 
 	if setup.animated == true
 		overlay.opacity = 0 
-		sheets.maxY = exports.device.height + exports.px((setup.actions.length + 3) * 58)
+		sheets.maxY = exports.device.height + utils.px((setup.actions.length + 3) * 58)
 		overlay.animate
 			properties:(opacity:1)
 			time:.3
@@ -3087,7 +2821,7 @@ exports.Sheet = (array) ->
 
 	overlay.on Events.TouchEnd, ->
 		sheets.animate 
-			properties: (maxY:exports.device.height+exports.px((setup.actions.length + 3) * 58))
+			properties: (maxY:exports.device.height+utils.px((setup.actions.length + 3) * 58))
 			time:.3
 		overlay.animate
 			properties: (opacity:0)
@@ -3097,7 +2831,7 @@ exports.Sheet = (array) ->
 
 	exitButton.on Events.TouchEnd, ->
 		sheets.animate 
-			properties: (maxY:exports.device.height+exports.px((setup.actions.length + 3) * 58))
+			properties: (maxY:exports.device.height+utils.px((setup.actions.length + 3) * 58))
 			time:.3
 		overlay.animate
 			properties: (opacity:0)
@@ -3223,7 +2957,7 @@ exports.Tab = (array) ->
 	tabBox.constraints =
 		width:@tabWidth
 		height:49
-	icon = new Layer width:exports.px(25), height:exports.px(25), backgroundColor:"transparent", name:"icon", superLayer:tabBox
+	icon = new Layer width:utils.px(25), height:utils.px(25), backgroundColor:"transparent", name:"icon", superLayer:tabBox
 	icon.constraints =
 		align:"horizontal"
 		top:7
@@ -3286,12 +3020,12 @@ exports.TabBar = (array) ->
 	setActive = (tabIndex) ->
 		for tab, index in setup.tabs
 			if index == tabIndex
-				exports.changeFill(tab.icon, exports.color(setup.activeColor))
-				tab.label.color = exports.color(setup.activeColor)
+				exports.changeFill(tab.icon, utils.color(setup.activeColor))
+				tab.label.color = utils.color(setup.activeColor)
 				tab.view.visible = true
 			else
-				exports.changeFill(tab.icon, exports.color(setup.inactiveColor))
-				tab.label.color = exports.color(setup.inactiveColor)
+				exports.changeFill(tab.icon, utils.color(setup.inactiveColor))
+				tab.label.color = utils.color(setup.inactiveColor)
 				tab.view.visible = false
 
 	for tab, index in setup.tabs
@@ -3301,8 +3035,8 @@ exports.TabBar = (array) ->
 
 		tabBarBox.addSubLayer(tab)
 		# Change colors
-		exports.changeFill(tab.icon, exports.color(setup.inactiveColor))
-		tab.label.color = exports.color(setup.inactiveColor)
+		exports.changeFill(tab.icon, utils.color(setup.inactiveColor))
+		tab.label.color = utils.color(setup.inactiveColor)
 		tabBarBG.backgroundColor = setup.backgroundColor
 		if setup.blur
 			tabBarBG.backgroundColor = "rgba(255,255,255, .9)"
@@ -3314,7 +3048,7 @@ exports.TabBar = (array) ->
 			exports.layout()
 
 		tab.on Events.TouchStart, ->
-			tabIndex = @.x / exports.px(tabWidth)
+			tabIndex = @.x / utils.px(tabWidth)
 			setActive(tabIndex)
 	tabBarBox.constraints =
 		align:"horizontal"
@@ -3333,7 +3067,7 @@ exports.Text = (array) ->
 	for prop in defaults.framerProps
 		if setup[prop]
 			if prop == "color"
-				setup[prop] = exports.color(setup[prop])
+				setup[prop] = utils.color(setup[prop])
 			textLayer[prop] = setup[prop]
 	for prop in defaults.styleProps
 		if setup[prop]
@@ -3350,7 +3084,7 @@ exports.Text = (array) ->
 					when "bold" then setup[prop] = 700
 					when "black" then setup[prop] = 800
 			if setup[prop] == parseInt(setup[prop], 10) && setup[prop] < 99
-				setup[prop] = exports.px(setup[prop]) + "px"
+				setup[prop] = utils.px(setup[prop]) + "px"
 			textLayer.style[prop] = setup[prop]
 	textFrame = textAutoSize(textLayer)
 	textLayer.props = (height:textFrame.height, width:textFrame.width)
@@ -3360,7 +3094,7 @@ exports.Text = (array) ->
 
 iconLibrary = {
 	activity: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(16)}px' height='#{exports.px(16)}px' viewBox='0 0 16 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			<svg width='#{utils.px(16)}px' height='#{utils.px(16)}px' viewBox='0 0 16 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>Soccer Ball</title>
 				<desc>Created with Sketch.</desc>
@@ -3392,7 +3126,7 @@ iconLibrary = {
 				</g>
 			</svg>"
 	animals: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			<svg width='#{utils.px(17)}px' height='#{utils.px(16)}px' viewBox='0 0 17 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>Group</title>
 				<desc>Created with Sketch.</desc>
@@ -3427,7 +3161,7 @@ iconLibrary = {
 		    </g>
 		</svg>"
 	emoji : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-		<svg width='#{exports.px(20)}px' height='#{exports.px(20)}px' viewBox='0 0 20 20' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+		<svg width='#{utils.px(20)}px' height='#{utils.px(20)}px' viewBox='0 0 20 20' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 			<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 			<title>Emoji</title>
 			<desc>Created with Sketch.</desc>
@@ -3442,7 +3176,7 @@ iconLibrary = {
 		</svg>"
 	delete: {
 		on : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-				<svg width='#{exports.px(24)}px' height='#{exports.px(18)}px' viewBox='0 0 24 18' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+				<svg width='#{utils.px(24)}px' height='#{utils.px(18)}px' viewBox='0 0 24 18' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 					<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 					<title>Back</title>
 					<desc>Created with Sketch.</desc>
@@ -3456,7 +3190,7 @@ iconLibrary = {
 					</g>
 				</svg>"
 		off : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-		<svg width='#{exports.px(24)}px' height='#{exports.px(18)}px' viewBox='0 0 24 18' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+		<svg width='#{utils.px(24)}px' height='#{utils.px(18)}px' viewBox='0 0 24 18' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 			<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 			<title>Back</title>
 			<desc>Created with Sketch.</desc>
@@ -3471,7 +3205,7 @@ iconLibrary = {
 		</svg>"
 	}
 	food :  "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			<svg width='#{utils.px(17)}px' height='#{utils.px(16)}px' viewBox='0 0 17 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>Food</title>
 				<desc>Created with Sketch.</desc>
@@ -3492,7 +3226,7 @@ iconLibrary = {
 				</g>
 			</svg>"
 	flags: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(11)}px' height='#{exports.px(15)}px' viewBox='0 0 11 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			<svg width='#{utils.px(11)}px' height='#{utils.px(15)}px' viewBox='0 0 11 15' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>Flag</title>
 				<desc>Created with Sketch.</desc>
@@ -3509,7 +3243,7 @@ iconLibrary = {
 				</g>
 			</svg>"
 	frequent: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			<svg width='#{utils.px(17)}px' height='#{utils.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>Recent</title>
 				<desc>Created with Sketch.</desc>
@@ -3526,7 +3260,7 @@ iconLibrary = {
 				</g>
 			</svg>"
 	keyboard : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(32.5)}px' height='#{exports.px(23.5)}px' viewBox='0 0 65 47' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
+			<svg width='#{utils.px(32.5)}px' height='#{utils.px(23.5)}px' viewBox='0 0 65 47' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink'>
 			    <!-- Generator: Sketch 3.6.1 (26313) - http://www.bohemiancoding.com/sketch -->
 			    <title>Shape</title>
 			    <desc>Created with Sketch.</desc>
@@ -3543,7 +3277,7 @@ iconLibrary = {
 			</svg>"
 	objects : 
 		"<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-				<svg width='#{exports.px(11)}px' height='#{exports.px(16)}px' viewBox='0 0 11 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+				<svg width='#{utils.px(11)}px' height='#{utils.px(16)}px' viewBox='0 0 11 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>Lightbulb</title>
 				<desc>Created with Sketch.</desc>
@@ -3561,7 +3295,7 @@ iconLibrary = {
 			</svg>"
 	shift : {
 		on : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-				<svg width='#{exports.px(20)}px' height='#{exports.px(18)}px' viewBox='0 0 20 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+				<svg width='#{utils.px(20)}px' height='#{utils.px(18)}px' viewBox='0 0 20 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 					<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 					<title>Shift</title>
 					<desc>Created with Sketch.</desc>
@@ -3575,7 +3309,7 @@ iconLibrary = {
 					</g>
 				</svg>"
 		off : "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-		<svg width='#{exports.px(20)}px' height='#{exports.px(18)}px' viewBox='0 0 20 19' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+		<svg width='#{utils.px(20)}px' height='#{utils.px(18)}px' viewBox='0 0 20 19' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 			<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 			<title>Shift</title>
 			<desc>Created with Sketch.</desc>
@@ -3590,7 +3324,7 @@ iconLibrary = {
 		</svg>"
 	}
 	smileys: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			<svg width='#{utils.px(17)}px' height='#{utils.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>:D</title>
 				<desc>Created with Sketch.</desc>
@@ -3609,7 +3343,7 @@ iconLibrary = {
 			</svg>"
 
 	symbols: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(16)}px' height='#{exports.px(17)}px' viewBox='0 0 15 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			<svg width='#{utils.px(16)}px' height='#{utils.px(17)}px' viewBox='0 0 15 17' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>Objects &amp; Symbols</title>
 				<desc>Created with Sketch.</desc>
@@ -3636,7 +3370,7 @@ iconLibrary = {
 				</g>
 			</svg>"
 	travel: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-			<svg width='#{exports.px(17)}px' height='#{exports.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
+			<svg width='#{utils.px(17)}px' height='#{utils.px(16)}px' viewBox='0 0 17 16' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xmlns:sketch='http://www.bohemiancoding.com/sketch/ns'>
 				<!-- Generator: Sketch 3.5.2 (25235) - http://www.bohemiancoding.com/sketch -->
 				<title>Transport</title>
 				<desc>Created with Sketch.</desc>

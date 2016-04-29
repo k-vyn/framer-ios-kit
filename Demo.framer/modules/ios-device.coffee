@@ -143,5 +143,7 @@ exports.get = ->
 	device = device.replace("-4", "")
 	device = device.replace("-silver", "")
 
+	capturedDevice.name = device
+
 	# exports.device becomes either ipad, ipad-pro, iphone-5, iphone-6s, iphone-6s-plus
 	return capturedDevice
