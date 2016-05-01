@@ -159,7 +159,7 @@ You can animate between constraints by running ` ios.animateLayout()`.
 - **time** *Num* <br> This will be the time of each layer's animation, not the entire animation of all the layers. 
 - **stagger** *Num* <br> This will put an incremental delay across all layers being animated.
 - **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers' opacity to 0. When set to a layer, that layer's opacity will be set to 0.
-- **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers' opacity to 1. When set to a layer, that layer's opacity will be set to 1.
+- **fadeIn** *Boolean or Layer* <br> When set to true, this will animate all layers' opacity to 1. When set to a layer, that layer's opacity will be set to 1.
 
 #### Example
 If we have a bunch of layers in a column and we want them to all move up, we can set the `topLayer`'s constraint to 50, and all the layers with a relationship with topLayer will also move up. 
