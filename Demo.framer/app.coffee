@@ -3,16 +3,4 @@ ios = require 'ios-kit'
 
 bg = new BackgroundLayer
 
-
-layer = new Layer
-layer.constraints = 
-	leading:20
-	bottom:20	
-	
-layer2 = new Layer
-layer2.constraints = 
-	leading:[layer, 10]
-	bottomEdges:layer
-	
-ios.layout.animate
-	curve:"spring(1200,20,10)"
+banner = new ios.Text constraints:{"align":"center", width:200}, lineHeight:40, text:"This is how you write good sentences"

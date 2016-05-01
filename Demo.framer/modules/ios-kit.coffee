@@ -1,85 +1,24 @@
 #iOSKit Module
 #By Kevyn Arnott 
 
-device = require 'ios-device'
-exports.layout = layout = require 'ios-layout'
-exports.utils = utils = require 'ios-utils'
+device = require 'ios-kit-device'
+
+exports.layout = layout = require 'ios-kit-layout'
+exports.utils = utils = require 'ios-kit-utils'
+exports.lib = library = require 'ios-kit-library'
+
 
 exports.device = device.get()
+exports.assets = library.assets
 
+#Import Components
+banner = require 'ios-kit-banner'
+text = require 'ios-kit-text'
 
-# Supporting Functions
+##Export Components
+exports.Banner = banner.create
+exports.Text = text.create
 
-# Cleans a string of <br> and &nbsp;
-exports.clean = (string) ->
-	## remove white space
-	string = string.replace(/[&]nbsp[;]/gi, " ").replace(/[<]br[>]/gi, "")
-	return string
-
-# Converts px's of an SVG to scalable variables
-exports.svg = (svg) ->
-	# Find String
-	startIndex = svg.search("<svg width=") 
-	endIndex = svg.search(" viewBox")
-	string = svg.slice(startIndex, endIndex)
-
-	#Find width
-	wStartIndex = string.search("=") + 2
-	wEndIndex =  string.search("px")
-	width = string.slice(wStartIndex, wEndIndex)
-	newWidth = utils.px(width)
-
-	# Find Height
-	heightString = string.slice(wEndIndex + 4, string.length)
-	hStartIndex = heightString.search("=")+ 2
-	hEndIndex = heightString.search("px") 
-	height = heightString.slice(hStartIndex, hEndIndex)
-	newHeight = utils.px(height)
-
-	#Create new string
-	newString = string.replace(width, newWidth)
-	newString = newString.replace(height, newHeight)
-
-	#Replace strings
-	svg = svg.replace(string, newString)
-
-	return {
-		svg:svg
-		width:newWidth
-		height:newHeight
-	}
-
-# Changes the fill of an SVG
-exports.changeFill = (layer, color) ->
-	startIndex = layer.html.search("fill=\"#")
-	fillString = layer.html.slice(startIndex, layer.html.length)
-	endIndex = fillString.search("\">")
-	string = fillString.slice(0, endIndex)
-	newString = "fill=\"" + utils.color(color).toHexString()
-	layer.html = layer.html.replace(string, newString)
-
-exports.capitalize = (string) ->
-	return string.charAt(0).toUpperCase() + string.slice(1)
-
-# Returns the current time
-exports.getTime = ->
-	daysOfTheWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
-	monthsOfTheYear = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
-	dateObj = new Date()
-	month = monthsOfTheYear[dateObj.getMonth()]
-	date = dateObj.getDate()
-	day = daysOfTheWeek[dateObj.getDay()]
-	hours = dateObj.getHours()
-	mins = dateObj.getMinutes()
-	secs = dateObj.getSeconds()
-	return {
-		month:month
-		date:date
-		day:day
-		hours:hours
-		mins:mins
-		secs:secs
-	}
 
 
 ## Defaults for everything
@@ -90,15 +29,6 @@ defaults = {
 		actions:["OK"]
 		action:"Action"
 		secondaryAction: "secondaryAction"
-	}
-	banner: {
-		title: "Title"
-		message:"Message"
-		action:"Action"
-		time:"now"
-		icon:undefined
-		duration:7
-		animated:false
 	}
 	button:{
 		text:"text"
@@ -270,27 +200,7 @@ defaults = {
 	}
 
 	text: {
-		text: "iOS Text Layer"
-		type:"text"
-		x:0
-		y:0
-		width:-1
-		height:-1
-		superLayer:undefined
-		style:"default"
-		lines:1
-		textAlign:"left"
-		backgroundColor:"transparent"
-		color:"black"
-		fontSize: 17
-		fontFamily:"-apple-system, Helvetica, Arial, sans-serif"
-		fontWeight:"regular"
-		lineHeight:"auto"
-		name:"text layer"
-		opacity:1
-		textTransform:"none"
-		name:"text layer"
-		constraints:{}
+
 	}
 }
 
@@ -300,20 +210,20 @@ setProps = (object) ->
 	keys = Object.keys(object)
 	object["props"] = keys
 
-components = [defaults.text, defaults.alert, defaults.banner, defaults.sheet, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
+components = [defaults.text, defaults.alert, defaults.sheet, defaults.field, defaults.table, defaults.tableCell, defaults.keyboard, defaults.button, defaults.navBar, defaults.tabBar, defaults.tab, defaults.statusBar, defaults.lockScreen]
 
 for comp in components
 	setProps(comp)
 
-setupComponent = (component, array) ->
+exports.setupComponent = (array, defaults) ->
 	if array == undefined
 		array = []
 	obj = {}
-	for i in defaults[component].props
+	for i in defaults.props
 		if array[i] != undefined
 			obj[i] = array[i]
 		else
-			obj[i] = defaults[component][i]
+			obj[i] = defaults[i]
 	return obj
 
 # Errors
@@ -401,293 +311,12 @@ exports.sameParent = (layer1, layer2) ->
 	else 
 		return false
 
-
-# updateConstraints = (layer) ->
-# 	if layer.constraints.leading
-# 		#If it's a number
-# 		if layer.constraints.leading == parseInt(layer.constraints.leading, 10)	
-# 			layer.constraints.leading = utils.pt(layer.x)
-# 		else
-# 			#If it's a layer
-# 			if layer.constraints.leading.length == undefined
-# 				layer.constraints.leading = utils.pt(layer.x)
-# 			else
-# 				#If it's a relationship
-# 				layer.constraints.leading = [layer.constraints.leading[0], utils.pt(layer.x - layer.constraints.leading[0].maxX)]
-
-# 	if layer.constraints.trailing
-# 		#If it's a number
-# 		if layer.constraints.trailing == parseInt(layer.constraints.trailing, 10)	
-# 			layer.constraints.trailing = utils.pt(layer.maxX)
-# 		else
-# 			#If it's a layer
-# 			if layer.constraints.trailing.length == undefined
-# 				layer.constraints.trailing = utils.pt(layer.maxX)
-# 			else
-# 				#If it's a relationship
-# 				layer.constraints.trailing = [layer.constraints.trailing[0], utils.pt(layer.constraints.trailing[0].x - layer.maxX)]
-
-# 	if layer.constraints.top
-# 		#If it's a number
-# 		if layer.constraints.top == parseInt(layer.constraints.top, 10)	
-# 			layer.constraints.top = utils.pt(layer.y)
-# 		else
-# 			#If it's a layer
-# 			if layer.constraints.top.length == undefined
-# 				layer.constraints.top = utils.pt(layer.y)
-# 			else
-# 				#If it's a relationship
-# 				layer.constraints.top = [layer.constraints.top[0], utils.pt(layer.y - layer.constraints.top[0].maxY)]
-
-# 	if layer.constraints.bottom
-# 		#If it's a number
-# 		if layer.constraints.bottom == parseInt(layer.constraints.bottom, 10)	
-# 			layer.constraints.bottom = utils.pt(layer.maxY)
-# 		else
-# 			#If it's a layer
-# 			if layer.constraints.bottom.length == undefined
-# 				layer.constraints.bottom = utils.pt(layer.maxY)
-# 			else
-# 				#If it's a relationship
-# 				layer.constraints.bottom = [layer.constraints.bottom[0], utils.pt(layer.constraints.bottom[0].y - layer.maxY)]
-
-# 	if layer.constraints.align == "center"
-# 		layer.constraints.align = undefined
-# 		layer.constraints.leading = utils.pt(layer.x)
-# 		layer.constraints.top = utils.pt(layer.y)
-
-# 	if layer.constraints.align == "horizontal"
-# 		layer.constraints.align = undefined
-# 		layer.constraints.leading = utils.pt(layer.x)
-
-# 	if layer.constraints.align == "vertical"
-# 		layer.constraints.align = undefined
-# 		layer.constraints.top = utils.pt(layer.y)
-
-# 	if layer.constraints.width
-# 		layer.constraints.width = utils.pt(layer.width)
-# 	if layer.constraints.height
-# 		layer.constraints.width = utils.pt(layer.height)
- 
-
-
-#Refutilshes Layer or All Layers
-# exports.layout = (layer) ->
-# 	if layer == undefined
-# 		@.array = Framer.CurrentContext.layers
-# 	else 
-# 		@.array = [layer]
-# 	for layer in @.array
-# 		if layer.constraints
-# 			for p in defaults.constraintProps
-# 				layoutSize(layer, p)
-# 			for c in defaults.constraintTypes
-# 				if layer.constraints[c] != undefined
-# 					layoutChange(layer, c)
-# 			for a in defaults.constraintAligns
-# 				if layer.constraints[a]
-# 					layoutAlign(layer, a)
-
-# 			#Updates the constraints if the layer is manipulated through other means
-# 			if layer.constraintListener == undefined
-# 				layer.constraintListener = true
-
-#Align constraints
-layoutAlign = (layer, type) ->
-	declaredConstraint = layer.constraints[type]
-	if layer.superLayer
-		@superLayer = layer.superLayer
-	else
-		@superLayer = screen
-	if declaredConstraint == parseInt(declaredConstraint, 10)
-		error(type, 20)
-	if declaredConstraint == layer
-		error(type, 21)
-	if typeof declaredConstraint == "object"
-		for i in declaredConstraint
-			if typeof i == "string"
-				@type = i
-			if typeof i == "object"
-				@layer = i 
-		if @type == "horizontalCenter" || @type == "horizontal"
-			deltaMove = (@layer.width - layer.width) / 2
-			layer.x = @layer.x + deltaMove
-			layer.constraints["leading"] = utils.pt(layer.x)
-		if @type == "verticalCenter" || @type == "vertical"  
-			deltaMove = (@layer.height - layer.height) / 2
-			layer.y = @layer.y + deltaMove
-			layer.constraints["top"] = utils.pt(layer.y)
-		if @type == "leadingEdges" || @type == "leading"
-			layer.x = @layer.x
-			layer.constraints["leading"] = utils.pt(layer.x)
-		if @type == "trailingEdges" || @type == "trailing"
-			layer.maxX = @layer.maxX
-			layer.constraints["trailing"] = utils.pt(@superLayer.width - layer.maxX)
-		if @type == "topEdges" || @type == "top"
-			layer.y = @layer.y
-			layer.constraints["top"] = utils.pt(layer.y)
-		if @type == "bottomEdges" || @type == "bottom"
-			layer.maxY = @layer.maxY
-			layer.constraints["bottom"] = utils.pt(@superLayer.height - layer.maxY)
-	if type == "horizontalCenter" || type == "horizontal"
-		deltaMove = (declaredConstraint.width - layer.width) / 2
-		layer.x = declaredConstraint.x + deltaMove
-	if type == "verticalCenter" || type == "vertical"  
-		deltaMove = (declaredConstraint.height - layer.height) / 2
-		layer.y = declaredConstraint.y + deltaMove
-	if type == "leadingEdges" 
-		layer.x = declaredConstraint.x
-		layer.constraints["leading"] = utils.pt(declaredConstraint.x)
-	if type == "trailingEdges"
-		layer.maxX = declaredConstraint.maxX
-		layer.constraints["trailing"] = utils.pt(@superLayer.height - layer.maxX)
-	if type == "topEdges"
-		layer.y = declaredConstraint.y
-		layer.constraints["top"] = utils.pt(layer.y)
-	if type == "bottomEdges"
-		layer.maxY = declaredConstraint.maxY
-		layer.constraints["bottom"] = utils.pt(@superLayer.height - layer.maxY)
-	if type == "align"
-		if declaredConstraint == "horizontal"
-			layer.centerX()
-		if declaredConstraint == "vertical"
-			layer.centerY()
-		if declaredConstraint == "center"
-			layer.center()
-		if declaredConstraint == "vertical"
-			layer.centerY()
-
-
-
-#Size Constraints
-layoutSize = (layer, type) ->
-	if layer.constraints[type]
-		layer[type] = utils.px(layer.constraints[type])
-		if layer.type == "text"
-			textFrame = textAutoSize(layer)
-			layer.width = textFrame.width
-			layer.height = textFrame.height
-
-#Move & utilsizes Layers
-layoutChange = (layer, type) ->
-	if layer.constraints[type] != undefined 
-		prop = defaults.constraints[type].prop
-		objProp = defaults.constraints[type].objProp
-		opp = defaults.constraints[type].opp
-		superTrait = defaults.constraints[type].objProp
-
-		if objProp != "width" && objProp != "height"
-			superTrait = defaults.constraints[type].objProp2
-
-		if layer.superLayer != null
-			#Has a superLayer
-			@[superTrait] = layer.superLayer[superTrait]
-		else
-			#Does not have a superLayer
-			@[superTrait] = exports[superTrait]
-		if type == "top" || type == "leading"
-			# Handle Top & Leading
-			if layer.constraints[type] == parseInt(layer.constraints[type], 10)
-				layer[prop] = layer.constraints[type] * exports.device.scale
-			else 
-				if layer.constraints[type].length == undefined
-					layer[prop] = layer.constraints[type][objProp]
-				if layer.constraints[type].length == 1
-					if layer.constraints[type][0] == parseInt(layer.constraints[type][0], 10)
-						layer[prop] = layer.constraints[type][0] * exports.device.scale
-					else
-						layer[prop] = layer.constraints[type][0][objProp]
-				if layer.constraints[type].length > 1 
-					for object in layer.constraints[type]
-						if object == parseInt(object, 10)
-							@.objInt = object
-						else 
-							@.objLayer = object
-					layer[prop] = (@.objInt * exports.device.scale) + @.objLayer[objProp]
-			if layer.constraints[opp] != undefined
-				trait = defaults.constraints[opp]["objProp"]
-				if layer.constraints[opp] == parseInt(layer.constraints[opp], 10)
-					layer[trait] = @[superTrait] - (layer[prop] + (exports.device.scale * layer.constraints[opp]))
-				else
-					if layer.constraints[opp].length == undefined
-						layer[trait] = layer[prop] - layer.constraints[opp][prop]
-						if layer[trait] < 0
-							layer[trait] = layer[trait] * -1
-					else
-						startX = layer.x
-						endX = 0
-						for object in layer.constraints[opp]
-							# If it's a number
-							if object == parseInt(object, 10)
-								endX = endX - object
-							else
-								endTrait = defaults.constraints[opp].objProp2
-								endX = endX + object[endTrait]
-						layer.width = endX - startX
-						
-		else
-			## Handle Bottom & Trailing
-			objProp2 = defaults.constraints[type].objProp2
-			if layer.constraints[opp] == undefined
-				## No opposite
-				if layer.constraints[type] == parseInt(layer.constraints[type], 10)
-					## Only Integer
-					layer[prop] = @[superTrait] - (layer.constraints[type] * exports.device.scale)
-					print @
-					print superTrait + " " + @[superTrait]
-				else 
-					if layer.constraints[type].length == undefined
-						#Entered Layer
-						if exports.sameParent(layer, layer.constraints[type])
-							layer[prop] = layer.constraints[type][objProp2]
-						else
-							error(layer, 10)
-					if layer.constraints[type].length == 1
-						#Array of One
-						if layer.constraints[type][0] == parseInt(layer.constraints[type][0], 10)
-							#Int
-							layer[prop] = @[objProp] - (layer.constraints[type][0] * exports.device.scale)
-						else 
-							#Object
-							if exports.sameParent(layer, layer.constraints[type][0])
-								layer[prop] = layer.constraints[type][0][objProp2]
-							else
-								error(layer, 10)
-					if layer.constraints[type].length > 1	
-						#Relationship Array
-						for object in layer.constraints[type]
-							if object == parseInt(object, 10)
-								@.objInt = object
-							else
-								@.objLayer = object
-							layer[prop] = @.objLayer[objProp2] - exports.device.scale * @.objInt
 #Text Layers
 exports.styles = {}
 
 exports.bgBlur = (layer) ->
 	layer.style["-webkit-backdrop-filter"] = "blur(#{utils.px(5)}px)"
 	return layer 
-
-textAutoSize = (textLayer) ->
-	#Define Width
-	constraints = {}
-	if textLayer.constraints 
-		if textLayer.constraints.height
-			constraints.height = utils.px(textLayer.constraints.height)
-		if textLayer.constraints.width
-			constraints.width = utils.px(textLayer.constraints.width)
-	styles =
-		fontSize: textLayer.style["font-size"]
-		fontFamily: textLayer.style["font-family"]
-		fontWeight: textLayer.style["font-weight"]
-		lineHeight: textLayer.style["line-height"]
-		letterSpacing: textLayer.style["letter-spacing"]
-		textTransform: textLayer.style["text-transform"]
-	textWidth = Utils.textSize textLayer.html, styles, constraints
-	return {
-		width : textWidth.width
-		height: textWidth.height
-	}
 
 listenToKeys = (field, keyboard) ->
 
@@ -1120,115 +749,6 @@ exports.Alert = (array) ->
 
 	return alert
 
-exports.Banner = (array) ->
-	setup = setupComponent("banner", array)
-	banner = new Layer backgroundColor:"transparent", name:"banner"
-	banner.html = exports.svg(bannerBG[exports.device]).svg
-	banner.constraints =
-		leading:0
-		trailing:0
-		top:0
-		height:68
-
-	# Different positionings for each device
-	switch exports.device 
-		when "ipad" 
-			@leadingIcon = 200
-			@topIcon = 15
-			@topTitle = 11
-		when "ipad-pro"
-			@leadingIcon = 192
-			@topIcon = 12
-			@topTitle = 9
-		else
-			@leadingIcon = 15
-			@topIcon = 8
-			@topTitle = 5
-
-	if setup.icon == undefined
-		setup.icon = new Layer superLayer:banner
-		setup.icon.style["background"] = "linear-gradient(-180deg, #67FF81 0%, #01B41F 100%)"
-	else
-		banner.addSubLayer(setup.icon)
-
-	setup.icon.borderRadius = utils.px(4.5)
-	setup.icon.name = "icon"
-	setup.icon.constraints =
-		height:20
-		width:20
-		leading:@leadingIcon
-		top:@topIcon 
-
-	title = new exports.Text style:"bannerTitle", text:setup.title, color:"white", fontWeight:"medium", fontSize:13, superLayer:banner, name:"title"
-	title.constraints = 
-		top:@topTitle
-
-		leading:[setup.icon, 11]
-	message = new exports.Text style:"bannerMessage", text:setup.message, color:"white", fontSize:13, superLayer:banner, name:"message"
-	message.constraints =
-		leadingEdges:title
-		top:[title, 2]
-
-	time = new exports.Text style:"bannerTime", text:setup.time, color:"white", fontSize:11, superLayer:banner, name:"time"
-	time.constraints =
-		leading:[title, 5]
-		bottomEdges: title
-
-	if exports.device.name == "ipad" || exports.device.name == "ipad-pro"
-		time.constraints =
-			bottomEdges: title
-			trailing: @leadingIcon
-
-	exports.layout()
-	exports.bgBlur(banner)
-
-	## Banner Drag settings
-	banner.draggable = true
-	banner.draggable.horizontal = false
-	banner.draggable.constraints =
-		y:0
-
-	banner.draggable.bounceOptions =
-	    friction: 25
-	    tension: 250
-
-	banner.on Events.DragEnd, ->
-		if banner.maxY < utils.px(68)
-			banner.animate
-				properties:(maxY:0)
-				time:.15
-				curve:"ease-in-out"
-			Utils.delay .25, ->
-				banner.destroy()
-
-	print exports.width.buffer
-	# Buffer that sits above the banner
-	bannerBuffer = new Layer maxY:0, name:"buffer", backgroundColor:"#1B1B1C", opacity:.9, superLayer:banner, width:exports.device.width, maxY:banner.y, height:exports.device.height
-	exports.bgBlur(bannerBuffer)
-
-	# Animate-in
-	if setup.animated == true
-		banner.y = 0 - banner.height
-		banner.animate
-			properties:(y:0)
-			time:.25
-			curve:"ease-in-out"
-
-	# Animate-out
-	if setup.duration
-		Utils.delay setup.duration, ->
-			banner.animate
-				properties:(maxY:0)
-				time:.25
-				curve:"ease-in-out"
-		Utils.delay setup.duration + .25, ->
-			banner.destroy()
-		
-	# Export Banner
-	banner.icon = setup.icon
-	banner.title = title
-	banner.message = message
-	return banner
 
 exports.Button = (array) ->
 	setup = setupComponent("button", array)
@@ -2906,7 +2426,7 @@ exports.NavBar = (array) ->
 	if typeof setup.left == "string" && typeof setup.left != "boolean"
 		leading = 8
 		if setup.left.indexOf("<") != -1
-			svg = exports.svg(iconLibrary.chevron)
+			svg = exports.utils.svg(iconLibrary.chevron)
 			bar.chevron = new Layer width:svg.width, height:svg.height, backgroundColor:"transparent", superLayer:barArea
 			bar.chevron.html = svg.svg
 			bar.chevron.constraints = {bottom:9, leading:8}
@@ -2961,7 +2481,7 @@ exports.Tab = (array) ->
 	icon.constraints =
 		align:"horizontal"
 		top:7
-	svgFrame = exports.svg(setup.icon)
+	svgFrame = exports.utils.svg(setup.icon)
 	icon.html = svgFrame.svg
 	icon.width = svgFrame.width
 	icon.height = svgFrame.height
@@ -3058,39 +2578,7 @@ exports.TabBar = (array) ->
 	exports.layout()
 	return tabBar
 
-exports.Text = (array) ->
-	setup = setupComponent("text", array)
-	exceptions = Object.keys(setup)
-	textLayer = new Layer backgroundColor:"transparent", name:setup.name
-	textLayer.type = "text"
-	textLayer.html = setup.text
-	for prop in defaults.framerProps
-		if setup[prop]
-			if prop == "color"
-				setup[prop] = utils.color(setup[prop])
-			textLayer[prop] = setup[prop]
-	for prop in defaults.styleProps
-		if setup[prop]
-			if prop == "lineHeight" && setup[prop] == "auto"
-				setup[prop] =  setup["fontSize"]
-			if prop == "fontWeight"
-				switch setup[prop]
-					when "ultrathin" then setup[prop] = 100
-					when "thin" then setup[prop] = 200
-					when "light" then setup[prop] = 300
-					when "regular" then setup[prop] = 400
-					when "medium" then setup[prop] = 500
-					when "semibold" then setup[prop] = 600
-					when "bold" then setup[prop] = 700
-					when "black" then setup[prop] = 800
-			if setup[prop] == parseInt(setup[prop], 10) && setup[prop] < 99
-				setup[prop] = utils.px(setup[prop]) + "px"
-			textLayer.style[prop] = setup[prop]
-	textFrame = textAutoSize(textLayer)
-	textLayer.props = (height:textFrame.height, width:textFrame.width)
-	textLayer.constraints = setup.constraints
-	exports.layout()
-	return textLayer
+
 
 iconLibrary = {
 	activity: "<?xml version='1.0' encoding='UTF-8' standalone='no'?>

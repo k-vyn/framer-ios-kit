@@ -1,3 +1,5 @@
+# Utils
+
 ios = require 'ios-kit'
 
 exports.defaults = {
@@ -16,10 +18,10 @@ exports.defaults = {
 	}
 }
 
-
-exports.animate = (array) ->
+layout = (array) ->
 	setup = {}
-	animatedLayers = []
+	targetLayers = []
+	blueprint = []
 	if array
 		for i in Object.keys(exports.defaults.animations)
 			if array[i]
@@ -29,11 +31,11 @@ exports.animate = (array) ->
 
 	if setup.target 
 		if setup.target.length 
-			animatedLayers = setup.target
+			targetLayers = setup.target
 		else
-			animatedLayers.push setup.target
+			targetLayers.push setup.target
 	else
-		animatedLayers = Framer.CurrentContext.layers
+		targetLayers = Framer.CurrentContext.layers
 
 	if setup.target
 		if setup.constraints
@@ -41,9 +43,9 @@ exports.animate = (array) ->
 				setup.target.constraints[newConstraint] = setup.constraints[newConstraint]
 
 	#Translate new constraints
-	for layer, index in animatedLayers
+	for layer, index in targetLayers
 		if layer.constraints
-			layer.end = {}
+			layer.calculatedPosition = {}
 			props = {}
 			layer.superFrame = {}
 
@@ -78,15 +80,15 @@ exports.animate = (array) ->
 					props.x = ios.utils.px(layer.constraints.leading)
 				else
 					#If the layer referenced hasn't been set
-					if layer.constraints.leading[0].end == undefined
+					if layer.constraints.leading[0].calculatedPosition == undefined
 							exports.animateLayout
 								layer:layer.constraints.leading[0]
 					#If it's a layer
 					if layer.constraints.leading.length == undefined
-						props.x = layer.constraints.leading.end.x + layer.constraints.leading.end.width
+						props.x = layer.constraints.leading.calculatedPosition.x + layer.constraints.leading.calculatedPosition.width
 					#If it's a relationship
 					else
-						props.x = layer.constraints.leading[0].end.x + layer.constraints.leading[0].end.width + ios.utils.px(layer.constraints.leading[1])
+						props.x = layer.constraints.leading[0].calculatedPosition.x + layer.constraints.leading[0].calculatedPosition.width + ios.utils.px(layer.constraints.leading[1])
 
 			# Opposing constraints handler
 			if layer.constraints.autoWidth != undefined
@@ -98,23 +100,23 @@ exports.animate = (array) ->
 					props.x = layer.superFrame.width - ios.utils.px(layer.constraints.trailing) - props.width
 				else
 					#If the layer referenced hasn't been set
-					if layer.constraints.trailing[0].end == undefined
+					if layer.constraints.trailing[0].calculatedPosition == undefined
 							exports.animateLayout
 								layer:layer.constraints.trailing[0]
 					#If it's a layer
 					if layer.constraints.trailing.length == undefined
-						props.x = layer.constraints.trailing.end.x - props.width
+						props.x = layer.constraints.trailing.calculatedPosition.x - props.width
 					#If it's a relationship
 					else
-						props.x = layer.constraints.trailing[0].end.x - ios.utils.px(layer.constraints.trailing[1]) - props.width
+						props.x = layer.constraints.trailing[0].calculatedPosition.x - ios.utils.px(layer.constraints.trailing[1]) - props.width
 
 			# Opposing constraints handler
 			if layer.constraints.autoWidth != undefined
-				layer.constraints.autoWidth.endX = props.x
+				layer.constraints.autoWidth.calculatedPositionX = props.x
 
 				##perform autosize
 				props.x = layer.constraints.autoWidth.startX
-				props.width = layer.constraints.autoWidth.endX - layer.constraints.autoWidth.startX + props.width
+				props.width = layer.constraints.autoWidth.calculatedPositionX - layer.constraints.autoWidth.startX + props.width
 
 			if layer.constraints.top != undefined
 				#If it's a number
@@ -123,10 +125,10 @@ exports.animate = (array) ->
 				else
 					#If it's a layer
 					if layer.constraints.top.length == undefined
-						props.y = layer.constraints.top.end.y + layer.constraints.top.end.height
+						props.y = layer.constraints.top.calculatedPosition.y + layer.constraints.top.calculatedPosition.height
 					#If it's a relationship
 					else
-						props.y = layer.constraints.top[0].end.y + layer.constraints.top[0].end.height + ios.utils.px(layer.constraints.top[1])
+						props.y = layer.constraints.top[0].calculatedPosition.y + layer.constraints.top[0].calculatedPosition.height + ios.utils.px(layer.constraints.top[1])
 
 			# Opposing constraints handler
 			if layer.constraints.autoHeight != undefined
@@ -140,21 +142,21 @@ exports.animate = (array) ->
 
 				else
 					#If the layer referenced hasn't been set
-					if layer.constraints.bottom[0].end == undefined
+					if layer.constraints.bottom[0].calculatedPosition == undefined
 							exports.animateLayout
 								layer:layer.constraints.bottom[0]
 					#If it's a layer
 					if layer.constraints.bottom.length == undefined
-						props.y = layer.constraints.bottom.end.y - props.height
+						props.y = layer.constraints.bottom.calculatedPosition.y - props.height
 					#If it's a relationship
 					else 
-						props.y = layer.constraints.bottom[0].end.y -  ios.utils.px(layer.constraints.bottom[1])
+						props.y = layer.constraints.bottom[0].calculatedPosition.y -  ios.utils.px(layer.constraints.bottom[1])
 
 			# Opposing constraints handler
 			if layer.constraints.autoHeight != undefined
-				layer.constraints.autoHeight.endY = props.y
+				layer.constraints.autoHeight.calculatedPositionY = props.y
 				## perform autosize
-				props.height = layer.constraints.autoHeight.endY - layer.constraints.autoHeight.startY 
+				props.height = layer.constraints.autoHeight.calculatedPositionY - layer.constraints.autoHeight.startY 
 				props.y = layer.constraints.autoHeight.startY
 
 
@@ -174,52 +176,85 @@ exports.animate = (array) ->
 
 			# Centering constraints
 			if layer.constraints.horizontalCenter != undefined
-				props.x = layer.constraints.horizontalCenter.end.x + (layer.constraints.horizontalCenter.end.width - props.width) / 2
+				props.x = layer.constraints.horizontalCenter.calculatedPosition.x + (layer.constraints.horizontalCenter.calculatedPosition.width - props.width) / 2
 
 			if layer.constraints.verticalCenter != undefined
-				props.y = layer.constraints.verticalCenter.end.y + (layer.constraints.verticalCenter.end.height - props.height) / 2
+				props.y = layer.constraints.verticalCenter.calculatedPosition.y + (layer.constraints.verticalCenter.calculatedPosition.height - props.height) / 2
 
 			if layer.constraints.center != undefined
-				props.x = layer.constraints.center.end.x + (layer.constraints.center.end.width - props.width) / 2
-				props.y = layer.constraints.center.end.y + (layer.constraints.center.end.height - props.height) / 2
+				props.x = layer.constraints.center.calculatedPosition.x + (layer.constraints.center.calculatedPosition.width - props.width) / 2
+				props.y = layer.constraints.center.calculatedPosition.y + (layer.constraints.center.calculatedPosition.height - props.height) / 2
 
 			# Aligning constraints
 			if layer.constraints.leadingEdges != undefined
-				props.x = layer.constraints.leadingEdges.end.x 
+				props.x = layer.constraints.leadingEdges.calculatedPosition.x 
 
 			if layer.constraints.trailingEdges != undefined
-				props.x = layer.constraints.trailingEdges.end.x - props.width + layer.constraints.trailingEdges.end.width
+				props.x = layer.constraints.trailingEdges.calculatedPosition.x - props.width + layer.constraints.trailingEdges.calculatedPosition.width
 
 
 			if layer.constraints.topEdges != undefined
-				props.y = layer.constraints.topEdges.end.y
+				props.y = layer.constraints.topEdges.calculatedPosition.y
 			
 			if layer.constraints.bottomEdges != undefined
-				props.y = layer.constraints.bottomEdges.end.y - props.height + layer.constraints.bottomEdges.end.height 
-
-			#Timing
-			delay = setup.delay
-			if setup.stagger
-				stag = setup.stagger
-				delay = ((index) * stag)
-
-			if setup.fadeOut
-				# if typeof == "boolean"
-				# 	props.opacity = 0
-				if layer == setup.fadeOut
-					props.opacity = 0
-
-			if setup.fadeIn
-				props.opacity = 1
+				props.y = layer.constraints.bottomEdges.calculatedPosition.y - props.height + layer.constraints.bottomEdges.calculatedPosition.height
 
 
-			layer.animate
-				properties:props
-				time:setup.time
-				delay:delay
-				curve:setup.curve
-				repeat:setup.repeat
-				colorModel:setup.colorModel
-				curveOptions:setup.curveOptions
+			layer.calculatedPosition = props
 
-			layer.end = props
+			blueprint.push layer
+
+	return blueprint
+
+exports.set = (array) -> 
+	setup = {}
+	props = {}
+	if array
+		for i in Object.keys(exports.defaults.animations)
+			if array[i]
+				setup[i] = array[i]
+			else
+				setup[i] = exports.defaults.animations[i]
+
+	blueprint = layout(array)
+
+	for layer, index in blueprint
+		for key in Object.keys(layer.calculatedPosition)
+			layer[key] = layer.calculatedPosition[key]
+
+exports.animate = (array) ->
+	setup = {}
+	props = {}
+	if array
+		for i in Object.keys(exports.defaults.animations)
+			if array[i]
+				setup[i] = array[i]
+			else
+				setup[i] = exports.defaults.animations[i]
+
+	blueprint = layout(array)
+
+	for layer, index in blueprint
+		#Timing
+		delay = setup.delay
+		if setup.stagger
+			stag = setup.stagger
+			delay = ((index) * stag) + delay
+
+		if setup.fadeOut
+			if layer == setup.fadeOut
+				layer.calculatedPosition.opacity = 0
+
+		if setup.fadeIn
+			layer.calculatedPosition.opacity = 1
+
+		layer.animate
+			properties:layer.calculatedPosition
+			time:setup.time
+			delay:delay
+			curve:setup.curve
+			repeat:setup.repeat
+			colorModel:setup.colorModel
+			curveOptions:setup.curveOptions
+
+		layer.calculatedPosition = props
