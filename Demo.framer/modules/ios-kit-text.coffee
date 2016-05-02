@@ -30,7 +30,7 @@ exports.defaults.props = Object.keys(exports.defaults)
 
 
 exports.create = (array) ->
-	setup = ios.setupComponent(array, exports.defaults)
+	setup = ios.utils.setupComponent(array, exports.defaults)
 	exceptions = Object.keys(setup)
 	textLayer = new Layer backgroundColor:"transparent", name:setup.name
 	textLayer.type = "text"

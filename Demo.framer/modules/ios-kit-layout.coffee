@@ -42,10 +42,12 @@ layout = (array) ->
 			for newConstraint in Object.keys(setup.constraints)
 				setup.target.constraints[newConstraint] = setup.constraints[newConstraint]
 
+
 	#Translate new constraints
 	for layer, index in targetLayers
 		layer.calculatedPosition = {}
 		if layer.constraints
+
 			props = {}
 			layer.superFrame = {}
 

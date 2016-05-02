@@ -12,7 +12,7 @@ exports.defaults = {
 exports.defaults.props = Object.keys(exports.defaults)
 
 exports.create = (array) ->
-	setup = ios.setupComponent(array, exports.defaults)
+	setup = ios.utils.setupComponent(array, exports.defaults)
 
 	alert = new Layer backgroundColor:"transparent", name:"alert"
 	alert.constraints = 

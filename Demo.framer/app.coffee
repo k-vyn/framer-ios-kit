@@ -4,4 +4,4 @@ ios = require 'ios-kit'
 bg = new BackgroundLayer backgroundColor:"white"
 
 
-print ios.utils.autoColor()
+nav = new ios.TabBar

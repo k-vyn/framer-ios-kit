@@ -101,7 +101,7 @@ exports.changeFill = (layer, color) ->
 	fillString = layer.html.slice(startIndex, layer.html.length)
 	endIndex = fillString.search("\">")
 	string = fillString.slice(0, endIndex)
-	newString = "fill=\"" + utils.color(color).toHexString()
+	newString = "fill=\"" + exports.color(color).toHexString()
 	layer.html = layer.html.replace(string, newString)
 
 exports.capitalize = (string) ->
@@ -336,3 +336,33 @@ exports.sameParent = (layer1, layer2) ->
 		return true
 	else 
 		return false
+
+
+exports.timeDelegate = (layer, clockType) ->
+	@time = exports.getTime()
+	Utils.delay 60 - @time.secs, ->
+		@time = exports.getTime()
+		exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
+		Utils.interval 60, ->
+			@time = exports.getTime()
+			exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
+ 
+exports.timeFormatter = (timeObj, clockType) ->
+	if clockType == false 
+		if timeObj.hours > 12
+			timeObj.hours = timeObj.hours - 12
+		if timeObj.hours == 0 then timeObj.hours = 12
+	if timeObj.mins < 10
+		timeObj.mins = "0" + timeObj.mins
+	return timeObj.hours + ":" + timeObj.mins
+
+exports.setupComponent = (array, defaults) ->
+	if array == undefined
+		array = []
+	obj = {}
+	for i in defaults.props
+		if array[i] != undefined
+			obj[i] = array[i]
+		else
+			obj[i] = defaults[i]
+	return obj

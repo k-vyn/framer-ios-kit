@@ -18,7 +18,7 @@ exports.defaults = {
 exports.defaults.props = Object.keys(exports.defaults)
 
 exports.create = (array) ->
-	setup = ios.setupComponent(array, exports.defaults)
+	setup = ios.utils.setupComponent(array, exports.defaults)
 	button = new Layer name:setup.name
 	button.buttonType = setup.buttonType
 	button.type = setup.type
@@ -31,19 +31,24 @@ exports.create = (array) ->
 
 	switch setup.buttonType
 		when "big"
-			@fontSize = 20
-			@top = 18
-			@fontWeight = "medium"
+			setup.fontSize = 20
+			setup.fontWeight = "medium"
+
 			if button.constraints == undefined
 				button.constraints = {}
+
 			if button.constraints.leading == undefined
 				button.constraints.leading = 10
+
 			if button.constraints.trailing == undefined
 				button.constraints.trailing = 10
+
 			if button.constraints.height == undefined
 				button.constraints.height = 57
+
 			button.borderRadius = ios.utils.px(12.5)
 			backgroundColor = ""
+
 			switch setup.style
 				when "light"
 					color = "#007AFF"
@@ -85,6 +90,7 @@ exports.create = (array) ->
 				button.animate 
 					properties:(backgroundColor:newColor)
 					time:.5
+					
 			button.on Events.TouchEnd, ->
 				button.animate
 					properties:(backgroundColor:backgroundColor)
@@ -122,7 +128,15 @@ exports.create = (array) ->
 					properties:(color:setup.color)
 					time:.5
 
-	textLayer = new ios.Text text:setup.text, color:color, superLayer:button, fontSize:setup.fontSize, fontWeight:setup.fontWeight, constraints:{align:"center"}, name:"label"
+	textLayer = new ios.Text 
+		name:"label"
+		text:setup.text
+		color:color
+		superLayer:button
+		fontSize:setup.fontSize
+		fontWeight:setup.fontWeight
+		constraints:
+			align:"center"
 
 	switch setup.buttonType 
 		when "small"
@@ -150,6 +164,7 @@ exports.create = (array) ->
 	button.label = textLayer
 	ios.layout.set
 		target:button
+
 	ios.layout.set
 		target:textLayer
 	return button
