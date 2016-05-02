@@ -2,6 +2,7 @@ ios = require 'ios-kit'
 
 
 exports.defaults = {
+	constraints:{}
 	text: "iOS Text Layer"
 	type:"text"
 	x:0
@@ -21,8 +22,8 @@ exports.defaults = {
 	name:"text layer"
 	opacity:1
 	textTransform:"none"
+	letterSpacing:0
 	name:"text layer"
-	constraints:{}
 }
 
 exports.defaults.props = Object.keys(exports.defaults)
@@ -42,7 +43,7 @@ exports.create = (array) ->
 	for prop in ios.lib.layerStyles
 		if setup[prop]
 			if prop == "lineHeight" && setup[prop] == "auto"
-				setup[prop] =  setup["fontSize"]
+				textLayer.style.lineHeight =  setup.fontSize
 			if prop == "fontWeight"
 				switch setup[prop]
 					when "ultrathin" then setup[prop] = 100
@@ -53,12 +54,13 @@ exports.create = (array) ->
 					when "semibold" then setup[prop] = 600
 					when "bold" then setup[prop] = 700
 					when "black" then setup[prop] = 800
-			if setup[prop] == parseInt(setup[prop], 10) && setup[prop] < 99
+			if prop == "fontSize" || prop == "lineHeight" || prop == "letterSpacing"
 				setup[prop] = ios.utils.px(setup[prop]) + "px"
 			textLayer.style[prop] = setup[prop]
 
 	textFrame = ios.utils.textAutoSize(textLayer)
 	textLayer.props = (height:textFrame.height, width:textFrame.width)
 	textLayer.constraints = setup.constraints
-	ios.layout.set()
+	ios.layout.set
+		target:textLayer
 	return textLayer

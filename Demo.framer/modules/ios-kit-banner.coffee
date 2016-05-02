@@ -24,7 +24,7 @@ exports.create = (array) ->
 		height:68
 
 	# Different positionings for each device
-	switch exports.device 
+	switch ios.device.name
 		when "ipad" 
 			@leadingIcon = 200
 			@topIcon = 15
@@ -33,10 +33,14 @@ exports.create = (array) ->
 			@leadingIcon = 192
 			@topIcon = 12
 			@topTitle = 9
+		when "iphone-6s-plus"
+			@leadingIcon = 15
+			@topIcon = 12
+			@topTitle = 10		
 		else
 			@leadingIcon = 15
 			@topIcon = 8
-			@topTitle = 5
+			@topTitle = 6
 
 	if setup.icon == undefined
 		setup.icon = new Layer superLayer:banner
@@ -55,7 +59,6 @@ exports.create = (array) ->
 	title = new ios.Text style:"bannerTitle", text:setup.title, color:"white", fontWeight:"medium", fontSize:13, superLayer:banner, name:"title"
 	title.constraints = 
 		top:@topTitle
-
 		leading:[setup.icon, 11]
 	message = new ios.Text style:"bannerMessage", text:setup.message, color:"white", fontSize:13, superLayer:banner, name:"message"
 	message.constraints =

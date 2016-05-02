@@ -44,8 +44,8 @@ layout = (array) ->
 
 	#Translate new constraints
 	for layer, index in targetLayers
+		layer.calculatedPosition = {}
 		if layer.constraints
-			layer.calculatedPosition = {}
 			props = {}
 			layer.superFrame = {}
 
@@ -79,10 +79,6 @@ layout = (array) ->
 				if layer.constraints.leading == parseInt(layer.constraints.leading, 10)	
 					props.x = ios.utils.px(layer.constraints.leading)
 				else
-					#If the layer referenced hasn't been set
-					if layer.constraints.leading[0].calculatedPosition == undefined
-							exports.animateLayout
-								layer:layer.constraints.leading[0]
 					#If it's a layer
 					if layer.constraints.leading.length == undefined
 						props.x = layer.constraints.leading.calculatedPosition.x + layer.constraints.leading.calculatedPosition.width
@@ -99,10 +95,6 @@ layout = (array) ->
 				if layer.constraints.trailing == parseInt(layer.constraints.trailing, 10)	
 					props.x = layer.superFrame.width - ios.utils.px(layer.constraints.trailing) - props.width
 				else
-					#If the layer referenced hasn't been set
-					if layer.constraints.trailing[0].calculatedPosition == undefined
-							exports.animateLayout
-								layer:layer.constraints.trailing[0]
 					#If it's a layer
 					if layer.constraints.trailing.length == undefined
 						props.x = layer.constraints.trailing.calculatedPosition.x - props.width
@@ -141,22 +133,18 @@ layout = (array) ->
 					props.y = layer.superFrame.height - ios.utils.px(layer.constraints.bottom) - props.height
 
 				else
-					#If the layer referenced hasn't been set
-					if layer.constraints.bottom[0].calculatedPosition == undefined
-							exports.animateLayout
-								layer:layer.constraints.bottom[0]
 					#If it's a layer
-					if layer.constraints.bottom.length == undefined
+					if layer.constraints.bottom.length == undefined 
 						props.y = layer.constraints.bottom.calculatedPosition.y - props.height
 					#If it's a relationship
 					else 
-						props.y = layer.constraints.bottom[0].calculatedPosition.y -  ios.utils.px(layer.constraints.bottom[1])
+						props.y = layer.constraints.bottom[0].calculatedPosition.y -  ios.utils.px(layer.constraints.bottom[1]) - props.height
 
 			# Opposing constraints handler
 			if layer.constraints.autoHeight != undefined
 				layer.constraints.autoHeight.calculatedPositionY = props.y
 				## perform autosize
-				props.height = layer.constraints.autoHeight.calculatedPositionY - layer.constraints.autoHeight.startY 
+				props.height = layer.constraints.autoHeight.calculatedPositionY - layer.constraints.autoHeight.startY + props.height
 				props.y = layer.constraints.autoHeight.startY
 
 
@@ -201,8 +189,11 @@ layout = (array) ->
 
 
 			layer.calculatedPosition = props
+		else
+			layer.calculatedPosition = layer.props
 
-			blueprint.push layer
+		blueprint.push layer
+
 
 	return blueprint
 

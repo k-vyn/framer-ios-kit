@@ -159,7 +159,7 @@ You can animate between constraints by running ` ios.animateLayout()`.
 - **time** *Num* <br> This will be the time of each layer's animation, not the entire animation of all the layers. 
 - **stagger** *Num* <br> This will put an incremental delay across all layers being animated.
 - **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers' opacity to 0. When set to a layer, that layer's opacity will be set to 0.
-- **fadeOut** *Boolean or Layer* <br> When set to true, this will animate all layers' opacity to 1. When set to a layer, that layer's opacity will be set to 1.
+- **fadeIn** *Boolean or Layer* <br> When set to true, this will animate all layers' opacity to 1. When set to a layer, that layer's opacity will be set to 1.
 
 #### Example
 If we have a bunch of layers in a column and we want them to all move up, we can set the `topLayer`'s constraint to 50, and all the layers with a relationship with topLayer will also move up. 
@@ -664,25 +664,25 @@ A dynamic text object that'll automatically size for you.
 ## Supporting Functions
 These are a set of functions that were created to help provide functionality to various elements of this module. I opened them up, so if you by chance need any of these functions you can use them. 
 
-#### ios.update(layer, styleArray)
+#### ios.utils.update(layer, styleArray)
 This was specifically intended for text objects. If the html or style of a text object is altered, the width/height of the object would be incorrect. With ios.update, you'll be able to pass your changes in while also resizing the text layer.
 
 <pre>
 ios.update(headerOne, [text:"Done!"]
 </pre>
 
-#### ios.pt(int) & ios.px(int)
+#### ios.utils.pt(int) & ios.utils.px(int)
 These functions will automatically convert pixels -> points and points -> pixels.
 <pre>
 ios.pt(6) # will return 3 points on an iPhone 6
 ios.px(6) # will return 12 pixels on an iPhone 6
 </pre>
 
-####ios.clean(string)
+####ios.utils.clean(string)
 This will remove any space or bracket HTML syntax from a string.
 ios.clean("`Hi,&nbsp;how&nbsp;are&nbsp;you?<br>`") returns "Hi, how are you?"
 
-####ios.svg(svg path)
+####ios.utils.svg(svg path)
 This does a series of things: it'll rewrite the SVG path into points, and it'll provide variables to set the layer's height and width.
 <pre>
 svgObj = ios.svg(svgPath)
@@ -691,16 +691,16 @@ svgObj.height = # is the value for the height of the layer
 svgObj.width = # is the value for the width of the layer 
 </pre>
 
-####ios.changeFill(layer, color)
+####ios.utils.changeFill(layer, color)
 This only works with layers with a SVG path. This will change the SVG fill to whatever color is passed.
 
-####ios.capitalize(string)
+####ios.utils.capitalize(string)
 This will capitalize only the first letter of the entire string.
 <pre>
 print ios.capitalize("welcome to the party") #returns "Welcome to the party"
 </pre>
 
-####ios.getTime()
+####ios.utils.getTime()
 Fetches the current time and returns a neatly organized time object with some humanization.
 
 <pre>
@@ -714,22 +714,29 @@ print time.mins # prints "33"
 print time.secs # prints "1"
 </pre>
 
-####ios.timeDelegate(layer, clock24)
+####ios.utis.timeDelegate(layer, clock24)
 This sets up a reoccuring task at the top of every minute to update whatever layer passed to the current time. If clock24 is set to true, it'll return 24-hour clock values. If set to false or omitted, it'll return 12-hour clock values. 
 
-####ios.timeFormatter(timeObj, clock24)
+####ios.utils.timeFormatter(timeObj, clock24)
 This will create a time string for screen display. It'll return a hours-minutes string based on the clock24 object. 
 
-#### ios.color(colorString)
+#### ios.utils.color(colorString)
 This changes the color words to be set to iOS default colors in place of web color defaults. If it's a hexcode, it'll set the hexcode. If invalid, it'll return a grey hexcode.
 
 Supports - `red, blue, pink, grey/gray, black, white, orange, green, light blue/light-blue, yellow`
 
 <pre>
-ios.color("light-blue) # returns "#54C7FC"
+ios.utils.color("light-blue) # returns "#54C7FC"
 </pre>
 
+#### ios.utils.autoColor(colorObject)
+This will decide whether to return black or white based on the contrast of the color passed through the color object. So an easy example would be: if you pass white it'll return black. If you pass black, it'll return white. It'll work with any color.
 
-#### ios.bgBlur(layer)
+<pre>
+ios.utils.autoColor(ios.utils.color("yellow")) # returns "#000"
+ios.utils.autoColor(ios.utils.color("blue")) # returns "#FFF"
+</pre>
+
+#### ios.utils.bgBlur(layer)
 Add background blur to any layer using -webkit-backdrop-filter. Make sure that whatever layer you use is using rgba with an alpha set below 1.
 

@@ -3,6 +3,7 @@
 layer = new Layer
 exports.layerProps = Object.keys(layer.props)
 exports.layerProps.push "superLayer"
+exports.layerProps.push "constraints"
 exports.layerStyles = Object.keys(layer.style)
 layer.destroy()
 
@@ -77,4 +78,53 @@ exports.assets = {
 				    </g>
 				</svg>"
 		}
+}
+# Device frames 
+exports.frames =  {
+
+# Fullscreen
+	"fullscreen" : { height: window.innerHeight, width: window.innerWidth,	scale:1, mobile:false, platform:"web"}
+
+	# iPhones
+	## 5S
+	"apple-iphone-5s-space-gray": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-5s-silver": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-5s-gold": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+
+	## 5c
+	"apple-iphone-5c-green": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-5c-blue": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-5c-red": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-5c-white": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-5c-yellow": { height: 1136, width: 640,scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-5c-pink": { height: 1136, width: 640,	scale: 2, mobile:true, platform:"iOS"}
+
+	## 6s
+	"apple-iphone-6s-space-gray" : { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-6s-silver": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-6s-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-iphone-6s-rose-gold": { height: 1334, width: 750,	scale: 2, mobile:true, platform:"iOS"}
+
+	## 6s plus
+	"apple-iphone-6s-plus-gold": { height: 2208, width: 1242, scale: 3, mobile:true, platform:"iOS"}
+	"apple-iphone-6s-plus-silver": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
+	"apple-iphone-6s-plus-space-gray": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
+	"apple-iphone-6s-plus": { height: 2208, width: 1242,	scale: 3, mobile:true, platform:"iOS"}
+
+	# iPads
+
+	## Air 
+	"apple-ipad-air-2-gold": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-ipad-air-2-silver": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-ipad-air-2-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+
+	## Mini
+	"apple-ipad-mini-4-gold": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-ipad-mini-4-space-gray": { height: 2048, width: 1536,	scale: 2, mobile:true, platform:"iOS"}
+	"apple-ipad-mini-4-silver":{ height: 2048, width: 1536, scale: 2, mobile:true, platform:"iOS"}
+
+	## Pro
+	"apple-ipad-pro-gold": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
+	"apple-ipad-pro-silver": { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
+	"apple-ipad-pro-space-gray" : { height: 2732, width: 2048, scale: 2, mobile:true, platform:"iOS"}
 }
