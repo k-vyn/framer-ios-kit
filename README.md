@@ -626,7 +626,7 @@ The tab bar is comprised of multiple tabs. It'll handle switching of tabs and vi
 
 #### Example
 <pre>
-tabBar = ios.TabBar tabs:[home, discovery, profile], activeColor:"#blue", inactiveColor:"grey"
+tabBar = new ios.TabBar tabs:[home, discovery, profile], activeColor:"#blue", inactiveColor:"grey"
 </pre>
 
 #### Listening to Tabs
