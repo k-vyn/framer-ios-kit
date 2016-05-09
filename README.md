@@ -4,6 +4,14 @@ iOS Kit was created to make prototyping for iOS fast and easy without compromisi
 
 There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
 
+##Updates
+**Date** Major code cleanup:
+
+- The module is now broken into subcoffee files, and it's stitched together with the `ios-kit.coffee`. 
+- Layout functions have been changed from `ios.layout()` to `ios.layout.set()` and `ios.animateLayout()` to `ios.layout.animate()`. 
+- All supporting functions were moved to `ios.utils` and all assets were moved to `ios.library`. 
+- Added Contribution section to **README**.
+
 # Table of Contents
 - [Setup](#setup)<br>
 <u><b>[Foundational Elements](#foundational)</b></u>
@@ -17,7 +25,7 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 		- [Align](#align-rel)
 	- [Animating Constraints](#animating)
 	- [Size Constraints](#size-constraints)
-	- [Understanding ios.layout()](#layout)
+	- [Understanding ios.layout.set()](#layout)
 - [Real device override](#real)
 - [Device details library](#details)<br>
 <u><b>[System Components](#system)</b></u>
@@ -35,10 +43,29 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 - [Text](#text)<br>
 <u><b>[Supporting Functions](#supporting)</b></u>
 
-
 <div id='setup' />
 ## Setup
-To setup the kit, add the iOSKit.coffee file to your modules folder in your project. 
+To setup the kit, add the following list of files to your modules folder in your project. Don't worry, you'll only need to require one. <br><br>
+<pre>
+ios-kit.coffee
+ios-kit-alert.coffee
+ios-kit-banner.coffee
+ios-kit-button.coffee
+ios-kit-field.coffee
+ios-kit-keyboard.coffee
+ios-kit-layout.coffee
+ios-kit-library.coffee
+ios-kit-nav-bar.coffee
+ios-kit-sheet.coffee
+ios-kit-status-bar.coffee
+ios-kit-tab-bar.coffee
+ios-kit-text.coffee
+ios-kit-utils.coffee
+</pre>
+
+**Please note:** that Framer Studio currently doesn't support subfolders in the modules folder, so they'll need to be added to the root. 
+
+
 
 In Framer Studio, write – 
 `ios = require 'iOSKit'`
@@ -77,12 +104,12 @@ layer = new Layer
 layer.constraints = 
     top:10
     leading:10
-ios.layout()
+ios.layout.set()
 </pre>
 
 This will position the layer at x:20, y:20 on iPhone 6, and x:30, y:30 on iPhone 6 plus.
 
-Side note: you can also do this on one line if you'd prefer using this syntax. Just replace the layer.constraints line from above with this line. You'll still need to run the ios.layout function.
+Side note: you can also do this on one line if you'd prefer using this syntax. Just replace the layer.constraints line from above with this line. You'll still need to run the ios.layout.set function.
 
 <pre>
 layer.constraints = {top:10, leading:10}
@@ -107,7 +134,7 @@ When you declare a constraint, you can set a constraint as a layer instead of an
 <pre>
 boxB.constraints = 
 	<b>top:boxA</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 <p>This will stack the boxes so that boxB's top edge is constrained to below boxA, but what if you want a little buffer? That's really easy. We'll use a little different syntax with wrapping the layer and buffer in brackets.</p>
@@ -115,7 +142,7 @@ ios.layout()
 <pre>
 boxB.constraints = 
 	<b>top:[boxA, 10]</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 This will set boxB's top edge to 10 points below boxA. 
@@ -131,7 +158,7 @@ For example, if you'd like boxB to be horizontally centered on boxA, write this:
 boxB.constraints = 
 	top:[boxA, 10]
 	<b>horizontalCenter:boxA</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 This will set boxB 10 points below boxA, and it'll center it within boxA on the x-axis. The other centering constraint verticalCenter will work simliarly center boxB within boxA on the y-axis. If you've set a top/bottom constraint, it'll ignore those constraints.
@@ -146,12 +173,12 @@ If you'd like to align boxB's trailing edge onto boxA's trailing edge, write thi
 boxB.constraints = 
 	top:[boxA, 10]
 	<b>trailingEdges:boxA</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 <div id='animating' />
 #### Animating Constraints
-You can animate between constraints by running ` ios.animateLayout()`. 
+You can animate between constraints by running ` ios.layout.animate()`. 
 
 ##### Properties
 - **target (optional)** *Layer or Array of layers* <br> When set, this will only animate the target layers with updated constraints. When this is not set, it'll animate all layers with their updated constraints.
@@ -195,8 +222,6 @@ topLayer.constraints =
 topLayer.constraints.leading = 20
 </pre>
 
-
-
 <div id='size-constraints' />
 ####Size Constraints
 You can also set height/width constraints just like above. This will ensure that your layers will remain a particular size.  One big difference in setting a height/width constraint over a property height/width is that you'll need to set the height/width constraint in points. 
@@ -207,20 +232,20 @@ boxB.constraints =
 	trailingEdges:boxA
 	<b>height:100</b>
 	<b>width:100</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 <div id='layout' />
-####Understanding ios.layout()
+####ios.layout.set()
 This function only need to be called once for all constraints. It'll cycle through all the layers in order of creation, and it'll fulfill all constraints. 
 
 #####When to call it
-You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer, you'll need to call ios.layout before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout(), it'll set the position to the accurate position. <br><br>
+You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer, you'll need to call ios.layout.set before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout.set(), it'll set the position to the accurate position. <br><br>
 
 #####Mixing up the queue
-ios.layout will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be laid out before others.<br>
+ios.layout.set will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be laid out before others.<br>
 
-`ios.layout(boxB)`
+`ios.layout.set(boxB)`
 This will only layout boxB and not boxA. 
 <br>
 You may also want to play with the creation order if you're having issues with relationships.  
@@ -626,7 +651,7 @@ The tab bar is comprised of multiple tabs. It'll handle switching of tabs and vi
 
 #### Example
 <pre>
-tabBar = ios.TabBar tabs:[home, discovery, profile], activeColor:"#blue", inactiveColor:"grey"
+tabBar = new ios.TabBar tabs:[home, discovery, profile], activeColor:"#blue", inactiveColor:"grey"
 </pre>
 
 #### Listening to Tabs
@@ -739,4 +764,39 @@ ios.utils.autoColor(ios.utils.color("blue")) # returns "#FFF"
 
 #### ios.utils.bgBlur(layer)
 Add background blur to any layer using -webkit-backdrop-filter. Make sure that whatever layer you use is using rgba with an alpha set below 1.
+
+## How to contribute
+Contributions are welcome! If you'd like to add any new components/any new logic, please follow the guidelines below: 
+
+#### For components
+If you'd like to add a component, please start a new coffee file, unless it's a directly related to another component similar to Tab & TabBar. Please use this boilerplate to help make the components consistent. 
+
+<pre> 
+# Allows you to use all the ios kit components & logic
+ios = require 'ios-kit'
+
+exports.defaults = {
+	## Add any thing a user can set in here. For example:
+	backgroundColor: "blue"
+	}
+
+# Creates a property list 
+exports.defaults.props = Object.keys(exports.defaults)
+
+# Begin component
+exports.create = (array) ->
+
+	## This will loop through the property list and either choose the default or the user's setting if set. 
+	setup = ios.utils.setupComponent(array, exports.defaults)
+	
+	print setup.backgroundColor ## prints blue
+	
+</pre>
+	
+	#### For logic
+	Please add any layout logic to the layout file. Otherwise, please add the logic to `ios-kit-utils.coffee`. 
+	
+	#### For data
+	Please add any referencable data object to `ios-kit-library.coffee`. You can either reference it with `ios.library["object"]` or with `ios.assets["object"]`. Whatever works best for you.
+	
 

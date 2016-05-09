@@ -29,8 +29,10 @@ layout = (array) ->
 			else
 				setup[i] = exports.defaults.animations[i]
 
-	if setup.target 
-		if setup.target.length 
+	print setup.target
+
+	if setup.target
+		if setup.target.length
 			targetLayers = setup.target
 		else
 			targetLayers.push setup.target
@@ -57,9 +59,9 @@ layout = (array) ->
 			else
 				layer.superFrame.height = ios.device.height
 				layer.superFrame.width = ios.device.width
-			
+
 			if layer.constraints.leading != undefined && layer.constraints.trailing != undefined
-				layer.constraints.autoWidth = {}	
+				layer.constraints.autoWidth = {}
 
 			if layer.constraints.top != undefined && layer.constraints.bottom != undefined
 				layer.constraints.autoHeight = {}
@@ -67,7 +69,7 @@ layout = (array) ->
 			# Size constraints
 			if layer.constraints.width != undefined
 				props.width = ios.utils.px(layer.constraints.width)
-			else 
+			else
 				props.width = layer.width
 
 			if layer.constraints.height != undefined
@@ -78,7 +80,7 @@ layout = (array) ->
 			# Positioning constraints
 			if layer.constraints.leading != undefined
 				#If it's a number`
-				if layer.constraints.leading == parseInt(layer.constraints.leading, 10)	
+				if layer.constraints.leading == parseInt(layer.constraints.leading, 10)
 					props.x = ios.utils.px(layer.constraints.leading)
 				else
 					#If it's a layer
@@ -94,7 +96,7 @@ layout = (array) ->
 
 			if layer.constraints.trailing != undefined
 				#If it's a number
-				if layer.constraints.trailing == parseInt(layer.constraints.trailing, 10)	
+				if layer.constraints.trailing == parseInt(layer.constraints.trailing, 10)
 					props.x = layer.superFrame.width - ios.utils.px(layer.constraints.trailing) - props.width
 				else
 					#If it's a layer
@@ -114,7 +116,7 @@ layout = (array) ->
 
 			if layer.constraints.top != undefined
 				#If it's a number
-				if layer.constraints.top == parseInt(layer.constraints.top, 10)	
+				if layer.constraints.top == parseInt(layer.constraints.top, 10)
 					props.y = ios.utils.px(layer.constraints.top)
 				else
 					#If it's a layer
@@ -131,15 +133,15 @@ layout = (array) ->
 
 			if layer.constraints.bottom != undefined
 				#If it's a number
-				if layer.constraints.bottom == parseInt(layer.constraints.bottom, 10)	
+				if layer.constraints.bottom == parseInt(layer.constraints.bottom, 10)
 					props.y = layer.superFrame.height - ios.utils.px(layer.constraints.bottom) - props.height
 
 				else
 					#If it's a layer
-					if layer.constraints.bottom.length == undefined 
+					if layer.constraints.bottom.length == undefined
 						props.y = layer.constraints.bottom.calculatedPosition.y - props.height
 					#If it's a relationship
-					else 
+					else
 						props.y = layer.constraints.bottom[0].calculatedPosition.y -  ios.utils.px(layer.constraints.bottom[1]) - props.height
 
 			# Opposing constraints handler
@@ -154,14 +156,14 @@ layout = (array) ->
 			if layer.constraints.align != undefined
 				#Set the centering frame
 				if layer.constraints.align == "horizontal"
-					props.x = layer.superFrame.width / 2 - props.width / 2 
+					props.x = layer.superFrame.width / 2 - props.width / 2
 
 				if layer.constraints.align == "vertical"
-					props.y = layer.superFrame.height / 2 - props.height / 2 
+					props.y = layer.superFrame.height / 2 - props.height / 2
 
 				if layer.constraints.align == "center"
-					props.x = layer.superFrame.width / 2 - props.width / 2 
-					props.y = layer.superFrame.height / 2 - props.height / 2 
+					props.x = layer.superFrame.width / 2 - props.width / 2
+					props.y = layer.superFrame.height / 2 - props.height / 2
 
 
 			# Centering constraints
@@ -177,7 +179,7 @@ layout = (array) ->
 
 			# Aligning constraints
 			if layer.constraints.leadingEdges != undefined
-				props.x = layer.constraints.leadingEdges.calculatedPosition.x 
+				props.x = layer.constraints.leadingEdges.calculatedPosition.x
 
 			if layer.constraints.trailingEdges != undefined
 				props.x = layer.constraints.trailingEdges.calculatedPosition.x - props.width + layer.constraints.trailingEdges.calculatedPosition.width
@@ -185,7 +187,7 @@ layout = (array) ->
 
 			if layer.constraints.topEdges != undefined
 				props.y = layer.constraints.topEdges.calculatedPosition.y
-			
+
 			if layer.constraints.bottomEdges != undefined
 				props.y = layer.constraints.bottomEdges.calculatedPosition.y - props.height + layer.constraints.bottomEdges.calculatedPosition.height
 
@@ -199,7 +201,7 @@ layout = (array) ->
 
 	return blueprint
 
-exports.set = (array) -> 
+exports.set = (array) ->
 	setup = {}
 	props = {}
 	if array
