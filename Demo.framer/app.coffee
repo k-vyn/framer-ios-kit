@@ -3,5 +3,4 @@ ios = require 'ios-kit'
 
 bg = new BackgroundLayer backgroundColor:"white"
 
-
-nav = new ios.TabBar
+keyboard = new ios.Field constrains:{align:"center"}

@@ -44,9 +44,9 @@ exports.color = (colorString) ->
 			color = new Color("#FFCD00")
 		when "light key"
 			color = new Color("#9DA7B3")
-		when "light-key" 
+		when "light-key"
 			color = new Color("#9DA7B3")
-		else 
+		else
 			if colorString[0] == "#" || colorString.toHexString()[0] == "#"
 				color = new Color(colorString)
 			else
@@ -65,7 +65,7 @@ exports.clean = (string) ->
 # Converts px's of an SVG to scalable variables
 exports.svg = (svg) ->
 	# Find String
-	startIndex = svg.search("<svg width=") 
+	startIndex = svg.search("<svg width=")
 	endIndex = svg.search(" viewBox")
 	string = svg.slice(startIndex, endIndex)
 
@@ -78,7 +78,7 @@ exports.svg = (svg) ->
 	# Find Height
 	heightString = string.slice(wEndIndex + 4, string.length)
 	hStartIndex = heightString.search("=")+ 2
-	hEndIndex = heightString.search("px") 
+	hEndIndex = heightString.search("px")
 	height = heightString.slice(hStartIndex, hEndIndex)
 	newHeight = exports.px(height)
 
@@ -129,17 +129,17 @@ exports.getTime = ->
 
 exports.bgBlur = (layer) ->
 	layer.style["-webkit-backdrop-filter"] = "blur(#{exports.px(5)}px)"
-	return layer 
+	return layer
 
 exports.textAutoSize = (textLayer) ->
 	#Define Width
 	constraints = {}
-	if textLayer.constraints 
+	if textLayer.constraints
 		if textLayer.constraints.height
 			constraints.height = exports.px(textLayer.constraints.height)
 		if textLayer.constraints.width
 			constraints.width = exports.px(textLayer.constraints.width)
-	
+
 	styles =
 		fontSize: textLayer.style.fontSize
 		fontFamily: textLayer.style.fontFamily
@@ -159,7 +159,7 @@ exports.getDevice = ->
 	# Loads the initial frame
 	device = Framer.Device.deviceType
 
-	### This switch looks at the innerWidth to determine if the prototype is being opened on a device. 
+	### This switch looks at the innerWidth to determine if the prototype is being opened on a device.
 	If so, it'll override the device, and it'll adjust the view to fullscreen.###
 	capturedDevice = {
 		width:ios.lib.frames[device].width
@@ -181,13 +181,13 @@ exports.getDevice = ->
 			Framer.Device.deviceType = "fullscreen"
 
 		# iPhone 6s+
-		when 1242 
+		when 1242
 			if innerHeight == 2208
 				device = "apple-iphone-6s-plus-silver"
 				Framer.Device.deviceType = "fullscreen"
 
 		# iPad in portrait
-		when 1536 
+		when 1536
 			if innerHeight == 2048
 				device = "apple-ipad-air-2-silver"
 				Framer.Device.deviceType = "fullscreen"
@@ -283,7 +283,7 @@ exports.specialChar = (layer) ->
 	if text.html.indexOf("-#") != -1
 		chosenColor = text.html.slice(1, 8)
 		newText = text.html.slice(9, text.html.length)
-		exports.update(text, [{text:newText}, {color:chosenColor}])	
+		exports.update(text, [{text:newText}, {color:chosenColor}])
 	if text.html.indexOf("-") != -1
 		newText = text.html.replace("- ", "")
 		exports.update(text, [{text:newText}])
@@ -323,7 +323,7 @@ exports.autoColor = (colorObject) ->
 	green = rgb[1]
 	blue = rgb[2]
 	color = ""
-	if (red*0.299 + green*0.587 + blue*0.114) > 186 
+	if (red*0.299 + green*0.587 + blue*0.114) > 186
 		color = "#000"
 	else
 		color = "#FFF"
@@ -334,7 +334,7 @@ exports.sameParent = (layer1, layer2) ->
 	parentTwo = layer2.superLayer
 	if parentOne == parentTwo
 		return true
-	else 
+	else
 		return false
 
 
@@ -346,9 +346,9 @@ exports.timeDelegate = (layer, clockType) ->
 		Utils.interval 60, ->
 			@time = exports.getTime()
 			exports.update(layer, [text:exports.timeFormatter(@time, clockType)])
- 
+
 exports.timeFormatter = (timeObj, clockType) ->
-	if clockType == false 
+	if clockType == false
 		if timeObj.hours > 12
 			timeObj.hours = timeObj.hours - 12
 		if timeObj.hours == 0 then timeObj.hours = 12
@@ -366,3 +366,24 @@ exports.setupComponent = (array, defaults) ->
 		else
 			obj[i] = defaults[i]
 	return obj
+
+
+exports.emojiFormatter = (string) ->
+		unicodeFormat = ""
+		if string[0] == "E" || string[0] == "3" || string[0] == "2" || string[0] == "C"
+			arrayOfCodes = string.split(" ")
+			for code in arrayOfCodes
+				unicodeFormat = unicodeFormat + "%" + code
+		else
+			arrayOfCodes = string.split(" ")
+			unicodeFormat = "%F0%9F"
+			for code in arrayOfCodes
+				unicodeFormat = unicodeFormat + "%" + code
+		decoded = decodeURIComponent(unicodeFormat)
+		return decoded
+
+exports.buildEmojisObject = () ->
+	emojis = []
+	for code, index in ios.assets.emojiCodes
+		emoji = exports.emojiFormatter(code)
+		emojis.push emoji

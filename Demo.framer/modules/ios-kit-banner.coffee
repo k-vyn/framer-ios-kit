@@ -14,7 +14,7 @@ exports.defaults = {
 exports.defaults.props = Object.keys(exports.defaults)
 
 exports.create = (array) ->
-	setup = ios.setupComponent(array, exports.defaults)
+	setup = ios.utils.setupComponent(array, exports.defaults)
 	banner = new Layer backgroundColor:"transparent", name:"banner"
 	banner.html = ios.utils.svg(ios.assets.bannerBG[ios.device.name]).svg
 	banner.constraints =
