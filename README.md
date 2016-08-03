@@ -1,28 +1,44 @@
 # iOS Kit for FramerJS
+![](https://dl.dropboxusercontent.com/u/143270556/ios-kit.png)
 
 iOS Kit was created to make prototyping for iOS fast and easy without compromising the quality or customization.
 
 There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
 
 ##Updates
-**Date** Major code cleanup:
+**August 3rd, 2016** – Sketch integration & major code cleanup:
 
+- Added [Sketch convert](#convert) & [Sketch components](#sketch-com).
+- Added [View layer](#view), which is like a Framer Layer but accepts constraints.
+- Major field component update.
+	- Better cursor handling.
+	- Allows for keyboard to move between fields.
+- Keyboard overhaul.
+	- Added iPad Pro support.
+	- Added dark style.
+- Banner is updated to iOS 10 styling.
+- Tab & Tab Bars work with only layers. 
 - The module is now broken into subcoffee files, and it's stitched together with the `ios-kit.coffee`. 
 - Layout functions have been changed from `ios.layout()` to `ios.layout.set()` and `ios.animateLayout()` to `ios.layout.animate()`. 
-- All supporting functions were moved to `ios.utils` and all assets were moved to `ios.library`. 
+- All supporting functions were moved to `ios-utils` and all assets were moved to `ios-library`. 
 - Added Contribution section to **README**.
+	- Empty component added as `iso-temp`.
+- Alerts now dismiss automatically.
+- Bunch of bug fixes.
 
 # Table of Contents
 - [Setup](#setup)<br>
 <u><b>[Foundational Elements](#foundational)</b></u>
+- [Sketch convert](#convert)
+- [Sketch components](#sketch-com)
 -  [Dynamic Layout](#dynamic)
 	-	[The Point](#point)
 	-	[Positioning](#positioning)
 		- [Setting opposite constraints](#opposite)
 	-	[Relationships](#relationships)
-		- [Position](#pos-rel)
-		- [Center](#center-rel)
-		- [Align](#align-rel)
+		- [Positioning](#pos-rel)
+		- [Centering](#center-rel)
+		- [Aligning](#align-rel)
 	- [Animating Constraints](#animating)
 	- [Size Constraints](#size-constraints)
 	- [Understanding ios.layout.set()](#layout)
@@ -41,7 +57,8 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 - [Tab](#tab)
 - [Tab Bar](#tabbar)
 - [Text](#text)<br>
-<u><b>[Supporting Functions](#supporting)</b></u>
+<u><b>[Supporting Functions](#supporting)</b></u><br>
+<u><b>[How to Contribute](#contribute)</b></u>
 
 <div id='setup' />
 ## Setup
@@ -68,12 +85,38 @@ ios-kit-utils.coffee
 
 
 In Framer Studio, write – 
-`ios = require 'iOSKit'`
+`ios = require 'ios-kit'`
 
 You can write any variable name you'd like, but for the purposes of this guide we'll be using `ios`.
 
 <div id='foundational' />
 ## Foundational Elements
+
+
+<div id='convert' />
+###  Sketch convert *NEW*
+(Currently only texted with one artboard)
+Sketch convert brings a whole new set of logic to help make the transition from Sketch to Framer seamless. Sketch convert will go through your sketch layers & write constraints for you, so all your layers will scale & position perfectly no matter the device. You also won’t have the dreaded over-scaling problems. 
+
+To use Sketch convert, just wrap your sketch file inside of `ios.convert()`
+
+<pre>  
+ios = require "ios-kit"
+sketch = Framer.Importer.load("imported/iOS Kit Demo@1x")
+sketch = ios.convert(sketch)
+</pre>
+
+That’s it! You’re done. 
+
+#### **Pro-Tip** – Framer imports layers that not in groups as combined layers, so the more you separate your layers into groups the more accurate Sketch convert can be.
+
+<div id='sketch-com' />
+### Sketch components 
+Included in this kit is a iOS Kit for Framer Sketch file full of components. These components will be written for you when converted. So right away, you can interact with them. Smart components are aware of a lot of properties, which saves a lot of time, but please be aware that not all properties will carry over.
+
+To convert Sketch layers into iOS Kit components, you write the same convert statement as above.
+
+
 <div id='dynamic' />
 ### Dynamic Layout
 
@@ -147,7 +190,7 @@ ios.layout.set()
 
 This will set boxB's top edge to 10 points below boxA. 
 <div id='center-rel' />
-#####Center Relationships
+#####Centering Relationships
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/centering.png)
 
@@ -164,7 +207,7 @@ ios.layout.set()
 This will set boxB 10 points below boxA, and it'll center it within boxA on the x-axis. The other centering constraint verticalCenter will work simliarly center boxB within boxA on the y-axis. If you've set a top/bottom constraint, it'll ignore those constraints.
 
 <div id='align-rel' />
-#####Align Relationships
+#####Aligning Relationships
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/align.png)
 The last type of relationships will allow you to align any edge of layer onto another layer's edge. To do this, there are four constraints at your disposal: leadingEdges, trailingEdges, topEdges, and bottomEdges. These layers, like centers, will not accept anything other than another layer.
 
@@ -454,7 +497,7 @@ field.on Events.TouchEnd, ->
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/keyboard.png)
 
-The keyboard is a fully rendered component that mimics the native iOS keyboard. It'll adapt to all devices. (Not currently supported on iPad Pro)
+The keyboard is a fully rendered component that mimics the native iOS keyboard. It'll adapt to all devices. 
 
 ####Properties
 - **returnText** *String* <br> Overrides the text on the return button.
@@ -685,6 +728,10 @@ A dynamic text object that'll automatically size for you.
 		constraints:{align:"center"}
 </pre>
 
+<div id="view" />
+## View 
+coming soon
+
 <div id="supporting" />
 ## Supporting Functions
 These are a set of functions that were created to help provide functionality to various elements of this module. I opened them up, so if you by chance need any of these functions you can use them. 
@@ -765,6 +812,7 @@ ios.utils.autoColor(ios.utils.color("blue")) # returns "#FFF"
 #### ios.utils.bgBlur(layer)
 Add background blur to any layer using -webkit-backdrop-filter. Make sure that whatever layer you use is using rgba with an alpha set below 1.
 
+<div id="contribute" />
 ## How to contribute
 Contributions are welcome! If you'd like to add any new components/any new logic, please follow the guidelines below: 
 
@@ -772,31 +820,32 @@ Contributions are welcome! If you'd like to add any new components/any new logic
 If you'd like to add a component, please start a new coffee file, unless it's a directly related to another component similar to Tab & TabBar. Please use this boilerplate to help make the components consistent. 
 
 <pre> 
-# Allows you to use all the ios kit components & logic
+## Allows you to use all the ios kit components & logic
 ios = require 'ios-kit'
 
 exports.defaults = {
 	## Add any thing a user can set in here. For example:
-	backgroundColor: "blue"
-	}
+		backgroundColor: "blue"
+		}
 
-# Creates a property list 
+## Creates a property list 
 exports.defaults.props = Object.keys(exports.defaults)
-
-# Begin component
+	
+	
 exports.create = (array) ->
-
-	## This will loop through the property list and either choose the default or the user's setting if set. 
+	## Creates a setup object that has defaults + any custom props.
 	setup = ios.utils.setupComponent(array, exports.defaults)
 	
-	print setup.backgroundColor ## prints blue
+	print setup.backgroundColor ## prints blue</pre>
 	
-</pre>
+
 	
-	#### For logic
-	Please add any layout logic to the layout file. Otherwise, please add the logic to `ios-kit-utils.coffee`. 
+#### For logic
+Please add any layout logic to the layout file. Otherwise, please add the logic to `ios-kit-utils.coffee`. 
 	
-	#### For data
-	Please add any referencable data object to `ios-kit-library.coffee`. You can either reference it with `ios.library["object"]` or with `ios.assets["object"]`. Whatever works best for you.
+#### For data
+Please add any referencable data object to `ios-kit-library.coffee`. You can either reference it with `ios.library["object"]` or with `ios.assets["object"]`. Whatever works best for you.
 	
+#### For help
+Feel free to hit me up on [Twitter](https://twitter.com/kvyn_).
 
