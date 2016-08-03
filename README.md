@@ -97,7 +97,7 @@ You can write any variable name you'd like, but for the purposes of this guide w
 ###  Sketch convert *NEW*
 Sketch convert brings a whole new set of logic to help make the transition from Sketch to Framer seamless. Sketch convert will go through your sketch layers & write constraints for you, so all your layers will scale & position perfectly no matter the device. You also won’t have the dreaded over-scaling problems. 
 
-*Note* - This has only been tested with one artboard so far. 
+*Note* - This has only been tested with one artboard at a time.
 
 To use Sketch convert, just wrap your sketch file inside of `ios.convert()`
 
