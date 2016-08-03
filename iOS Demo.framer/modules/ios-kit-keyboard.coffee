@@ -225,8 +225,9 @@ exports.create = (obj) ->
         board.target.active = true
   board.hidden = setup.hidden
 
-  if board.hidden
-    board.constraints.bottom = -1 * ios.pt(board.height)
+  if board.hidden == false
+    board.constraints.bottom = 0
+    ios.layout.set(board)
 
   board.call = () ->
     board.y = ios.device.height

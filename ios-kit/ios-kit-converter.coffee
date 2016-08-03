@@ -11,36 +11,6 @@ genCSS = (cssArray) ->
 
 exports.convert = (obj) ->
 
-  getConstraints = (layer) ->
-    artboard = getArtboard(layer)
-    aPos = getArtboardPosition(layer)
-    constraints = {}
-
-    alignmentChecks = ""
-
-    hCenter = artboard.width/2
-    vCenter = artboard.height/2
-
-    if hCenter - 2 <= aPos.midX <= hCenter + 2
-      alignmentChecks = alignmentChecks + "horizontal"
-    if vCenter - 2 <= aPos.midY <= vCenter + 2
-      alignmentChecks = alignmentChecks + " vertical"
-
-    switch alignmentChecks
-      when "horizontal" then constraints.align = "horizontal"
-      when "veritcal" then constraints.align = "vertical"
-      when "horizontal vertical" then constraints.align = "center"
-      else
-        constraints.align = "no"
-
-    if constraints.align.indexOf("center") == -1
-      if aPos.x < artboard.width/2 && alignmentChecks.indexOf("horizontal") == -1 then constraints.leading = aPos.x
-      if aPos.x > artboard.width/2 && alignmentChecks.indexOf("horizontal") then constraints.trailing = artboard.width - aPos.maxX
-      if aPos.y < artboard.height/2 && alignmentChecks.indexOf("vertical") then constraints.top = aPos.y
-      if aPos.y > artboard.height/2 && alignmentChecks.indexOf("vertical")  then constraints.bottom = artboard.height - aPos.maxY
-
-    return constraints
-
   getDesignedDevice = (w) ->
     device = {}
     switch w
@@ -122,6 +92,10 @@ exports.convert = (obj) ->
       s = device.iScale
       cX = device.width/2
       cY = device.height/2
+      tY = device.height/4 * 3
+      bY = device.height/4 * 3
+      lX = device.width/4 * 3
+      tX = device.width/4 * 3
 
       r = (n) -> return Math.round(n)
       f = (n) -> return Math.floor(n)
@@ -135,34 +109,38 @@ exports.convert = (obj) ->
         else
           constraints.align = 'vertical'
 
-      if l.x/s < cX
+      if l.x/s < lX
         constraints.leading = r(l.x/s)
-      if l.x/s > cX
+      if l.x/s > tX
         constraints.trailing = r(l.parent.width/s - l.maxX/s)
 
-      if l.y/s < cY
+      if l.y/s < tY
         constraints.top = r(l.y/s)
-      if l.y/s > cY
+      if l.y/s > bY
         constraints.bottom = r(l.parent.height/s - l.maxY/s)
 
       if l.width/s == device.width
-        constraints.width = ios.pt(ios.device.width)
+        constraints.leading = 0
+        constraints.trailing = 0
       else
         constraints.width = l.width/s
+
       if l.height/s == device.height
-        constraints.height = ios.pt(ios.device.height)
+        constraints.top = 0
+        constraints.bottom = 0
       else
         constraints.height = l.height/s
 
       return constraints
 
-    genLayer = (l, nP) ->
+    genLayer = (l, parent) ->
       props =
         backgroundColor:'transparent'
         name:l.name
         image:l.image
-        superLayer: nP
+        superLayer: parent
         constraints: genConstraints(l)
+
       return new ios.View props
 
     genAlert = (l, nP) ->
@@ -330,10 +308,11 @@ exports.convert = (obj) ->
           if newLayer == undefined then newLayer = genLayer(c, nP)
         else
           newLayer = genLayer(c, nP)
+
         newLayers[n] = newLayer
 
         if c.children
-          children(c, ios.l[c.name])
+          children(c, newLayer)
 
         c.destroy()
 
