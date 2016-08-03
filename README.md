@@ -1,23 +1,47 @@
 # iOS Kit for FramerJS
+![](https://dl.dropboxusercontent.com/u/143270556/ios-kit.png)
 
 iOS Kit was created to make prototyping for iOS fast and easy without compromising the quality or customization.
 
 There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
 
+##Updates
+**August 3rd, 2016** – Sketch integration & major code cleanup:
+
+- Added [Sketch convert](#convert) & [Sketch components](#sketch-com).
+- Added [View layer](#view), which is like a Framer Layer but accepts constraints.
+- Major field component update.
+	- Better cursor handling.
+	- Allows for keyboard to move between fields.
+- Keyboard overhaul.
+	- Added iPad Pro support.
+	- Added dark style.
+- Banner is updated to iOS 10 styling.
+- Tab & Tab Bars work with only layers. 
+- The module is now broken into subcoffee files, and it's stitched together with the `ios-kit.coffee`. 
+- Layout functions have been changed from `ios.layout()` to `ios.layout.set()` and `ios.animateLayout()` to `ios.layout.animate()`. 
+- All supporting functions were moved to `ios-utils` and all assets were moved to `ios-library`. 
+- Added Contribution section to **README**.
+	- Empty component added as `iso-temp`.
+- Alerts now dismiss automatically.
+- Bunch of bug fixes.
+
 # Table of Contents
 - [Setup](#setup)<br>
 <u><b>[Foundational Elements](#foundational)</b></u>
+- [Sketch convert](#convert)
+- [Sketch components](#sketch-com)
 -  [Dynamic Layout](#dynamic)
 	-	[The Point](#point)
 	-	[Positioning](#positioning)
 		- [Setting opposite constraints](#opposite)
 	-	[Relationships](#relationships)
-		- [Position](#pos-rel)
-		- [Center](#center-rel)
-		- [Align](#align-rel)
+		- [Positioning](#pos-rel)
+		- [Centering](#center-rel)
+		- [Aligning](#align-rel)
 	- [Animating Constraints](#animating)
 	- [Size Constraints](#size-constraints)
-	- [Understanding ios.layout()](#layout)
+	- [Understanding ios.layout.set()](#layout)
 - [Real device override](#real)
 - [Device details library](#details)<br>
 <u><b>[System Components](#system)</b></u>
@@ -33,20 +57,66 @@ There are three core pieces that make up iOS Kit. There is the foundational elem
 - [Tab](#tab)
 - [Tab Bar](#tabbar)
 - [Text](#text)<br>
-<u><b>[Supporting Functions](#supporting)</b></u>
-
+<u><b>[Supporting Functions](#supporting)</b></u><br>
+<u><b>[How to Contribute](#contribute)</b></u>
 
 <div id='setup' />
 ## Setup
-To setup the kit, add the iOSKit.coffee file to your modules folder in your project. 
+To setup the kit, add the following list of files to your modules folder in your project. Don't worry, you'll only need to require one. <br><br>
+<pre>
+ios-kit.coffee
+ios-kit-alert.coffee
+ios-kit-banner.coffee
+ios-kit-button.coffee
+ios-kit-field.coffee
+ios-kit-keyboard.coffee
+ios-kit-layout.coffee
+ios-kit-library.coffee
+ios-kit-nav-bar.coffee
+ios-kit-sheet.coffee
+ios-kit-status-bar.coffee
+ios-kit-tab-bar.coffee
+ios-kit-text.coffee
+ios-kit-utils.coffee
+</pre>
+
+**Please note:** that Framer Studio currently doesn't support subfolders in the modules folder, so they'll need to be added to the root. 
+
+
 
 In Framer Studio, write – 
-`ios = require 'iOSKit'`
+`ios = require 'ios-kit'`
 
 You can write any variable name you'd like, but for the purposes of this guide we'll be using `ios`.
 
 <div id='foundational' />
 ## Foundational Elements
+
+
+<div id='convert' />
+###  Sketch convert *NEW*
+(Currently only texted with one artboard)
+Sketch convert brings a whole new set of logic to help make the transition from Sketch to Framer seamless. Sketch convert will go through your sketch layers & write constraints for you, so all your layers will scale & position perfectly no matter the device. You also won’t have the dreaded over-scaling problems. 
+
+To use Sketch convert, just wrap your sketch file inside of `ios.convert()`
+
+<pre>  
+ios = require "ios-kit"
+sketch = Framer.Importer.load("imported/iOS Kit Demo@1x")
+sketch = ios.convert(sketch)
+</pre>
+
+That’s it! You’re done. 
+
+#### **Pro-Tip** – Framer imports layers that not in groups as combined layers, so the more you separate your layers into groups the more accurate Sketch convert can be.
+
+<div id='sketch-com' />
+### Sketch components 
+Included in this kit is a iOS Kit for Framer Sketch file full of components. These components will be written for you when converted. So right away, you can interact with them. Smart components are aware of a lot of properties, which saves a lot of time, but please be aware that not all properties will carry over.
+
+To convert Sketch layers into iOS Kit components, you write the same convert statement as above.
+
+
 <div id='dynamic' />
 ### Dynamic Layout
 
@@ -77,12 +147,12 @@ layer = new Layer
 layer.constraints = 
     top:10
     leading:10
-ios.layout()
+ios.layout.set()
 </pre>
 
 This will position the layer at x:20, y:20 on iPhone 6, and x:30, y:30 on iPhone 6 plus.
 
-Side note: you can also do this on one line if you'd prefer using this syntax. Just replace the layer.constraints line from above with this line. You'll still need to run the ios.layout function.
+Side note: you can also do this on one line if you'd prefer using this syntax. Just replace the layer.constraints line from above with this line. You'll still need to run the ios.layout.set function.
 
 <pre>
 layer.constraints = {top:10, leading:10}
@@ -107,7 +177,7 @@ When you declare a constraint, you can set a constraint as a layer instead of an
 <pre>
 boxB.constraints = 
 	<b>top:boxA</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 <p>This will stack the boxes so that boxB's top edge is constrained to below boxA, but what if you want a little buffer? That's really easy. We'll use a little different syntax with wrapping the layer and buffer in brackets.</p>
@@ -115,12 +185,12 @@ ios.layout()
 <pre>
 boxB.constraints = 
 	<b>top:[boxA, 10]</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 This will set boxB's top edge to 10 points below boxA. 
 <div id='center-rel' />
-#####Center Relationships
+#####Centering Relationships
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/centering.png)
 
@@ -131,13 +201,13 @@ For example, if you'd like boxB to be horizontally centered on boxA, write this:
 boxB.constraints = 
 	top:[boxA, 10]
 	<b>horizontalCenter:boxA</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 This will set boxB 10 points below boxA, and it'll center it within boxA on the x-axis. The other centering constraint verticalCenter will work simliarly center boxB within boxA on the y-axis. If you've set a top/bottom constraint, it'll ignore those constraints.
 
 <div id='align-rel' />
-#####Align Relationships
+#####Aligning Relationships
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/align.png)
 The last type of relationships will allow you to align any edge of layer onto another layer's edge. To do this, there are four constraints at your disposal: leadingEdges, trailingEdges, topEdges, and bottomEdges. These layers, like centers, will not accept anything other than another layer.
 
@@ -146,12 +216,12 @@ If you'd like to align boxB's trailing edge onto boxA's trailing edge, write thi
 boxB.constraints = 
 	top:[boxA, 10]
 	<b>trailingEdges:boxA</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 <div id='animating' />
 #### Animating Constraints
-You can animate between constraints by running ` ios.animateLayout()`. 
+You can animate between constraints by running ` ios.layout.animate()`. 
 
 ##### Properties
 - **target (optional)** *Layer or Array of layers* <br> When set, this will only animate the target layers with updated constraints. When this is not set, it'll animate all layers with their updated constraints.
@@ -195,8 +265,6 @@ topLayer.constraints =
 topLayer.constraints.leading = 20
 </pre>
 
-
-
 <div id='size-constraints' />
 ####Size Constraints
 You can also set height/width constraints just like above. This will ensure that your layers will remain a particular size.  One big difference in setting a height/width constraint over a property height/width is that you'll need to set the height/width constraint in points. 
@@ -207,20 +275,20 @@ boxB.constraints =
 	trailingEdges:boxA
 	<b>height:100</b>
 	<b>width:100</b>
-ios.layout()
+ios.layout.set()
 </pre>
 
 <div id='layout' />
-####Understanding ios.layout()
+####ios.layout.set()
 This function only need to be called once for all constraints. It'll cycle through all the layers in order of creation, and it'll fulfill all constraints. 
 
 #####When to call it
-You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer, you'll need to call ios.layout before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout(), it'll set the position to the accurate position. <br><br>
+You'll need to call it before any x/y positions are referenced. If you have a function that's based off another layer, you'll need to call ios.layout.set before that positioning is stored otherwise it'll be wrong or 0. Once you call ios.layout.set(), it'll set the position to the accurate position. <br><br>
 
 #####Mixing up the queue
-ios.layout will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be laid out before others.<br>
+ios.layout.set will accept layers in the parathesis. This will layout **only** that layer and ignore all other constraints. This is to be used if a layer created after others needs to be laid out before others.<br>
 
-`ios.layout(boxB)`
+`ios.layout.set(boxB)`
 This will only layout boxB and not boxA. 
 <br>
 You may also want to play with the creation order if you're having issues with relationships.  
@@ -429,7 +497,7 @@ field.on Events.TouchEnd, ->
 
 ![](https://dl.dropboxusercontent.com/u/143270556/ioskit/keyboard.png)
 
-The keyboard is a fully rendered component that mimics the native iOS keyboard. It'll adapt to all devices. (Not currently supported on iPad Pro)
+The keyboard is a fully rendered component that mimics the native iOS keyboard. It'll adapt to all devices. 
 
 ####Properties
 - **returnText** *String* <br> Overrides the text on the return button.
@@ -660,29 +728,33 @@ A dynamic text object that'll automatically size for you.
 		constraints:{align:"center"}
 </pre>
 
+<div id="view" />
+## View 
+coming soon
+
 <div id="supporting" />
 ## Supporting Functions
 These are a set of functions that were created to help provide functionality to various elements of this module. I opened them up, so if you by chance need any of these functions you can use them. 
 
-#### ios.update(layer, styleArray)
+#### ios.utils.update(layer, styleArray)
 This was specifically intended for text objects. If the html or style of a text object is altered, the width/height of the object would be incorrect. With ios.update, you'll be able to pass your changes in while also resizing the text layer.
 
 <pre>
 ios.update(headerOne, [text:"Done!"]
 </pre>
 
-#### ios.pt(int) & ios.px(int)
+#### ios.utils.pt(int) & ios.utils.px(int)
 These functions will automatically convert pixels -> points and points -> pixels.
 <pre>
 ios.pt(6) # will return 3 points on an iPhone 6
 ios.px(6) # will return 12 pixels on an iPhone 6
 </pre>
 
-####ios.clean(string)
+####ios.utils.clean(string)
 This will remove any space or bracket HTML syntax from a string.
 ios.clean("`Hi,&nbsp;how&nbsp;are&nbsp;you?<br>`") returns "Hi, how are you?"
 
-####ios.svg(svg path)
+####ios.utils.svg(svg path)
 This does a series of things: it'll rewrite the SVG path into points, and it'll provide variables to set the layer's height and width.
 <pre>
 svgObj = ios.svg(svgPath)
@@ -691,16 +763,16 @@ svgObj.height = # is the value for the height of the layer
 svgObj.width = # is the value for the width of the layer 
 </pre>
 
-####ios.changeFill(layer, color)
+####ios.utils.changeFill(layer, color)
 This only works with layers with a SVG path. This will change the SVG fill to whatever color is passed.
 
-####ios.capitalize(string)
+####ios.utils.capitalize(string)
 This will capitalize only the first letter of the entire string.
 <pre>
 print ios.capitalize("welcome to the party") #returns "Welcome to the party"
 </pre>
 
-####ios.getTime()
+####ios.utils.getTime()
 Fetches the current time and returns a neatly organized time object with some humanization.
 
 <pre>
@@ -714,22 +786,66 @@ print time.mins # prints "33"
 print time.secs # prints "1"
 </pre>
 
-####ios.timeDelegate(layer, clock24)
+####ios.utis.timeDelegate(layer, clock24)
 This sets up a reoccuring task at the top of every minute to update whatever layer passed to the current time. If clock24 is set to true, it'll return 24-hour clock values. If set to false or omitted, it'll return 12-hour clock values. 
 
-####ios.timeFormatter(timeObj, clock24)
+####ios.utils.timeFormatter(timeObj, clock24)
 This will create a time string for screen display. It'll return a hours-minutes string based on the clock24 object. 
 
-#### ios.color(colorString)
+#### ios.utils.color(colorString)
 This changes the color words to be set to iOS default colors in place of web color defaults. If it's a hexcode, it'll set the hexcode. If invalid, it'll return a grey hexcode.
 
 Supports - `red, blue, pink, grey/gray, black, white, orange, green, light blue/light-blue, yellow`
 
 <pre>
-ios.color("light-blue) # returns "#54C7FC"
+ios.utils.color("light-blue) # returns "#54C7FC"
 </pre>
 
+#### ios.utils.autoColor(colorObject)
+This will decide whether to return black or white based on the contrast of the color passed through the color object. So an easy example would be: if you pass white it'll return black. If you pass black, it'll return white. It'll work with any color.
 
-#### ios.bgBlur(layer)
+<pre>
+ios.utils.autoColor(ios.utils.color("yellow")) # returns "#000"
+ios.utils.autoColor(ios.utils.color("blue")) # returns "#FFF"
+</pre>
+
+#### ios.utils.bgBlur(layer)
 Add background blur to any layer using -webkit-backdrop-filter. Make sure that whatever layer you use is using rgba with an alpha set below 1.
+
+<div id="contribute" />
+## How to contribute
+Contributions are welcome! If you'd like to add any new components/any new logic, please follow the guidelines below: 
+
+#### For components
+If you'd like to add a component, please start a new coffee file, unless it's a directly related to another component similar to Tab & TabBar. Please use this boilerplate to help make the components consistent. 
+
+<pre> 
+## Allows you to use all the ios kit components & logic
+ios = require 'ios-kit'
+
+exports.defaults = {
+	## Add any thing a user can set in here. For example:
+		backgroundColor: "blue"
+		}
+
+## Creates a property list 
+exports.defaults.props = Object.keys(exports.defaults)
+	
+	
+exports.create = (array) ->
+	## Creates a setup object that has defaults + any custom props.
+	setup = ios.utils.setupComponent(array, exports.defaults)
+	
+	print setup.backgroundColor ## prints blue</pre>
+	
+
+	
+#### For logic
+Please add any layout logic to the layout file. Otherwise, please add the logic to `ios-kit-utils.coffee`. 
+	
+#### For data
+Please add any referencable data object to `ios-kit-library.coffee`. You can either reference it with `ios.library["object"]` or with `ios.assets["object"]`. Whatever works best for you.
+	
+#### For help
+Feel free to hit me up on [Twitter](https://twitter.com/kvyn_).
 
