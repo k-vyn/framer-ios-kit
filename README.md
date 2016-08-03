@@ -3,7 +3,7 @@
 
 iOS Kit was created to make prototyping for iOS fast and easy without compromising the quality or customization.
 
-There are three core pieces that make up iOS Kit. There is the foundational elements that help iOS Kit mold to devices. There is the component library that’ll save you time by providing native iOS offerings, and then there’s the supporting functions that help power the foundation & components.
+There are three core pieces that make up iOS Kit. There is the [foundational](#foundational) elements that help iOS Kit mold to devices. There is the [component library](#system) that’ll save you time by providing native iOS offerings, and then there’s the [supporting functions ](#supporting) that help power the foundation & components.
 
 ##Updates
 **August 3rd, 2016** – Sketch integration & major code cleanup:
@@ -92,12 +92,10 @@ You can write any variable name you'd like, but for the purposes of this guide w
 <div id='foundational' />
 ## Foundational Elements
 
-
 <div id='convert' />
 ###  Sketch convert *NEW*
 Sketch convert brings a whole new set of logic to help make the transition from Sketch to Framer seamless. Sketch convert will go through your sketch layers & write constraints for you, so all your layers will scale & position perfectly no matter the device. You also won’t have the dreaded over-scaling problems. 
 
-*Note* - This has only been tested with one artboard at a time.
 
 To use Sketch convert, just wrap your sketch file inside of `ios.convert()`
 
@@ -731,7 +729,21 @@ A dynamic text object that'll automatically size for you.
 
 <div id="view" />
 ## View 
-coming soon
+
+A generic layer that you can set constraints at initiization. These constraints will be rendered immediately.
+
+#### Example
+<pre>
+	view = new ios.View
+		constraints:
+			top:0
+			leading:25
+			width:200
+		backgroundColor:'red'
+</pre>
+
+
+
 
 <div id="supporting" />
 ## Supporting Functions
