@@ -1,18 +1,4 @@
 app.coffee
-framer/backups/backup-2016-08-03 04.36.24.coffee
-framer/backups/backup-2016-08-03 04.51.24.coffee
-framer/backups/backup-2016-08-03 04.52.24.coffee
-framer/backups/backup-2016-08-03 04.53.24.coffee
-framer/backups/backup-2016-08-03 04.54.26.coffee
-framer/backups/backup-2016-08-03 04.59.24.coffee
-framer/backups/backup-2016-08-03 05.00.24.coffee
-framer/backups/backup-2016-08-03 05.11.25.coffee
-framer/backups/backup-2016-08-03 05.12.24.coffee
-framer/backups/backup-2016-08-03 05.13.24.coffee
-framer/backups/backup-2016-08-03 05.14.24.coffee
-framer/backups/backup-2016-08-03 05.15.24.coffee
-framer/backups/backup-2016-08-03 05.17.24.coffee
-framer/backups/backup-2016-08-03 05.18.24.coffee
 framer/coffee-script.js
 framer/config.json
 framer/framer.generated.js
@@ -27,6 +13,8 @@ framer/images/cursor.png
 framer/images/cursor@2x.png
 framer/images/icon-120.png
 framer/images/icon-152.png
+framer/images/icon-180.png
+framer/images/icon-192.png
 framer/images/icon-76.png
 framer/images/icon-arrow.png
 framer/images/icon-arrow@2x.png
@@ -55,8 +43,6 @@ imported/Demo@1x/images/Layer-placeholder-qzk3odkx.png
 imported/Demo@1x/images/Layer-signal-ouq2q0rd.png
 imported/Demo@1x/images/Layer-time-qjc3meyy.png
 imported/Demo@1x/images/Layer-wifi-qjddmufg.png
-imported/Demo@1x/layers.json
-imported/Demo@1x/layers.json.js
 imported/iOS Kit Demo@1x/images/Layer-batt_icon-ndjbndg0.png
 imported/iOS Kit Demo@1x/images/Layer-battery-oum4nkfb.png
 imported/iOS Kit Demo@1x/images/Layer-bg-rku3qkzd.png
@@ -230,8 +216,6 @@ imported/iOS Kit for Framer@1x/images/Layer-title-qzgwmti0.png
 imported/iOS Kit for Framer@1x/images/Layer-title-rjy1njyy.png
 imported/iOS Kit for Framer@1x/images/Layer-wifi-ntnbnuuw.png
 imported/iOS Kit for Framer@1x/images/Layer-wifi-qzfemknf.png
-imported/iOS Kit for Framer@1x/layers.json
-imported/iOS Kit for Framer@1x/layers.json.js
 index.html
 modules/ios-kit-alert.coffee
 modules/ios-kit-banner.coffee
