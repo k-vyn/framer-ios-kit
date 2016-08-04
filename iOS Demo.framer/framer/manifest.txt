@@ -1,4 +1,5 @@
 app.coffee
+framer/backups/backup-2016-08-04 10.51.53.coffee
 framer/coffee-script.js
 framer/config.json
 framer/framer.generated.js
@@ -25,24 +26,11 @@ framer/images/icon-framer@2x.png
 framer/images/icon-share.png
 framer/images/icon-share@2x.png
 framer/manifest.txt
+framer/metadata.json
 framer/mirror.css
 framer/preview.png
 framer/style.css
 framer/version
-imported/Demo@1x/images/Layer-batt_icon-qzm2rdje.png
-imported/Demo@1x/images/Layer-battery-odlbree4.png
-imported/Demo@1x/images/Layer-bg-mtdcnke2.png
-imported/Demo@1x/images/Layer-bluetooth-mue2n0u1.png
-imported/Demo@1x/images/Layer-carrier-m0vfoeex.png
-imported/Demo@1x/images/Layer-Group_7-ndu1rtux.png
-imported/Demo@1x/images/Layer-Group_8-mkq2ouq0.png
-imported/Demo@1x/images/Layer-Group_9-numyrduy.png
-imported/Demo@1x/images/Layer-network-mjm4rkzc.png
-imported/Demo@1x/images/Layer-Pin_Left-qzg0mzq5.png
-imported/Demo@1x/images/Layer-placeholder-qzk3odkx.png
-imported/Demo@1x/images/Layer-signal-ouq2q0rd.png
-imported/Demo@1x/images/Layer-time-qjc3meyy.png
-imported/Demo@1x/images/Layer-wifi-qjddmufg.png
 imported/iOS Kit Demo@1x/images/Layer-batt_icon-ndjbndg0.png
 imported/iOS Kit Demo@1x/images/Layer-battery-oum4nkfb.png
 imported/iOS Kit Demo@1x/images/Layer-bg-rku3qkzd.png
@@ -59,163 +47,6 @@ imported/iOS Kit Demo@1x/images/Layer-title-mzdgrjdf.png
 imported/iOS Kit Demo@1x/images/Layer-wifi-nda4qzze.png
 imported/iOS Kit Demo@1x/layers.json
 imported/iOS Kit Demo@1x/layers.json.js
-imported/iOS Kit for Framer@1x/images/Layer-$123-mdbfruq3.png
-imported/iOS Kit for Framer@1x/images/Layer-$123-nujerkuy.png
-imported/iOS Kit for Framer@1x/images/Layer-_-njddqzuy.png
-imported/iOS Kit for Framer@1x/images/Layer-_-njzgmdix.png
-imported/iOS Kit for Framer@1x/images/Layer-_Alert-mtcymjcy.png
-imported/iOS Kit for Framer@1x/images/Layer-_Alert-nte4mdzd.png
-imported/iOS Kit for Framer@1x/images/Layer-_TabBar-rkq3q0rf.png
-imported/iOS Kit for Framer@1x/images/Layer-_Text-mtu3q0ex.png
-imported/iOS Kit for Framer@1x/images/Layer-_Text-njbfn0e4.png
-imported/iOS Kit for Framer@1x/images/Layer-_Text-oeiyounb.png
-imported/iOS Kit for Framer@1x/images/Layer-action-mjm5odyz.png
-imported/iOS Kit for Framer@1x/images/Layer-action-mzg0otzf.png
-imported/iOS Kit for Framer@1x/images/Layer-action-nzdcouq0.png
-imported/iOS Kit for Framer@1x/images/Layer-action-nzlerujd.png
-imported/iOS Kit for Framer@1x/images/Layer-action-q0u0rtqw.png
-imported/iOS Kit for Framer@1x/images/Layer-action-qjvdrtq5.png
-imported/iOS Kit for Framer@1x/images/Layer-action-qtkzmdbf.png
-imported/iOS Kit for Framer@1x/images/Layer-action-rey1rkfc.png
-imported/iOS Kit for Framer@1x/images/Layer-action-rue5qtve.png
-imported/iOS Kit for Framer@1x/images/Layer-action-rum3qkm4.png
-imported/iOS Kit for Framer@1x/images/Layer-active-m0u0nere.png
-imported/iOS Kit for Framer@1x/images/Layer-active-qky0qzrf.png
-imported/iOS Kit for Framer@1x/images/Layer-active-qtk4q0zb.png
-imported/iOS Kit for Framer@1x/images/Layer-active-quuzq0yx.png
-imported/iOS Kit for Framer@1x/images/Layer-active-ruzdotcx.png
-imported/iOS Kit for Framer@1x/images/Layer-app-m0uyrtu0.png
-imported/iOS Kit for Framer@1x/images/Layer-backspace-n0i5meux.png
-imported/iOS Kit for Framer@1x/images/Layer-backspace-rku1mtbb.png
-imported/iOS Kit for Framer@1x/images/Layer-batt_icon-rdjdmjrd.png
-imported/iOS Kit for Framer@1x/images/Layer-battery-ouzbntqw.png
-imported/iOS Kit for Framer@1x/images/Layer-battery-rtiyotlc.png
-imported/iOS Kit for Framer@1x/images/Layer-bg-mdderje4.png
-imported/iOS Kit for Framer@1x/images/Layer-bg-odzgody2.png
-imported/iOS Kit for Framer@1x/images/Layer-BG-otnertnd.png
-imported/iOS Kit for Framer@1x/images/Layer-bg-oujgrduy.png
-imported/iOS Kit for Framer@1x/images/Layer-bg-reuzqti2.png
-imported/iOS Kit for Framer@1x/images/Layer-bg-rjq3qtlb.png
-imported/iOS Kit for Framer@1x/images/Layer-big-mdg2qjg1.png
-imported/iOS Kit for Framer@1x/images/Layer-big_dark-muq5otqw.png
-imported/iOS Kit for Framer@1x/images/Layer-bluetooth-mzrfn0zb.png
-imported/iOS Kit for Framer@1x/images/Layer-bluetooth-oeuxntzd.png
-imported/iOS Kit for Framer@1x/images/Layer-button_bg-nkzgnjdb.png
-imported/iOS Kit for Framer@1x/images/Layer-carrier-nei5mjex.png
-imported/iOS Kit for Framer@1x/images/Layer-carrier-odg4rtdc.png
-imported/iOS Kit for Framer@1x/images/Layer-dark-m0ngmtez.png
-imported/iOS Kit for Framer@1x/images/Layer-dark-nzrbmeng.png
-imported/iOS Kit for Framer@1x/images/Layer-Elements-mzlgm0u3.png
-imported/iOS Kit for Framer@1x/images/Layer-exit-nenfntuy.png
-imported/iOS Kit for Framer@1x/images/Layer-grip-oengotc5.png
-imported/iOS Kit for Framer@1x/images/Layer-Icon-ntewmzvf.png
-imported/iOS Kit for Framer@1x/images/Layer-Icon-ntvbrtex.png
-imported/iOS Kit for Framer@1x/images/Layer-icon-oevcn0u3.png
-imported/iOS Kit for Framer@1x/images/Layer-icon-q0yymzmx.png
-imported/iOS Kit for Framer@1x/images/Layer-inactive-m0mwnzk3.png
-imported/iOS Kit for Framer@1x/images/Layer-inactive-mde5oeu3.png
-imported/iOS Kit for Framer@1x/images/Layer-inactive-mtgxmue1.png
-imported/iOS Kit for Framer@1x/images/Layer-inactive-qzg4rjgz.png
-imported/iOS Kit for Framer@1x/images/Layer-inactive-ruqzodhg.png
-imported/iOS Kit for Framer@1x/images/Layer-iOS_Kit-nkq5oeey.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mddcmzbc.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mejfndi0.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mkmyrtk4.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mky0m0u3.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mtbeqzjc.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mtdgmtjb.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mte4q0i1.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mtm3qjiz.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mueynjvd.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mufemufd.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-mujdndq4.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-n0i0mziw.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-n0m5mtbc.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-n0reqtkw.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-n0uxnki1.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-n0zdqzhf.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-nde5rdne.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-ndi3njfb.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-nee3oee2.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-nemyndi5.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-njcxoumy.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-nkyxrufc.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-nkzbqjjb.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-ntcxmumx.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-nte2nzq2.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-nujfmkqy.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-ody2mdgx.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-oeqyq0i3.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-otdcmzkw.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-otgzn0yz.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-otkzrum0.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-oufentk1.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-ouqxmuuy.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-ourdnkqy.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qjbdmee1.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qkvfnzrg.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qkyznti3.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qtfemtcz.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qtqzmuje.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qui4mjuw.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qurcqzey.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qureqtqy.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-quu2rjk2.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-qzrfrtqz.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-rdg0m0m3.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-reu1mtvg.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-revcmkq0.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-rezfneje.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-rjmxrjuw.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-rjngmtjb.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-rjngmzgw.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-rkvcnti3.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-rky2qjq0.png
-imported/iOS Kit for Framer@1x/images/Layer-Key-ruuzndfc.png
-imported/iOS Kit for Framer@1x/images/Layer-label-mdfdodze.png
-imported/iOS Kit for Framer@1x/images/Layer-label-mkmwndkx.png
-imported/iOS Kit for Framer@1x/images/Layer-label-nki2mjcx.png
-imported/iOS Kit for Framer@1x/images/Layer-label-nky3qkqz.png
-imported/iOS Kit for Framer@1x/images/Layer-label-ntlgntbe.png
-imported/iOS Kit for Framer@1x/images/Layer-label-qjqwnjk2.png
-imported/iOS Kit for Framer@1x/images/Layer-label-rei0rtm3.png
-imported/iOS Kit for Framer@1x/images/Layer-label-rkmwnzgz.png
-imported/iOS Kit for Framer@1x/images/Layer-label-rtrcnjy0.png
-imported/iOS Kit for Framer@1x/images/Layer-Labels-nuzfmuex.png
-imported/iOS Kit for Framer@1x/images/Layer-left-n0eymta2.png
-imported/iOS Kit for Framer@1x/images/Layer-message-n0vcotc1.png
-imported/iOS Kit for Framer@1x/images/Layer-message-odqwnuze.png
-imported/iOS Kit for Framer@1x/images/Layer-message-rencnza2.png
-imported/iOS Kit for Framer@1x/images/Layer-network-qtg0oum5.png
-imported/iOS Kit for Framer@1x/images/Layer-network-qty3qtmx.png
-imported/iOS Kit for Framer@1x/images/Layer-placeholder-njm0m0jf.png
-imported/iOS Kit for Framer@1x/images/Layer-return-mtheque5.png
-imported/iOS Kit for Framer@1x/images/Layer-return-n0y3oey0.png
-imported/iOS Kit for Framer@1x/images/Layer-return_bg-m0jbmumz.png
-imported/iOS Kit for Framer@1x/images/Layer-return_bg-qkjbrtky.png
-imported/iOS Kit for Framer@1x/images/Layer-right-nei3rufd.png
-imported/iOS Kit for Framer@1x/images/Layer-shift-oerfrkzc.png
-imported/iOS Kit for Framer@1x/images/Layer-shift-q0e5mzdb.png
-imported/iOS Kit for Framer@1x/images/Layer-signal-mtjdqzzf.png
-imported/iOS Kit for Framer@1x/images/Layer-signal-ntu5rda3.png
-imported/iOS Kit for Framer@1x/images/Layer-small-rtzbrkre.png
-imported/iOS Kit for Framer@1x/images/Layer-space-mzbdqkm0.png
-imported/iOS Kit for Framer@1x/images/Layer-space-rdaxrtze.png
-imported/iOS Kit for Framer@1x/images/Layer-tab_active-ndfbndvf.png
-imported/iOS Kit for Framer@1x/images/Layer-tab_five-neuwqjbd.png
-imported/iOS Kit for Framer@1x/images/Layer-tab_four-qky3ndc5.png
-imported/iOS Kit for Framer@1x/images/Layer-tab_three-rtlcmtmx.png
-imported/iOS Kit for Framer@1x/images/Layer-tab_two-mde1rdc3.png
-imported/iOS Kit for Framer@1x/images/Layer-time-mjk0rdew.png
-imported/iOS Kit for Framer@1x/images/Layer-time-otcwndlb.png
-imported/iOS Kit for Framer@1x/images/Layer-time-oui5qunc.png
-imported/iOS Kit for Framer@1x/images/Layer-title-mkndoduw.png
-imported/iOS Kit for Framer@1x/images/Layer-title-qtdcrjjc.png
-imported/iOS Kit for Framer@1x/images/Layer-title-qty2mzzc.png
-imported/iOS Kit for Framer@1x/images/Layer-title-qzgwmti0.png
-imported/iOS Kit for Framer@1x/images/Layer-title-rjy1njyy.png
-imported/iOS Kit for Framer@1x/images/Layer-wifi-ntnbnuuw.png
-imported/iOS Kit for Framer@1x/images/Layer-wifi-qzfemknf.png
 index.html
 modules/ios-kit-alert.coffee
 modules/ios-kit-banner.coffee
