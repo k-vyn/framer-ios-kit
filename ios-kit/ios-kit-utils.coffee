@@ -105,6 +105,7 @@ exports.changeFill = (layer, color) ->
 	string = fillString.slice(0, endIndex)
 	newString = "fill=\"" + exports.color(color)
 	layer.html = layer.html.replace(string, newString)
+
 exports.capitalize = (string) ->
 	return string.charAt(0).toUpperCase() + string.slice(1)
 

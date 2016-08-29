@@ -63,8 +63,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 13
 							}
 						},
-						"children": [],
-						"time": 29
+						"children": []
 					},
 					{
 						"objectId": "E3326B45-4822-4D73-A395-325E9735D56A",
@@ -90,11 +89,9 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 30
 							}
 						},
-						"children": [],
-						"time": 31
+						"children": []
 					}
-				],
-				"time": 76
+				]
 			},
 			{
 				"objectId": "00C52D1D-BEEA-40D5-A961-DB206E20FA8B",
@@ -136,8 +133,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 14
 							}
 						},
-						"children": [],
-						"time": 27
+						"children": []
 					},
 					{
 						"objectId": "0FD39244-B81C-4042-B64F-CCE0E46359FC",
@@ -163,8 +159,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 6
 							}
 						},
-						"children": [],
-						"time": 27
+						"children": []
 					},
 					{
 						"objectId": "408C6DEA-E80B-4FCD-88BD-67741369FBAB",
@@ -190,8 +185,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 10
 							}
 						},
-						"children": [],
-						"time": 27
+						"children": []
 					},
 					{
 						"objectId": "FADBE2EA-7233-4D32-B9EE-9FF07605B31B",
@@ -225,8 +219,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 9
 							}
 						},
-						"children": [],
-						"time": 28
+						"children": []
 					},
 					{
 						"objectId": "39DEBF2B-C410-4E31-B984-4240E30BBFA9",
@@ -260,8 +253,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 11
 							}
 						},
-						"children": [],
-						"time": 28
+						"children": []
 					},
 					{
 						"objectId": "851C849A-6270-4AA8-BF74-BDF9D056745B",
@@ -295,8 +287,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 11
 							}
 						},
-						"children": [],
-						"time": 29
+						"children": []
 					},
 					{
 						"objectId": "9C86AA06-1A92-4436-81F3-7208E46C5144",
@@ -330,8 +321,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 11
 							}
 						},
-						"children": [],
-						"time": 29
+						"children": []
 					},
 					{
 						"objectId": "42A48406-882B-4B86-8333-4B13206BE0DD",
@@ -357,11 +347,9 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 10
 							}
 						},
-						"children": [],
-						"time": 29
+						"children": []
 					}
-				],
-				"time": 246
+				]
 			},
 			{
 				"objectId": "FA135584-6CCC-4E9F-917B-06A429BF9A9E",
@@ -411,8 +399,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 14
 							}
 						},
-						"children": [],
-						"time": 29
+						"children": []
 					},
 					{
 						"objectId": "37FF7E15-5917-41B4-8F0A-CFA2B6B1EAA7",
@@ -446,8 +433,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 14
 							}
 						},
-						"children": [],
-						"time": 28
+						"children": []
 					},
 					{
 						"objectId": "0CD0F3D2-08B1-4355-ABF1-17C9C4FDCD4D",
@@ -481,8 +467,7 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 13
 							}
 						},
-						"children": [],
-						"time": 28
+						"children": []
 					},
 					{
 						"objectId": "FE7BFC91-12BB-4991-9487-EF2262E76CBF",
@@ -508,13 +493,10 @@ window.__imported__["iOS Kit Demo@1x/layers.json.js"] = [
 								"height": 65
 							}
 						},
-						"children": [],
-						"time": 101
+						"children": []
 					}
-				],
-				"time": 225
+				]
 			}
-		],
-		"time": 565
+		]
 	}
 ]

@@ -213,8 +213,12 @@ exports.convert = (obj) ->
         superLayer:nP
       for c in l.children
         n = c.name
-        if found(n, 'title') then props.title = getString(c)
-        if found(n, 'right') then props.right = getString(c)
+        if found(n, 'title')
+          props.title = getString(c)
+          props.titleColor = getCSS(c).color
+        if found(n, 'right')
+          props.right = getString(c)
+          props.color = getCSS(c).color
         if found(n, 'left') then props.left = getString(c)
         c.destroy()
       return new ios.NavBar props

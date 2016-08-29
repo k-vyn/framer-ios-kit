@@ -7,6 +7,10 @@ exports.defaults =
 	blur:true
 	superLayer:undefined
 	type:"navBar"
+	color:'blue'
+	titleColor:'black'
+	backgroundColor:"rgba(255, 255, 255, .8)"
+	dividerBackgroundColor:"#B2B2B2"
 
 exports.defaults.props = Object.keys(exports.defaults)
 
@@ -15,6 +19,7 @@ exports.create = (array) ->
 
 	bar = new ios.View
 		name:"navBar"
+		backgroundColor: setup.backgroundColor
 		constraints:
 			leading:0
 			trailing:0
@@ -23,7 +28,7 @@ exports.create = (array) ->
 
 	bar.bg = new ios.View
 		superLayer:bar
-		backgroundColor:"transparent"
+		backgroundColor:'transparent'
 		name:".bg"
 		constraints:
 			leading:0
@@ -32,7 +37,7 @@ exports.create = (array) ->
 			bottom:0
 
 	bar.divider = new ios.View
-		backgroundColor:"#B2B2B2"
+		backgroundColor:setup.dividerBackgroundColor
 		name:".divider"
 		superLayer:bar.bg
 		constraints:
@@ -44,13 +49,12 @@ exports.create = (array) ->
 	if setup.superLayer
 		setup.superLayer.addSubLayer(bar)
 
+
 	if setup.blur
-		bar.backgroundColor = "rgba(255, 255, 255, .8)"
-		ios.utils.bgBlur(bar)
-	else
-		bar.backgroundColor = "rgba(255, 255, 255, 1)"
 		ios.utils.bgBlur(bar)
 
+	if setup.blur == false && setup.backgroundColor == "rgba(255, 255, 255, .8)"
+		bar.backgroundColor = 'white'
 
 	bar.type = setup.type
 
@@ -69,6 +73,7 @@ exports.create = (array) ->
 		superLayer:bar.bg
 		text:setup.title
 		name:".title"
+		color:setup.titleColor
 		constraints:
 			align:"horizontal"
 			bottom:12
@@ -81,6 +86,7 @@ exports.create = (array) ->
 			name:".right"
 			superLayer:bar.bg
 			text:setup.right
+			color:setup.color
 			fontWeight:500
 			constraints:
 				bottom:12
@@ -112,6 +118,7 @@ exports.create = (array) ->
 					bottom:9
 					leading:8
 			setup.left = setup.left.replace("<", "")
+			ios.utils.changeFill(bar.chevron, setup.color)
 			setLeading = [bar.chevron, 4]
 			ios.layout.set(bar.chevron)
 
@@ -119,6 +126,7 @@ exports.create = (array) ->
 			name:".left"
 			superLayer:bar.bg
 			text:setup.left
+			color:setup.color
 			fontWeight:500
 			constraints:
 				bottom:12

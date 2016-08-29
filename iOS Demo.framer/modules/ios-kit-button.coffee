@@ -100,16 +100,21 @@ exports.create = (array) ->
 		else
 			button.backgroundColor = "transparent"
 			button.origColor = ios.utils.specialChar(button)
+
 			color = setup.color
+			button.labelOrigColor = color
+
 
 			button.on Events.TouchStart, ->
+				@.labelOrigColor = button.label.color
 				newColor = button.subLayers[0].color.lighten(30)
 				button.subLayers[0].animate
 					properties:(color:newColor)
 					time:.5
+
 			button.on Events.TouchEnd, ->
-				button.subLayers[0].animate
-					properties:(color:setup.color)
+				@.subLayers[0].animate
+					properties:(color:ios.utils.color(@.labelOrigColor))
 					time:.5
 
 	button.label = new ios.Text
